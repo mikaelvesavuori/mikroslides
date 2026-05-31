@@ -1,0 +1,82 @@
+import { type DeckAspectRatio, type DeckTheme, defaultDeckTheme } from "../index.js";
+
+export const backgroundSwatches = [
+  "#f8fafc",
+  "#ffffff",
+  "#eef3fa",
+  "#e0f2fe",
+  "#ecfdf5",
+  "#fef3c7",
+  "#111827",
+  "#0f172a",
+];
+
+export const deckAspects: Array<{ id: DeckAspectRatio; name: string }> = [
+  { id: "16:9", name: "16:9" },
+  { id: "4:3", name: "4:3" },
+  { id: "1:1", name: "Square" },
+];
+
+export const builtInDeckThemes: DeckTheme[] = [
+  defaultDeckTheme,
+  {
+    id: "clean-dark",
+    name: "Clean dark",
+    accent: "#60a5fa",
+    background: "#0f172a",
+    muted: "#94a3b8",
+    surface: "#111827",
+    text: "#f8fafc",
+    fontHeading: "system-sans",
+    fontBody: "system-sans",
+    fontMono: "system-mono",
+  },
+  {
+    id: "editorial",
+    name: "Editorial",
+    accent: "#b45309",
+    background: "#fff7ed",
+    muted: "#7c2d12",
+    surface: "#ffedd5",
+    text: "#1c1917",
+    fontHeading: "system-serif",
+    fontBody: "system-serif",
+    fontMono: "system-mono",
+  },
+  {
+    id: "technical",
+    name: "Technical",
+    accent: "#0f766e",
+    background: "#f0fdfa",
+    muted: "#475569",
+    surface: "#ccfbf1",
+    text: "#0f172a",
+    fontHeading: "system-sans",
+    fontBody: "system-sans",
+    fontMono: "system-mono",
+  },
+  {
+    id: "warm-neutral",
+    name: "Warm neutral",
+    accent: "#7c3aed",
+    background: "#fafaf9",
+    muted: "#78716c",
+    surface: "#f5f5f4",
+    text: "#292524",
+    fontHeading: "system-sans",
+    fontBody: "system-serif",
+    fontMono: "system-mono",
+  },
+  {
+    id: "high-contrast",
+    name: "High contrast",
+    accent: "#facc15",
+    background: "#000000",
+    muted: "#d4d4d4",
+    surface: "#171717",
+    text: "#ffffff",
+    fontHeading: "system-sans",
+    fontBody: "system-sans",
+    fontMono: "system-mono",
+  },
+];

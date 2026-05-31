@@ -1,0 +1,67 @@
+import {
+  createShapeElement,
+  createTextElement,
+  MikroDeck,
+  type SlideElement,
+} from "../../src/index.js";
+
+describe("MikroDeck", () => {
+  it("creates a starter deck with useful defaults", () => {
+    const deck = MikroDeck.create({ title: "Launch Plan" });
+    const record = deck.toRecord();
+
+    expect(record.title).toBe("Launch Plan");
+    expect(record.slides).toHaveLength(3);
+    expect(record.activeSlideId).toBe(record.slides[0].id);
+    expect(deck.stats().slideCount).toBe(3);
+    expect(deck.stats().wordCount).toBeGreaterThan(0);
+  });
+
+  it("adds, duplicates, moves, and removes slides", () => {
+    const deck = MikroDeck.create({ title: "Deck" });
+    const withSlide = deck.addSlide();
+    const added = withSlide.toRecord().activeSlideId;
+    const duplicated = withSlide.duplicateSlide(added).toRecord();
+
+    expect(duplicated.slides).toHaveLength(5);
+    expect(duplicated.slides[2].title).toContain("copy");
+
+    const moved = MikroDeck.fromRecord(duplicated)
+      .moveSlide(duplicated.slides[2].id, -1)
+      .toRecord();
+    expect(moved.slides[1].id).toBe(duplicated.slides[2].id);
+
+    const removed = MikroDeck.fromRecord(moved).removeSlide(moved.slides[1].id).toRecord();
+    expect(removed.slides).toHaveLength(4);
+    expect(removed.slides.some((slide) => slide.id === moved.slides[1].id)).toBe(false);
+  });
+
+  it("updates slide elements and clamps unsafe geometry", () => {
+    const deck = MikroDeck.create({ title: "Deck" });
+    const slide = deck.toRecord().slides[0];
+    const shape = createShapeElement({ x: 200, y: -80, width: 300, height: 0 });
+    const withElement = deck.addElement(slide.id, shape).toRecord();
+    const element = withElement.slides[0].elements.at(-1) as SlideElement;
+
+    expect(element.x).toBe(120);
+    expect(element.y).toBe(-20);
+    expect(element.width).toBe(140);
+    expect(element.height).toBe(1);
+
+    const updated = MikroDeck.fromRecord(withElement)
+      .updateElement(slide.id, element.id, createTextElement({ content: "Changed" }))
+      .toRecord();
+
+    expect(updated.slides[0].elements.at(-1)?.kind).toBe("text");
+  });
+
+  it("keeps snapshots for manual saves", () => {
+    const saved = MikroDeck.create({ title: "Deck" })
+      .update({ saveSnapshot: true, snapshotReason: "manual" })
+      .toRecord();
+
+    expect(saved.lastSavedAt).toBeTruthy();
+    expect(saved.snapshots).toHaveLength(1);
+    expect(saved.snapshots[0].reason).toBe("manual");
+  });
+});

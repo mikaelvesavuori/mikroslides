@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="MikroSlides">
+  <rect width="128" height="128" rx="22" fill="#1665d8"/>
+  <rect x="28" y="31" width="72" height="45" rx="7" fill="#ffffff"/>
+  <path d="M42 92h44M64 76v16" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  <rect x="39" y="43" width="28" height="7" rx="3.5" fill="#1665d8"/>
+  <rect x="39" y="57" width="44" height="6" rx="3" fill="#bfdbfe"/>
+</svg>

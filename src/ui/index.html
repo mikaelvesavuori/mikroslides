@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MikroSlides</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./app-icon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f4f6f9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0d10" media="(prefers-color-scheme: dark)" />
+  </head>
+  <body>
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+        <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-minus" viewBox="0 0 24 24">
+        <path d="M19.5 12h-15" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-focus" viewBox="0 0 24 24">
+        <path d="M8 4.5H5.25a.75.75 0 0 0-.75.75V8m15 0V5.25a.75.75 0 0 0-.75-.75H16m0 15h2.75a.75.75 0 0 0 .75-.75V16m-15 0v2.75c0 .414.336.75.75.75H8" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-bookmark" viewBox="0 0 24 24">
+        <path d="M17.25 3.75H6.75A2.25 2.25 0 0 0 4.5 6v14.25l7.5-4.5 7.5 4.5V6a2.25 2.25 0 0 0-2.25-2.25Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-layers" viewBox="0 0 24 24">
+        <path d="m12 3 8.25 4.5L12 12 3.75 7.5 12 3Zm6.75 9L12 15.75 5.25 12M18.75 16.5 12 20.25 5.25 16.5" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24">
+        <path d="M9 15 3 9m0 0 6-6M3 9h10.5a4.5 4.5 0 1 1 0 9H9" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-redo" viewBox="0 0 24 24">
+        <path d="m15 15 6-6m0 0-6-6m6 6H10.5a4.5 4.5 0 1 0 0 9H15" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M4 7h16m-10 4v6m4-6v6M9 7V5h6v2m-9 0 1 14h10l1-14" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-copy" viewBox="0 0 24 24">
+        <path d="M8 8h11v11H8zM5 16H4V4h12v1" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-copy-object" viewBox="0 0 24 24">
+        <path d="M8 8h10v10H8zM5 15H4V4h11v1M11 12h4m-2-2v4" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-copy-slide" viewBox="0 0 24 24">
+        <path d="M7 7h12v9H7zM4 17.5v-13h13M10 19.5h6" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-folder-open" viewBox="0 0 24 24">
+        <path d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h3.294a2.25 2.25 0 0 1 1.591.659l1.206 1.205a2.25 2.25 0 0 0 1.591.659H18A2.25 2.25 0 0 1 20.25 9.27v7.98A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-upload" viewBox="0 0 24 24">
+        <path d="M4 16.5v2A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5v-2M12 15V3m-4 4 4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-download" viewBox="0 0 24 24">
+        <path d="M4 16.5v2A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5v-2M12 3v12m-4-4 4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-file" viewBox="0 0 24 24">
+        <path d="M14 3v5h5M14 3H6v18h12V8l-4-5Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-list" viewBox="0 0 24 24">
+        <path d="M8 6.5h11M8 12h11M8 17.5h11M4.75 6.5h.01M4.75 12h.01M4.75 17.5h.01" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-package" viewBox="0 0 24 24">
+        <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 9 8-4.5M12 12 4 7.5m8 4.5v9" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-command" viewBox="0 0 24 24">
+        <path d="M9 9H7.25A2.25 2.25 0 1 1 9 5.34V9Zm0 0v6m0 0H7.25A2.25 2.25 0 1 0 9 18.66V15Zm0 0h6m0 0v1.75A2.25 2.25 0 1 0 18.66 15H15Zm0 0V9m0 0v-1.75A2.25 2.25 0 1 1 18.66 9H15Zm0 0H9" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-sparkles" viewBox="0 0 24 24">
+        <path d="m12 3 1.7 5.1L19 10l-5.3 1.9L12 17l-1.7-5.1L5 10l5.3-1.9L12 3Zm6 10 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3ZM5.5 14 6.3 16.2 8.5 17l-2.2.8L5.5 20l-.8-2.2L2.5 17l2.2-.8.8-2.2Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-printer" viewBox="0 0 24 24">
+        <path d="M6.75 9V4.5h10.5V9M6.75 18H5.25A2.25 2.25 0 0 1 3 15.75V12a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v3.75A2.25 2.25 0 0 1 18.75 18h-1.5m-10.5-3h10.5v6H6.75v-6Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24">
+        <path d="M6.75 4.75v14.5L18.5 12 6.75 4.75Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-type" viewBox="0 0 24 24">
+        <path d="M4.5 6.75V4.5h15v2.25M12 4.5v15m-3.75 0h7.5" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-square" viewBox="0 0 24 24">
+        <path d="M5.25 5.25h13.5v13.5H5.25z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24">
+        <path d="M4.5 6.75A2.25 2.25 0 0 1 6.75 4.5h10.5a2.25 2.25 0 0 1 2.25 2.25v10.5a2.25 2.25 0 0 1-2.25 2.25H6.75a2.25 2.25 0 0 1-2.25-2.25V6.75Zm3 9 3.5-3.5 2.25 2.25 2.75-3.25 3.5 4.5M8.25 8.25h.01" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24">
+        <path d="M12 3v1.5m0 15V21m8.485-8.485H21m-18 0H3m15.364-6.364 1.06-1.06M4.576 19.425l1.06-1.06m12.728 0 1.06 1.06M4.576 4.575l1.06 1.06M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24">
+        <path fill="currentColor" stroke="none" d="M12 20.5a8.5 8.5 0 0 0 8.5-8.5c0-.7-.1-1.05-.43-1.05-.2 0-.36.12-.56.22a5.8 5.8 0 0 1-2.58.58 4.68 4.68 0 0 1-4.68-4.68c0-.94.2-1.8.58-2.58.1-.2.22-.36.22-.56 0-.33-.35-.43-1.05-.43a8.5 8.5 0 1 0 0 17Z" />
+      </symbol>
+      <symbol id="icon-x-mark" viewBox="0 0 24 24">
+        <path d="m6 18 12-12M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-align-left" viewBox="0 0 24 24">
+        <path d="M4.5 6.75h15m-15 4.5h9.75m-9.75 4.5h15m-15 4.5h9.75" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-align-center" viewBox="0 0 24 24">
+        <path d="M4.5 6.75h15m-10.5 4.5h6m-10.5 4.5h15m-10.5 4.5h6" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-align-right" viewBox="0 0 24 24">
+        <path d="M4.5 6.75h15m-5.25 4.5h5.25m-15 4.5h15m-5.25 4.5h5.25" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-chevron-up" viewBox="0 0 24 24">
+        <path d="m6 15 6-6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-chevron-down" viewBox="0 0 24 24">
+        <path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+    </svg>
+
+    <div id="app-shell" class="app-shell">
+      <header class="app-header">
+        <div class="brand-block">
+          <h1>MikroSlides</h1>
+          <input id="deck-title-input" class="deck-title-input" aria-label="Deck title" />
+        </div>
+        <div class="header-actions">
+          <button id="new-deck-btn" class="header-btn icon-btn" type="button" title="New deck" aria-label="New deck">
+            <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+          </button>
+          <button id="library-btn" class="header-btn icon-btn" type="button" title="Library" aria-label="Open library">
+            <svg class="icon" aria-hidden="true"><use href="#icon-folder-open"></use></svg>
+          </button>
+          <button id="import-json-btn" class="header-btn icon-btn" type="button" title="Import JSON" aria-label="Import JSON">
+            <svg class="icon" aria-hidden="true"><use href="#icon-upload"></use></svg>
+          </button>
+          <button id="outline-btn" class="header-btn icon-btn" type="button" title="Deck from outline" aria-label="Deck from outline">
+            <svg class="icon" aria-hidden="true"><use href="#icon-list"></use></svg>
+          </button>
+          <button id="polish-btn" class="header-btn icon-btn" type="button" title="Polish deck" aria-label="Polish deck">
+            <svg class="icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>
+          </button>
+          <button id="export-btn" class="header-btn icon-btn" type="button" title="Export" aria-label="Export">
+            <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>
+          </button>
+          <button id="present-btn" class="header-btn icon-btn" type="button" title="Present" aria-label="Present">
+            <svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg>
+          </button>
+          <button id="command-btn" class="header-btn icon-btn" type="button" title="Commands" aria-label="Open command palette">
+            <svg class="icon" aria-hidden="true"><use href="#icon-command"></use></svg>
+          </button>
+          <button id="theme-btn" class="header-btn icon-btn" type="button" title="Toggle color mode" aria-label="Toggle color mode">
+            <svg class="icon" aria-hidden="true"><use id="theme-icon" href="#icon-moon"></use></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="slide-strip" aria-label="Slides">
+          <div class="slide-strip-head">
+            <span>Slides</span>
+            <span id="deck-meta" class="deck-meta"></span>
+          </div>
+          <div id="slide-list" class="slide-list"></div>
+          <button id="add-slide-btn" class="add-slide-btn" type="button">
+            <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+            <span>Slide</span>
+          </button>
+        </aside>
+
+        <section class="stage-column" aria-label="Slide editor">
+          <nav class="tool-dock" aria-label="Slide tools">
+            <button id="add-text-btn" class="tool-btn icon-btn" type="button" title="Text" aria-label="Add text">
+              <svg class="icon" aria-hidden="true"><use href="#icon-type"></use></svg>
+            </button>
+            <button id="add-shape-btn" class="tool-btn icon-btn" type="button" title="Shape" aria-label="Add shape">
+              <svg class="icon" aria-hidden="true"><use href="#icon-square"></use></svg>
+            </button>
+            <button id="add-image-btn" class="tool-btn icon-btn" type="button" title="Image" aria-label="Add image">
+              <svg class="icon" aria-hidden="true"><use href="#icon-image"></use></svg>
+            </button>
+            <select id="template-select" class="template-select" aria-label="Slide layout">
+              <option value="">Layout</option>
+              <option value="title">Title</option>
+              <option value="section">Section</option>
+              <option value="statement">Statement</option>
+              <option value="bullets">Bullets</option>
+              <option value="twoColumn">Two-column</option>
+              <option value="imageLeft">Image left</option>
+              <option value="imageRight">Image right</option>
+              <option value="quote">Quote</option>
+              <option value="comparison">Comparison</option>
+              <option value="timeline">Timeline</option>
+              <option value="chartData">Chart/data</option>
+              <option value="closing">Closing</option>
+            </select>
+            <button id="save-template-btn" class="tool-btn icon-btn" type="button" title="Save slide as template" aria-label="Save slide as template">
+              <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+            </button>
+            <span class="dock-separator" aria-hidden="true"></span>
+            <button id="duplicate-element-btn" class="tool-btn icon-btn" type="button" title="Duplicate object" aria-label="Duplicate object">
+              <svg class="icon" aria-hidden="true"><use href="#icon-copy-object"></use></svg>
+            </button>
+            <button id="duplicate-slide-btn" class="tool-btn icon-btn" type="button" title="Duplicate slide" aria-label="Duplicate slide">
+              <svg class="icon" aria-hidden="true"><use href="#icon-copy-slide"></use></svg>
+            </button>
+            <button id="delete-slide-btn" class="tool-btn icon-btn danger" type="button" title="Delete slide" aria-label="Delete slide">
+              <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
+            </button>
+          </nav>
+          <div class="canvas-wrap">
+            <div id="slide-canvas" class="slide-canvas" tabindex="0" aria-label="Current slide"></div>
+          </div>
+          <section class="zoom-cluster" aria-label="History and zoom controls">
+            <button id="undo-btn" class="tool-btn icon-btn" type="button" title="Undo" aria-label="Undo">
+              <svg class="icon" aria-hidden="true"><use href="#icon-undo"></use></svg>
+            </button>
+            <button id="redo-btn" class="tool-btn icon-btn" type="button" title="Redo" aria-label="Redo">
+              <svg class="icon" aria-hidden="true"><use href="#icon-redo"></use></svg>
+            </button>
+            <span class="zoom-separator" aria-hidden="true"></span>
+            <button id="zoom-out-btn" class="tool-btn icon-btn" type="button" title="Zoom out" aria-label="Zoom out">
+              <svg class="icon" aria-hidden="true"><use href="#icon-minus"></use></svg>
+            </button>
+            <button id="zoom-fit-btn" class="tool-btn zoom-readout" type="button" title="Reset zoom" aria-label="Reset zoom to 100%">100%</button>
+            <button id="zoom-in-btn" class="tool-btn icon-btn" type="button" title="Zoom in" aria-label="Zoom in">
+              <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+            </button>
+          </section>
+          <textarea id="speaker-notes" class="speaker-notes" placeholder="Presenter notes" aria-label="Presenter notes"></textarea>
+        </section>
+
+        <aside class="inspector" aria-label="Inspector">
+          <section class="inspector-section">
+            <div class="section-head">
+              <h2>Slide</h2>
+            </div>
+            <label>
+              Title
+              <input id="slide-title-input" type="text" />
+            </label>
+            <div class="field-grid">
+              <label>
+                Theme
+                <select id="deck-theme-select"></select>
+              </label>
+              <label>
+                Ratio
+                <select id="deck-aspect-select"></select>
+              </label>
+            </div>
+            <label>
+              Background
+              <input id="slide-background-input" type="color" />
+            </label>
+            <div id="background-swatches" class="swatch-row" aria-label="Background swatches"></div>
+          </section>
+
+          <section id="element-inspector" class="inspector-section">
+            <div class="section-head">
+              <h2>Object</h2>
+              <button id="delete-element-btn" class="tool-btn icon-btn danger" type="button" title="Delete object" aria-label="Delete object">
+                <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
+              </button>
+            </div>
+
+            <div class="field-grid">
+              <label>
+                X
+                <input id="element-x-input" type="number" min="-20" max="120" step="1" />
+              </label>
+              <label>
+                Y
+                <input id="element-y-input" type="number" min="-20" max="120" step="1" />
+              </label>
+              <label>
+                W
+                <input id="element-width-input" type="number" min="1" max="140" step="1" />
+              </label>
+              <label>
+                H
+                <input id="element-height-input" type="number" min="1" max="140" step="1" />
+              </label>
+            </div>
+
+            <label>
+              Opacity
+              <input id="element-opacity-input" type="range" min="0.1" max="1" step="0.05" />
+            </label>
+            <div class="segmented" aria-label="Object alignment">
+              <button class="segment-btn" type="button" data-object-align="left" title="Align left" aria-label="Align object left"><svg class="icon" aria-hidden="true"><use href="#icon-align-left"></use></svg></button>
+              <button class="segment-btn" type="button" data-object-align="center" title="Align center" aria-label="Align object center"><svg class="icon" aria-hidden="true"><use href="#icon-align-center"></use></svg></button>
+              <button class="segment-btn" type="button" data-object-align="right" title="Align right" aria-label="Align object right"><svg class="icon" aria-hidden="true"><use href="#icon-align-right"></use></svg></button>
+              <button class="segment-btn" type="button" data-object-align="top" title="Align top" aria-label="Align object top"><svg class="icon" aria-hidden="true"><use href="#icon-chevron-up"></use></svg></button>
+              <button class="segment-btn" type="button" data-object-align="middle" title="Align middle" aria-label="Align object middle"><svg class="icon" aria-hidden="true"><use href="#icon-minus"></use></svg></button>
+              <button class="segment-btn" type="button" data-object-align="bottom" title="Align bottom" aria-label="Align object bottom"><svg class="icon" aria-hidden="true"><use href="#icon-chevron-down"></use></svg></button>
+            </div>
+
+            <div id="text-fields" class="object-fields">
+              <label>
+                Text
+                <textarea id="text-content-input" rows="5"></textarea>
+              </label>
+              <div class="field-grid">
+                <label>
+                  Size
+                  <input id="text-size-input" type="number" min="8" max="120" step="1" />
+                </label>
+                <label>
+                  Weight
+                  <input id="text-weight-input" type="number" min="300" max="900" step="50" />
+                </label>
+              </div>
+              <label>
+                Color
+                <input id="text-color-input" type="color" />
+              </label>
+              <div class="segmented" aria-label="Text alignment">
+                <button class="segment-btn" type="button" data-align="left" title="Align left" aria-label="Align left"><svg class="icon" aria-hidden="true"><use href="#icon-align-left"></use></svg></button>
+                <button class="segment-btn" type="button" data-align="center" title="Align center" aria-label="Align center"><svg class="icon" aria-hidden="true"><use href="#icon-align-center"></use></svg></button>
+                <button class="segment-btn" type="button" data-align="right" title="Align right" aria-label="Align right"><svg class="icon" aria-hidden="true"><use href="#icon-align-right"></use></svg></button>
+              </div>
+            </div>
+
+            <div id="shape-fields" class="object-fields">
+              <label>
+                Shape
+                <select id="shape-kind-select">
+                  <option value="rect">Rectangle</option>
+                  <option value="ellipse">Ellipse</option>
+                  <option value="line">Line</option>
+                </select>
+              </label>
+              <div class="field-grid">
+                <label>
+                  Fill
+                  <input id="shape-fill-input" type="color" />
+                </label>
+                <label>
+                  Stroke
+                  <input id="shape-stroke-input" type="color" />
+                </label>
+              </div>
+            </div>
+
+            <div id="image-fields" class="object-fields">
+              <label>
+                Source
+                <input id="image-src-input" type="url" />
+              </label>
+              <label>
+                Description
+                <input id="image-alt-input" type="text" />
+              </label>
+              <label>
+                Fit
+                <select id="image-fit-select">
+                  <option value="cover">Cover</option>
+                  <option value="contain">Contain</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="inspector-section layers-section" aria-label="Layers">
+            <div class="section-head">
+              <h2>Layers</h2>
+              <div class="layer-actions">
+                <button id="layer-front-btn" class="tool-btn icon-btn" type="button" title="Bring to front" aria-label="Bring to front">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-chevron-up"></use></svg>
+                </button>
+                <button id="layer-forward-btn" class="tool-btn icon-btn" type="button" title="Bring forward" aria-label="Bring forward">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
+                </button>
+                <button id="layer-backward-btn" class="tool-btn icon-btn" type="button" title="Send backward" aria-label="Send backward">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-minus"></use></svg>
+                </button>
+                <button id="layer-back-btn" class="tool-btn icon-btn" type="button" title="Send to back" aria-label="Send to back">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+                </button>
+              </div>
+            </div>
+            <div id="layers-list" class="layers-list"></div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <dialog id="library-dialog" class="side-dialog" aria-label="Deck library">
+      <div class="dialog-head">
+        <h2>Library</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="library-dialog" aria-label="Close library">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </div>
+      <input id="library-search" class="search-input" placeholder="Search decks" aria-label="Search decks" />
+      <div id="deck-list" class="deck-list"></div>
+    </dialog>
+
+    <dialog id="image-dialog" class="settings-dialog" aria-label="Add image">
+      <div class="dialog-head">
+        <h2>Image</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="image-dialog" aria-label="Close image dialog">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </div>
+      <label>
+        Source
+        <input id="image-url-input" type="url" placeholder="https://..." />
+      </label>
+      <label>
+        File
+        <input id="image-file-input" type="file" accept="image/*" />
+      </label>
+      <div class="dialog-actions">
+        <button id="insert-image-btn" class="primary-btn" type="button">Insert</button>
+      </div>
+    </dialog>
+
+    <dialog id="template-dialog" class="settings-dialog" aria-label="Save template">
+      <div class="dialog-head">
+        <h2>Template</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="template-dialog" aria-label="Close template dialog">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </div>
+      <label>
+        Name
+        <input id="template-name-input" type="text" placeholder="Template name" />
+      </label>
+      <div class="dialog-actions">
+        <button id="save-template-confirm-btn" class="primary-btn" type="button">Save</button>
+      </div>
+    </dialog>
+
+    <dialog id="outline-dialog" class="settings-dialog wide-dialog" aria-label="Deck from outline">
+      <div class="dialog-head">
+        <h2>Outline</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="outline-dialog" aria-label="Close outline dialog">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </div>
+      <label>
+        Markdown
+        <textarea id="outline-input" rows="12" spellcheck="true"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button id="create-outline-deck-btn" class="primary-btn" type="button">Create</button>
+      </div>
+    </dialog>
+
+    <dialog id="export-dialog" class="settings-dialog export-dialog" aria-label="Export">
+      <div class="dialog-head">
+        <h2>Export</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="export-dialog" aria-label="Close export dialog">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </div>
+      <div id="export-status" class="export-status" role="status"></div>
+      <div class="export-grid">
+        <button id="export-json-action" class="export-option" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#icon-file"></use></svg>
+          <span>
+            <strong>JSON</strong>
+            <small>Editable deck data</small>
+          </span>
+        </button>
+        <button id="export-portable-action" class="export-option" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#icon-package"></use></svg>
+          <span>
+            <strong>Portable</strong>
+            <small>Deck plus embedded assets</small>
+          </span>
+        </button>
+        <button id="export-pdf-action" class="export-option" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#icon-printer"></use></svg>
+          <span>
+            <strong>PDF</strong>
+            <small>Browser print output</small>
+          </span>
+        </button>
+        <button id="export-png-action" class="export-option" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#icon-image"></use></svg>
+          <span>
+            <strong>PNG</strong>
+            <small>Current slide image</small>
+          </span>
+        </button>
+      </div>
+    </dialog>
+
+    <dialog id="command-dialog" class="command-dialog" aria-label="Command palette">
+      <div class="command-head">
+        <label for="command-input">Command</label>
+        <input id="command-input" class="command-input" type="search" autocomplete="off" placeholder="Search commands" aria-controls="command-list" />
+      </div>
+      <div id="command-list" class="command-list" role="listbox"></div>
+    </dialog>
+
+    <dialog id="presenter-dialog" class="presenter-dialog" aria-label="Presentation mode">
+      <div class="presenter-stage">
+        <div id="presenter-slide" class="presenter-slide" tabindex="0"></div>
+      </div>
+      <footer class="presenter-bar">
+        <button id="presenter-prev-btn" class="header-btn icon-btn" type="button" title="Previous slide" aria-label="Previous slide">
+          <svg class="icon" aria-hidden="true"><use href="#icon-chevron-up"></use></svg>
+        </button>
+        <div id="presenter-meta" class="presenter-meta"></div>
+        <button id="presenter-next-btn" class="header-btn icon-btn" type="button" title="Next slide" aria-label="Next slide">
+          <svg class="icon" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+        </button>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="presenter-dialog" title="Close" aria-label="Close presentation">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </footer>
+    </dialog>
+
+    <input id="json-file-input" class="visually-hidden" type="file" accept=".json,.mikroslides,application/json,application/vnd.mikroslides+json" />
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="print-deck" class="print-deck" aria-hidden="true"></div>
+    <script type="module" src="./assets/main.js"></script>
+  </body>
+</html>

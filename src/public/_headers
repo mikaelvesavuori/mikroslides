@@ -1,0 +1,9 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cache-Control: no-store
+
+/assets/*
+  Cache-Control: public, max-age=3600

@@ -1,0 +1,51 @@
+{
+  "name": "mikroslides",
+  "version": "0.1.0",
+  "description": "MikroSlides is a minimalist local-first presentation app.",
+  "license": "MIT",
+  "author": "Mikael Vesavuori",
+  "keywords": [
+    "slides",
+    "presentations",
+    "deck",
+    "local-first",
+    "indexeddb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikaelvesavuori/mikroslides.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikaelvesavuori/mikroslides/issues"
+  },
+  "homepage": "https://github.com/mikaelvesavuori/mikroslides#readme",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npm run dev:web",
+    "dev:web": "npm run build && npx http-server dist -a ${HOST:-127.0.0.1} -p ${PORT:-4175} -c-1",
+    "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('coverage',{recursive:true,force:true})\"",
+    "build": "tsx esbuild.config.mts",
+    "test": "vitest run --config vitest.config.mts --coverage",
+    "test:watch": "vitest --config vitest.config.mts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --write",
+    "format": "biome format --write .",
+    "deploy": "npm run deploy:cloudflare",
+    "deploy:cloudflare": "npm run verify && npx wrangler deploy",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2",
+    "@types/node": "24",
+    "@vitest/coverage-v8": "4",
+    "esbuild": "latest",
+    "fake-indexeddb": "6",
+    "html-minifier-terser": "latest",
+    "lightningcss": "latest",
+    "tsx": "4",
+    "typescript": "6",
+    "vitest": "4"
+  }
+}
