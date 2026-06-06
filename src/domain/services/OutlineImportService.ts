@@ -231,6 +231,7 @@ function createSectionSlide(section: ParsedSection, theme: DeckTheme): MikroSlid
         color: theme.text,
         fontSize: body.length > 170 ? 21 : 25,
         fontWeight: 430,
+        listStyle: "bullet",
       }),
     ],
   });

@@ -22,6 +22,10 @@ export type SlideElementKind = "text" | "shape" | "image";
 export type SlideShapeKind = "rect" | "ellipse" | "line";
 export type TextAlignment = "left" | "center" | "right";
 export type ImageFit = "cover" | "contain";
+export type SystemTextFontFamily = "system" | "serif" | "mono";
+export type TextFontFamily = SystemTextFontFamily | `font:${string}`;
+export type TextListStyle = "none" | "bullet";
+export type MikroFontSource = "local" | "bunny" | "source";
 
 export interface DeckTheme {
   id: string;
@@ -51,11 +55,12 @@ export interface TextSlideElement extends SlideElementBase {
   kind: "text";
   content: string;
   color: string;
-  fontFamily: "system" | "serif" | "mono";
+  fontFamily: TextFontFamily;
   fontSize: number;
   fontWeight: number;
   italic: boolean;
   align: TextAlignment;
+  listStyle: TextListStyle;
 }
 
 export interface ShapeSlideElement extends SlideElementBase {
@@ -76,6 +81,18 @@ export interface ImageSlideElement extends SlideElementBase {
 
 export type SlideElement = TextSlideElement | ShapeSlideElement | ImageSlideElement;
 
+export interface MikroFontRecord {
+  id: string;
+  source: MikroFontSource;
+  label: string;
+  family: string;
+  assetId: string | null;
+  mediaType: string | null;
+  remoteUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MikroSlideRecord {
   id: MikroSlideId;
   title: string;
@@ -91,6 +108,7 @@ export interface MikroDeckSnapshot {
   deckId: MikroDeckId;
   title: string;
   slides: MikroSlideRecord[];
+  fonts: MikroFontRecord[];
   activeSlideId: MikroSlideId;
   aspectRatio: DeckAspectRatio;
   theme: DeckTheme;
@@ -102,6 +120,7 @@ export interface MikroDeckRecord {
   id: MikroDeckId;
   title: string;
   slides: MikroSlideRecord[];
+  fonts: MikroFontRecord[];
   activeSlideId: MikroSlideId;
   aspectRatio: DeckAspectRatio;
   theme: DeckTheme;
@@ -115,6 +134,7 @@ export interface MikroDeckRecord {
 export interface CreateDeckInput {
   title?: string;
   slides?: MikroSlideRecord[];
+  fonts?: MikroFontRecord[];
   aspectRatio?: DeckAspectRatio;
   theme?: DeckTheme;
 }
@@ -122,6 +142,7 @@ export interface CreateDeckInput {
 export interface UpdateDeckInput {
   title?: string;
   slides?: MikroSlideRecord[];
+  fonts?: MikroFontRecord[];
   activeSlideId?: MikroSlideId;
   aspectRatio?: DeckAspectRatio;
   theme?: DeckTheme;
@@ -150,23 +171,52 @@ export interface MikroPortableDeckExport {
   assets: MikroPortableAsset[];
 }
 
-export interface MikroPortableAsset {
-  id: string;
-  slideId: MikroSlideId;
-  elementId: MikroSlideElementId;
-  kind: "image";
-  mediaType: string;
-  dataUrl: string;
-  originalSrc: string;
-}
+export type MikroPortableAsset =
+  | {
+      id: string;
+      slideId: MikroSlideId;
+      elementId: MikroSlideElementId;
+      kind: "image";
+      mediaType: string;
+      dataUrl: string;
+      originalSrc: string;
+    }
+  | {
+      id: string;
+      fontId: string;
+      kind: "font";
+      mediaType: string;
+      dataUrl: string;
+      originalSrc: string;
+    };
 
-export interface PortableAssetInput {
-  slideId: MikroSlideId;
-  elementId: MikroSlideElementId;
-  kind: "image";
+export type PortableAssetInput =
+  | {
+      slideId: MikroSlideId;
+      elementId: MikroSlideElementId;
+      kind: "image";
+      mediaType: string;
+      dataUrl: string;
+      originalSrc: string;
+    }
+  | {
+      fontId: string;
+      kind: "font";
+      mediaType: string;
+      dataUrl: string;
+      originalSrc: string;
+    };
+
+export interface MikroAssetRecord {
+  id: string;
+  deckId: MikroDeckId;
+  kind: "image" | "font";
   mediaType: string;
-  dataUrl: string;
+  data: Blob;
+  originalName: string;
   originalSrc: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface StorageMetadata {

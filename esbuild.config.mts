@@ -15,6 +15,7 @@ import { transform } from "lightningcss";
 
 const webSrcDir = "src";
 const uiDir = join(webSrcDir, "ui");
+const uiStylesDir = join(uiDir, "styles");
 const publicDir = join(webSrcDir, "public");
 const distDir = "dist";
 const distAssetsDir = join(distDir, "assets");
@@ -44,15 +45,29 @@ async function buildWebApp() {
 function buildCss() {
   console.log("Optimizing CSS...");
 
-  const cssInput = readFileSync(join(uiDir, "styles.css"));
+  const cssInput = readCssInputs();
   const { code } = transform({
     filename: "styles.css",
-    code: cssInput,
+    code: Buffer.from(cssInput),
     minify: true,
     sourceMap: false,
   });
 
   writeFileSync(join(distAssetsDir, "styles.css"), code);
+}
+
+function readCssInputs() {
+  const inputs = [join(uiDir, "styles.css")];
+  if (statExists(uiStylesDir)) {
+    inputs.push(
+      ...readdirSync(uiStylesDir)
+        .filter((entry) => extname(entry) === ".css")
+        .sort()
+        .map((entry) => join(uiStylesDir, entry)),
+    );
+  }
+
+  return inputs.map((input) => readFileSync(input, "utf8")).join("\n");
 }
 
 async function buildHtml() {

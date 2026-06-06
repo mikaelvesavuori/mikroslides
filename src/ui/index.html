@@ -219,11 +219,10 @@
               <svg class="icon" aria-hidden="true"><use href="#icon-plus"></use></svg>
             </button>
           </section>
-          <textarea id="speaker-notes" class="speaker-notes" placeholder="Presenter notes" aria-label="Presenter notes"></textarea>
         </section>
 
         <aside class="inspector" aria-label="Inspector">
-          <section class="inspector-section">
+          <section id="slide-inspector" class="inspector-section">
             <div class="section-head">
               <h2>Slide</h2>
             </div>
@@ -246,11 +245,15 @@
               <input id="slide-background-input" type="color" />
             </label>
             <div id="background-swatches" class="swatch-row" aria-label="Background swatches"></div>
+            <label>
+              Notes
+              <textarea id="speaker-notes" class="speaker-notes" rows="7" placeholder="Presenter notes"></textarea>
+            </label>
           </section>
 
           <section id="element-inspector" class="inspector-section">
             <div class="section-head">
-              <h2>Object</h2>
+              <h2 id="object-inspector-title">Object</h2>
               <button id="delete-element-btn" class="tool-btn icon-btn danger" type="button" title="Delete object" aria-label="Delete object">
                 <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
               </button>
@@ -293,6 +296,15 @@
                 Text
                 <textarea id="text-content-input" rows="5"></textarea>
               </label>
+              <div class="field-with-action">
+                <label>
+                  Font
+                  <select id="text-font-select"></select>
+                </label>
+                <button id="manage-fonts-btn" class="tool-btn icon-btn" type="button" title="Fonts" aria-label="Manage fonts">
+                  <svg class="icon" aria-hidden="true"><use href="#icon-type"></use></svg>
+                </button>
+              </div>
               <div class="field-grid">
                 <label>
                   Size
@@ -311,6 +323,7 @@
                 <button class="segment-btn" type="button" data-align="left" title="Align left" aria-label="Align left"><svg class="icon" aria-hidden="true"><use href="#icon-align-left"></use></svg></button>
                 <button class="segment-btn" type="button" data-align="center" title="Align center" aria-label="Align center"><svg class="icon" aria-hidden="true"><use href="#icon-align-center"></use></svg></button>
                 <button class="segment-btn" type="button" data-align="right" title="Align right" aria-label="Align right"><svg class="icon" aria-hidden="true"><use href="#icon-align-right"></use></svg></button>
+                <button class="segment-btn" type="button" data-list-style="bullet" title="Bulleted list" aria-label="Bulleted list"><svg class="icon" aria-hidden="true"><use href="#icon-list"></use></svg></button>
               </div>
             </div>
 
@@ -354,7 +367,7 @@
             </div>
           </section>
 
-          <section class="inspector-section layers-section" aria-label="Layers">
+          <section id="layers-section" class="inspector-section layers-section" aria-label="Layers">
             <div class="section-head">
               <h2>Layers</h2>
               <div class="layer-actions">
@@ -425,6 +438,56 @@
       </div>
     </dialog>
 
+    <dialog id="font-dialog" class="settings-dialog wide-dialog font-dialog" aria-label="Fonts">
+      <div class="dialog-head">
+        <h2>Fonts</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="font-dialog" aria-label="Close fonts">
+          <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
+        </button>
+      </div>
+      <section class="font-panel" aria-label="Current fonts">
+        <div class="font-panel-head">
+          <h3>Current</h3>
+        </div>
+        <div id="font-list" class="font-list"></div>
+      </section>
+      <section class="font-panel" aria-label="Source fonts">
+        <div class="font-panel-head">
+          <h3>Developer</h3>
+          <span class="font-source-pill">Source</span>
+        </div>
+        <div id="font-source-catalog" class="font-catalog compact-font-catalog"></div>
+      </section>
+      <section class="font-panel" aria-label="Bunny fonts">
+        <div class="font-panel-head">
+          <h3>Bunny</h3>
+          <div class="font-panel-head-actions">
+            <button id="load-font-catalog-btn" class="font-source-load-btn" type="button">Load catalog</button>
+            <span id="font-catalog-status" class="font-source-pill"></span>
+          </div>
+        </div>
+        <input id="font-search-input" class="search-input font-search-input" type="search" placeholder="Search fonts" aria-label="Search Bunny fonts" />
+        <div id="font-category-list" class="font-category-list" aria-label="Font categories"></div>
+        <div id="font-catalog" class="font-catalog"></div>
+      </section>
+      <details class="font-import-group">
+        <summary>Import font file</summary>
+        <div class="font-import-fields">
+          <label>
+            Name
+            <input id="font-name-input" type="text" placeholder="Font name" />
+          </label>
+          <label>
+            File
+            <input id="font-file-input" type="file" accept=".woff,.woff2,.ttf,.otf,font/woff,font/woff2,font/ttf,font/otf" />
+          </label>
+          <div class="dialog-actions">
+            <button id="add-local-font-btn" class="primary-btn" type="button">Import</button>
+          </div>
+        </div>
+      </details>
+    </dialog>
+
     <dialog id="outline-dialog" class="settings-dialog wide-dialog" aria-label="Deck from outline">
       <div class="dialog-head">
         <h2>Outline</h2>
@@ -488,6 +551,22 @@
       </div>
       <div id="command-list" class="command-list" role="listbox"></div>
     </dialog>
+
+    <div id="context-menu" class="context-menu" role="menu" hidden>
+      <button type="button" role="menuitem" data-context-action="copy">Copy</button>
+      <button type="button" role="menuitem" data-context-action="cut">Cut</button>
+      <button type="button" role="menuitem" data-context-action="paste">Paste</button>
+      <button type="button" role="menuitem" data-context-action="duplicate">Duplicate</button>
+      <span class="context-menu-separator" aria-hidden="true"></span>
+      <button type="button" role="menuitem" data-context-action="bring-front">Bring to front</button>
+      <button type="button" role="menuitem" data-context-action="send-back">Send to back</button>
+      <span class="context-menu-separator" aria-hidden="true"></span>
+      <button type="button" role="menuitem" data-context-action="add-text">Add text</button>
+      <button type="button" role="menuitem" data-context-action="add-shape">Add shape</button>
+      <button type="button" role="menuitem" data-context-action="add-image">Add image</button>
+      <span class="context-menu-separator" aria-hidden="true"></span>
+      <button type="button" role="menuitem" data-context-action="delete" class="danger">Delete</button>
+    </div>
 
     <dialog id="presenter-dialog" class="presenter-dialog" aria-label="Presentation mode">
       <div class="presenter-stage">

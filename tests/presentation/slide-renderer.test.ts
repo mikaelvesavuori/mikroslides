@@ -1,0 +1,86 @@
+import { createImageElement, createTextElement, MikroDeck } from "../../src/index.js";
+import {
+  getElementLabel,
+  renderSlideElements,
+  renderSlideThumbnails,
+  renderTextElementContent,
+  textListItems,
+} from "../../src/presentation/slideRenderer.js";
+
+describe("slide renderer", () => {
+  it("renders bullet list text as escaped list items", () => {
+    const element = createTextElement({
+      id: "text_1",
+      content: "- Ship it\n2. Improve <detail>\n• Measure & learn",
+      listStyle: "bullet",
+    });
+
+    expect(textListItems(element.content)).toEqual([
+      "Ship it",
+      "Improve <detail>",
+      "Measure & learn",
+    ]);
+    expect(renderTextElementContent(element)).toBe(
+      "<ul><li>Ship it</li><li>Improve &lt;detail&gt;</li><li>Measure &amp; learn</li></ul>",
+    );
+  });
+
+  it("renders selected/editing state and resolves image/font sources", () => {
+    const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
+    slide.elements = [
+      createTextElement({
+        id: "text_1",
+        content: "Headline",
+        fontFamily: "font:brand",
+      }),
+      createImageElement({
+        id: "image_1",
+        src: "asset:image_1",
+        alt: "Catalog",
+      }),
+    ];
+
+    const html = renderSlideElements(slide, {
+      editingTextElementId: "text_1",
+      includeHandle: true,
+      resolveFontStack: () => '"Brand Sans", sans-serif',
+      resolveImageSource: () => "blob:image_1",
+      selectedIds: new Set(["text_1"]),
+    });
+
+    expect(html).toContain('data-selected="true"');
+    expect(html).toContain('contenteditable="true"');
+    expect(html).toContain("&quot;Brand Sans&quot;, sans-serif");
+    expect(html).toContain('src="blob:image_1"');
+    expect(html).toContain("element-resize-handle");
+  });
+
+  it("creates stable layer labels", () => {
+    expect(getElementLabel(createTextElement({ content: "Launch readiness plan" }), 0)).toBe(
+      "Launch readiness plan",
+    );
+    expect(getElementLabel(createImageElement({ alt: "Product screenshot" }), 1)).toBe(
+      "Product screenshot",
+    );
+  });
+
+  it("renders escaped slide thumbnails with active state", () => {
+    const deck = MikroDeck.create({ title: "Render" }).toRecord();
+    const slides = deck.slides.map((slide, index) => ({
+      ...slide,
+      id: index === 0 ? "slide&1" : slide.id,
+      title: index === 0 ? "Intro <now>" : slide.title,
+    }));
+
+    const html = renderSlideThumbnails(slides, {
+      activeSlideId: "slide&1",
+      resolveFontStack: () => "system-ui",
+      resolveImageSource: (src) => src,
+    });
+
+    expect(html).toContain('data-slide-id="slide&amp;1"');
+    expect(html).toContain('aria-current="true"');
+    expect(html).toContain("Intro &lt;now&gt;");
+    expect(html).toContain("thumb-preview");
+  });
+});

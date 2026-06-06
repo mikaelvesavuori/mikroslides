@@ -32,6 +32,8 @@
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "format": "biome format --write .",
+    "smoke:font-network": "npm run build && node scripts/font-network-smoke.mjs",
+    "smoke:ui": "npm run build && node scripts/ui-interactions-smoke.mjs",
     "deploy": "npm run deploy:cloudflare",
     "deploy:cloudflare": "npm run verify && npx wrangler deploy",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
@@ -44,6 +46,7 @@
     "fake-indexeddb": "6",
     "html-minifier-terser": "latest",
     "lightningcss": "latest",
+    "playwright": "^1.60.0",
     "tsx": "4",
     "typescript": "6",
     "vitest": "4"

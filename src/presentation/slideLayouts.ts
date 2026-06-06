@@ -106,7 +106,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           fontWeight: 740,
         }),
         createTextElement({
-          content: "• First point\n• Second point\n• Third point",
+          content: "First point\nSecond point\nThird point",
           x: 13,
           y: 34,
           width: 66,
@@ -114,6 +114,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           color: theme.text,
           fontSize: 25,
           fontWeight: 430,
+          listStyle: "bullet",
         }),
       ],
     });

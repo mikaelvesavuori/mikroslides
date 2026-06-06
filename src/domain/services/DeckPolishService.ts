@@ -313,6 +313,7 @@ function bulletSlide(slide: MikroSlideRecord, story: SlideStory, theme: DeckThem
       fontFamily: fontToken(theme.fontBody),
       fontSize: bullets.length > 210 ? 20 : 24,
       fontWeight: 440,
+      listStyle: "bullet",
     }),
   ]);
 }
@@ -371,6 +372,7 @@ function twoColumnSlide(slide: MikroSlideRecord, story: SlideStory, theme: DeckT
       color: theme.text,
       fontSize: 20,
       fontWeight: 440,
+      listStyle: "bullet",
     }),
     createTextElement({
       content: right,
@@ -381,6 +383,7 @@ function twoColumnSlide(slide: MikroSlideRecord, story: SlideStory, theme: DeckT
       color: theme.text,
       fontSize: 20,
       fontWeight: 440,
+      listStyle: "bullet",
     }),
   ]);
 }

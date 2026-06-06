@@ -9,6 +9,7 @@ import type {
 } from "../index.js";
 
 type PngExportOptions = {
+  resolveFontFamily?: (fontFamily: TextSlideElement["fontFamily"]) => string;
   scale?: number;
 };
 
@@ -86,6 +87,7 @@ async function drawElement(
   element: SlideElement,
   slide: SlideDimensions,
   scale: number,
+  options: PngExportOptions,
 ) {
   const box = elementBox(element, slide);
   context.save();
@@ -95,7 +97,7 @@ async function drawElement(
   context.translate(-box.width / 2, -box.height / 2);
 
   if (element.kind === "text") {
-    drawTextElement(context, element, box, slide, scale);
+    drawTextElement(context, element, box, slide, scale, options);
   }
 
   if (element.kind === "shape") {
@@ -115,17 +117,19 @@ function drawTextElement(
   box: ElementBox,
   slide: SlideDimensions,
   scale: number,
+  options: PngExportOptions,
 ) {
   const fontSize = Math.max(
     8 * scale,
     Math.min(120 * scale, (element.fontSize * slide.width) / 1000),
   );
   const fontFamily =
-    element.fontFamily === "serif"
+    options.resolveFontFamily?.(element.fontFamily) ??
+    (element.fontFamily === "serif"
       ? "Georgia, Cambria, serif"
       : element.fontFamily === "mono"
         ? '"SFMono-Regular", Consolas, monospace'
-        : 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        : 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
   const lineHeight = fontSize * 1.14;
   context.save();
   context.beginPath();
@@ -135,6 +139,12 @@ function drawTextElement(
   context.font = `${element.italic ? "italic " : ""}${element.fontWeight} ${fontSize}px ${fontFamily}`;
   context.textAlign = element.align;
   context.textBaseline = "alphabetic";
+
+  if (element.listStyle === "bullet") {
+    drawBulletTextElement(context, element, box, fontSize, lineHeight);
+    context.restore();
+    return;
+  }
 
   const lines = element.content
     .split("\n")
@@ -148,6 +158,40 @@ function drawTextElement(
   }
 
   context.restore();
+}
+
+function drawBulletTextElement(
+  context: CanvasRenderingContext2D,
+  element: TextSlideElement,
+  box: ElementBox,
+  fontSize: number,
+  lineHeight: number,
+) {
+  context.textAlign = "left";
+  const bulletX = 0;
+  const textX = fontSize * 0.82;
+  const maxLineWidth = Math.max(1, box.width - textX);
+  const itemLines = textListItems(element.content).map((item) =>
+    wrapText(context, item, maxLineWidth),
+  );
+  const totalLines = itemLines.reduce((count, lines) => count + Math.max(1, lines.length), 0);
+  let y = Math.max(fontSize, (box.height - totalLines * lineHeight) / 2 + fontSize);
+
+  for (const lines of itemLines) {
+    context.fillText("•", bulletX, y, textX * 0.8);
+    for (const line of lines) {
+      context.fillText(line, textX, y, maxLineWidth);
+      y += lineHeight;
+    }
+  }
+}
+
+function textListItems(content: string) {
+  const items = content
+    .split("\n")
+    .map((line) => line.replace(/^\s*(?:[-*•]\s+|\d+[.)]\s+)/, "").trim())
+    .filter(Boolean);
+  return items.length > 0 ? items : [""];
 }
 
 function wrapText(context: CanvasRenderingContext2D, value: string, maxWidth: number) {
@@ -322,7 +366,7 @@ export async function renderSlideToPng(
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   for (const element of slide.elements) {
-    await drawElement(context, element, dimensions, scale);
+    await drawElement(context, element, dimensions, scale, options);
   }
 
   return encodePng(canvas);

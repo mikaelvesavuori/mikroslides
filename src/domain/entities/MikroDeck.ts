@@ -6,11 +6,14 @@ import type {
   ImageSlideElement,
   MikroDeckRecord,
   MikroDeckSnapshot,
+  MikroFontRecord,
   MikroSlideRecord,
   ShapeSlideElement,
   SlideElement,
   SlideLayoutKind,
   SlideTransition,
+  TextFontFamily,
+  TextListStyle,
   TextSlideElement,
   UpdateDeckInput,
 } from "../../interfaces/index.js";
@@ -62,6 +65,10 @@ function cleanText(value: string, fallback = "") {
   return trimmed || fallback;
 }
 
+function cleanFontLabel(value: string, fallback = "Font") {
+  return cleanText(value.replace(/\s+/g, " "), fallback).slice(0, 80);
+}
+
 function clone<T>(value: T): T {
   return structuredClone(value);
 }
@@ -74,6 +81,74 @@ function normalizeFontToken(value: unknown): DeckTheme["fontBody"] {
   return value === "system-serif" || value === "system-mono" || value === "system-sans"
     ? value
     : "system-sans";
+}
+
+function normalizeTextFontFamily(value: unknown): TextFontFamily {
+  if (value === "serif" || value === "mono" || value === "system") {
+    return value;
+  }
+
+  if (typeof value === "string" && /^font:[a-zA-Z0-9_-]+$/.test(value)) {
+    return value as TextFontFamily;
+  }
+
+  return "system";
+}
+
+function normalizeTextListStyle(value: unknown): TextListStyle {
+  return value === "bullet" ? "bullet" : "none";
+}
+
+function normalizeFontRecord(value: MikroFontRecord): MikroFontRecord | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const id = typeof value.id === "string" && value.id.trim() ? value.id : createId("font");
+  const source =
+    value.source === "bunny" || value.source === "local" || value.source === "source"
+      ? value.source
+      : null;
+  if (!source) {
+    return null;
+  }
+
+  const label = cleanFontLabel(value.label || value.family || id, "Font");
+  const family = cleanFontLabel(value.family || label, label);
+  const now = nowIso();
+
+  return {
+    id,
+    source,
+    label,
+    family,
+    assetId: typeof value.assetId === "string" && value.assetId ? value.assetId : null,
+    mediaType: typeof value.mediaType === "string" && value.mediaType ? value.mediaType : null,
+    remoteUrl: typeof value.remoteUrl === "string" && value.remoteUrl ? value.remoteUrl : null,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : now,
+    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : now,
+  };
+}
+
+function normalizeFonts(fonts: MikroFontRecord[] | undefined): MikroFontRecord[] {
+  const records = fonts
+    ?.map(normalizeFontRecord)
+    .filter((font): font is MikroFontRecord => Boolean(font));
+  const seen = new Set<string>();
+  return (records ?? []).filter((font) => {
+    if (seen.has(font.id)) {
+      return false;
+    }
+    seen.add(font.id);
+    return true;
+  });
+}
+
+function normalizeSnapshots(snapshots: MikroDeckSnapshot[] | undefined): MikroDeckSnapshot[] {
+  return (snapshots ?? []).map((snapshot) => ({
+    ...snapshot,
+    fonts: normalizeFonts(snapshot.fonts),
+  }));
 }
 
 function normalizeTheme(theme: Partial<DeckTheme> | undefined): DeckTheme {
@@ -127,11 +202,12 @@ export function createTextElement(input: Partial<TextSlideElement> = {}): TextSl
     opacity: input.opacity ?? 1,
     content: input.content ?? "New text",
     color: input.color ?? defaultDeckTheme.text,
-    fontFamily: input.fontFamily ?? "system",
+    fontFamily: normalizeTextFontFamily(input.fontFamily),
     fontSize: clamp(input.fontSize ?? 32, 8, 120),
     fontWeight: clamp(input.fontWeight ?? 650, 300, 900),
     italic: input.italic ?? false,
     align: input.align ?? "left",
+    listStyle: normalizeTextListStyle(input.listStyle),
   });
 }
 
@@ -273,6 +349,7 @@ function createStarterSlides(): MikroSlideRecord[] {
         height: 32,
         fontSize: 25,
         fontWeight: 440,
+        listStyle: "bullet",
       }),
       createShapeElement({
         x: 70,
@@ -371,6 +448,7 @@ export class MikroDeck {
       id: createId("deck"),
       title: cleanText(input.title ?? "", "Untitled Deck"),
       slides,
+      fonts: normalizeFonts(input.fonts),
       activeSlideId,
       aspectRatio: normalizeAspectRatio(input.aspectRatio),
       theme: normalizeTheme(input.theme),
@@ -393,10 +471,11 @@ export class MikroDeck {
       ...record,
       title: cleanText(record.title, "Untitled Deck"),
       slides,
+      fonts: normalizeFonts(record.fonts),
       activeSlideId,
       aspectRatio: normalizeAspectRatio(record.aspectRatio),
       theme: normalizeTheme(record.theme),
-      snapshots: record.snapshots ?? [],
+      snapshots: normalizeSnapshots(record.snapshots),
     });
   }
 
@@ -419,6 +498,10 @@ export class MikroDeck {
     if (input.slides) {
       next.slides =
         input.slides.length > 0 ? input.slides.map(sanitizeSlide) : [createBlankSlide()];
+    }
+
+    if (input.fonts) {
+      next.fonts = normalizeFonts(input.fonts);
     }
 
     if (input.activeSlideId && next.slides.some((slide) => slide.id === input.activeSlideId)) {
@@ -447,6 +530,7 @@ export class MikroDeck {
         next.id,
         next.title,
         next.slides,
+        next.fonts,
         next.activeSlideId,
         next.aspectRatio,
         next.theme,
@@ -591,6 +675,7 @@ export class MikroDeck {
     deckId: string,
     title: string,
     slides: MikroSlideRecord[],
+    fonts: MikroFontRecord[],
     activeSlideId: string,
     aspectRatio: DeckAspectRatio,
     theme: DeckTheme,
@@ -603,6 +688,7 @@ export class MikroDeck {
         deckId,
         title,
         slides: clone(slides),
+        fonts: clone(fonts),
         activeSlideId,
         aspectRatio,
         theme: clone(theme),
