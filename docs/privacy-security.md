@@ -1,6 +1,6 @@
 # Privacy And Security
 
-MikroSlides is designed as a local-first browser app. There is no account system and no application backend in the current product.
+MikroSlides is designed as a local-first browser app. There is no account system and no MikroSlides application backend in the current product.
 
 ## Local Storage
 
@@ -13,17 +13,18 @@ MikroSlides is designed as a local-first browser app. There is no account system
 - The app shell can be served from any static host.
 - A deck can reference remote image URLs. The browser loads those images when the slide renders.
 - Portable export and PNG export may fetch remote image URLs already present in the deck to embed or render them.
+- Remote font sources may load from their configured provider when a deck uses them.
 - The app does not send deck data to a MikroSlides service.
 
 ## File Exports
 
-- `.mikroslides.json` contains editable deck data.
-- `.mikroslides` contains editable deck data plus embedded image assets where available.
+- `.mikroslides.json` contains editable deck data, including speaker notes.
+- `.mikroslides` contains editable deck data plus embedded image and font assets where available.
 - PNG export renders the current slide in the browser.
 - PDF export uses the browser print/save-to-PDF flow.
 
-## Operational Notes
+## Sharing Notes
 
-- Treat exported files as containing the full deck content, including speaker notes and embedded images.
-- Review remote image usage before sharing portable files if the source URL itself is sensitive.
+- Treat exported files as containing the full deck content, including speaker notes and embedded assets.
+- Review remote image and font usage before sharing portable files if source URLs are sensitive.
 - For shared or managed machines, use a separate browser profile or clear site data after use.

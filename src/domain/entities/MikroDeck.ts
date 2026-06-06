@@ -252,6 +252,7 @@ export function createBlankSlide(input: Partial<MikroSlideRecord> = {}): MikroSl
     layout: normalizeSlideLayout(input.layout),
     background: input.background ?? defaultDeckTheme.background,
     speakerNotes: input.speakerNotes ?? "",
+    skipped: input.skipped === true,
     transition: normalizeSlideTransition(input.transition),
     elements: input.elements?.map(sanitizeElement) ?? [
       createTextElement({
@@ -287,6 +288,7 @@ function sanitizeSlide(slide: MikroSlideRecord, index: number): MikroSlideRecord
     layout: normalizeSlideLayout(slide.layout),
     background: slide.background || defaultDeckTheme.background,
     speakerNotes: slide.speakerNotes ?? "",
+    skipped: slide.skipped === true,
     transition: normalizeSlideTransition(slide.transition),
     elements: slide.elements.map(sanitizeElement),
   };

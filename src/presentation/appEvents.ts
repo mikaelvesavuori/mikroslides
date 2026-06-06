@@ -70,7 +70,6 @@ export type AppEventElements = {
   slideBackgroundInput: HTMLInputElement;
   slideCanvas: HTMLElement;
   slideList: HTMLElement;
-  slideTitleInput: HTMLInputElement;
   speakerNotes: HTMLTextAreaElement;
   templateSelect: HTMLSelectElement;
   textColorInput: HTMLInputElement;
@@ -123,6 +122,7 @@ export type AppEventHandlers = {
   handleSlideDragStart: (event: DragEvent) => void;
   handleSlideDrop: (event: DragEvent) => void;
   handleSlideListClick: (event: MouseEvent) => void;
+  handleSlideListKeyDown: (event: KeyboardEvent) => void;
   importJsonFile: (event: Event) => Promise<void>;
   insertImageFromDialog: () => Promise<void>;
   movePresenter: (direction: -1 | 1) => void;
@@ -195,9 +195,6 @@ export function bindAppEvents(
   elements.librarySearch.addEventListener("input", handlers.renderLibrary);
   elements.insertImageButton.addEventListener("click", () => void handlers.insertImageFromDialog());
   elements.jsonFileInput.addEventListener("change", (event) => void handlers.importJsonFile(event));
-  elements.slideTitleInput.addEventListener("input", () =>
-    handlers.updateCurrentSlide({ title: elements.slideTitleInput.value }, { inspector: false }),
-  );
   elements.deckThemeSelect.addEventListener("change", handlers.updateDeckTheme);
   elements.deckAspectSelect.addEventListener("change", handlers.updateDeckAspect);
   elements.slideBackgroundInput.addEventListener("input", () =>
@@ -231,6 +228,7 @@ export function bindAppEvents(
 
 function bindSlideEvents(elements: AppEventElements, handlers: AppEventHandlers) {
   elements.slideList.addEventListener("click", handlers.handleSlideListClick);
+  elements.slideList.addEventListener("keydown", handlers.handleSlideListKeyDown);
   elements.slideList.addEventListener("dragstart", handlers.handleSlideDragStart);
   elements.slideList.addEventListener("dragover", handlers.handleSlideDragOver);
   elements.slideList.addEventListener("drop", handlers.handleSlideDrop);

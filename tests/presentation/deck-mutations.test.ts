@@ -5,9 +5,12 @@ import {
   alignElementsInActiveSlide,
   applyFontToSelectedText,
   duplicateElementsInActiveSlide,
+  duplicateElementsInPlaceInActiveSlide,
   pasteElementsIntoActiveSlide,
+  pasteSlidesAfterActiveSlide,
   removeFontFromDeck,
   reorderSelectedElementsInActiveSlide,
+  toggleSlideSkipped,
 } from "../../src/presentation/deckMutations.js";
 
 const now = "2026-06-03T00:00:00.000Z";
@@ -60,6 +63,68 @@ describe("deck mutations", () => {
       x: 15,
       y: 17,
     });
+
+    const inPlace = duplicateElementsInPlaceInActiveSlide(deck, ["original"], () => "in_place");
+    expect(inPlace?.selectedElementIds).toEqual(["in_place"]);
+    expect(inPlace?.deck.slides[0].elements.at(-1)).toMatchObject({
+      id: "in_place",
+      x: 10,
+      y: 12,
+    });
+  });
+
+  it("pastes slides after the active slide with fresh slide and element ids", () => {
+    const original = createTextElement({ id: "original" });
+    const baseDeck = MikroDeck.create({ title: "Base" }).toRecord();
+    const deck = {
+      ...baseDeck,
+      activeSlideId: "slide_1",
+      slides: [
+        {
+          ...baseDeck.slides[0],
+          elements: [original],
+          id: "slide_1",
+          title: "Intro",
+        },
+        {
+          ...baseDeck.slides[0],
+          elements: [],
+          id: "slide_2",
+          title: "Second",
+        },
+      ],
+    };
+
+    const pasted = pasteSlidesAfterActiveSlide(
+      deck,
+      [deck.slides[0]],
+      () => "slide_pasted",
+      () => "el_pasted",
+    );
+
+    expect(pasted?.deck.slides.map((slide) => slide.id)).toEqual([
+      "slide_1",
+      "slide_pasted",
+      "slide_2",
+    ]);
+    expect(pasted?.deck.activeSlideId).toBe("slide_pasted");
+    expect(pasted?.selectedElementIds).toEqual([]);
+    expect(pasted?.deck.slides[1]).toMatchObject({
+      elements: [{ id: "el_pasted" }],
+      id: "slide_pasted",
+      title: "Intro copy",
+    });
+  });
+
+  it("toggles skipped slides without changing the active slide", () => {
+    const deck = MikroDeck.create({ title: "Skip" }).addSlide().toRecord();
+    const slideId = deck.slides[1].id;
+
+    const skipped = toggleSlideSkipped(deck, slideId);
+
+    expect(skipped?.activeSlideId).toBe(deck.activeSlideId);
+    expect(skipped?.slides[1].skipped).toBe(true);
+    expect(toggleSlideSkipped(skipped ?? deck, slideId)?.slides[1].skipped).toBe(false);
   });
 
   it("applies and removes deck font tokens from selected text", () => {

@@ -1,92 +1,102 @@
 # MikroSlides
 
-**The minimalist presentation app that's all yours.**
+**Local-first presentation decks without the SaaS ceremony.**
 
-MikroSlides is an ultra-minimal, local-first presentation editor for modern browsers. It gives you focused deck creation, browser-local storage, JSON file exchange, and clean PDF distribution without a heavy SaaS surface.
+MikroSlides is a minimalist presentation editor for modern browsers. It keeps decks in browser storage by default, gives you a focused slide canvas, and exports portable files, images, and PDFs when you need to move work elsewhere.
+
+_Use MikroSlides online for free at [slides.mikrosuite.com](https://slides.mikrosuite.com). It runs over HTTPS, needs no account, and stores decks privately in browser storage for that site unless you export them._
+
+## Why MikroSlides
+
+- **Own the deck**: decks stay in browser-local storage until you export JSON, portable MikroSlides files, PNG, or PDF.
+- **Work directly**: add slides, text, shapes, images, notes, and layouts without a heavy workspace model.
+- **Move quickly**: start from Markdown outlines, reuse slide templates, and polish spacing locally.
+- **Present simply**: hide slides, keep speaker notes, and run a local presenter view from the browser.
+- **Deploy easily**: the app is static HTML, CSS, and JavaScript.
 
 ## Features
 
-- **Local-first decks** stored in browser IndexedDB
-- **Responsive slide editor** with 16:9, 4:3, and 1:1 decks, thumbnails, speaker notes, and a focused inspector
-- **Object editing** for text, shapes, and images
-- **Direct canvas controls** including select, multi-select, drag, resize, copy, paste, duplicate, delete, zoom, alignment, layering, and keyboard nudging
-- **Undo and redo** for deck and slide edits
-- **Slide layouts** for title, section, image/text, quote, and closing slides
-- **Markdown outline import** for quickly generating a deck from notes
-- **Deterministic polish pass** that tightens layouts, spacing, theme colors, and type scale locally
-- **Deck themes** with familiar MikroSuite defaults and editable slide backgrounds
-- **Saved slide templates** for reusable local layouts
-- **Presentation mode** for local playback
-- **JSON import/export** using the `.mikroslides.json` envelope
-- **Portable `.mikroslides` export** with embedded local/data URL images and best-effort remote image embedding
-- **Current-slide PNG export** for fast sharing
-- **PDF export** through the browser print/save-to-PDF flow
-- **Static deployment** for any host that can serve HTML, CSS, and JavaScript
+- **Local-first deck library** with IndexedDB persistence, rename, duplicate, delete, import, and recovery draft flows
+- **Slide rail** with add, reorder, duplicate, copy, paste, delete, and skip/show slide controls
+- **Responsive editor** for 16:9, 4:3, and square decks
+- **Object editing** for text, shapes, and images with drag, resize, align, layer, duplicate, copy, paste, delete, and keyboard nudging
+- **Familiar canvas gestures** including Shift-drag axis constraint and Option/Alt-drag duplication
+- **Text editing** by double-click, with normal object selection and resizing on single click
+- **Built-in slide layouts** plus saved local templates
+- **Markdown outline import** for turning notes into a first deck
+- **Local polish pass** that tightens layout, spacing, color, and type scale
+- **Speaker notes and presentation mode** with skipped slides excluded
+- **Theme, aspect ratio, slide background, and font controls**
+- **JSON, portable `.mikroslides`, PDF, and current-slide PNG export**
+- **Static deployment** for any host that can serve the built files
 
 ## Quick Start
 
-### Development
+Open [slides.mikrosuite.com](https://slides.mikrosuite.com) to use MikroSlides immediately, securely, and without an account.
 
-```sh
+### Download the App
+
+```bash
+curl -sSL -o mikroslides.zip https://releases.mikrosuite.com/mikroslides_latest.zip
+unzip mikroslides.zip -d mikroslides
+```
+
+Serve the extracted files with any static web server. For a quick local check:
+
+```bash
+cd mikroslides/*
+npx http-server . -a 127.0.0.1 -p 8000 -c-1
+```
+
+Open `http://127.0.0.1:8000`.
+
+## Using MikroSlides
+
+- [Docs home](docs/index.md)
+- [Create your first deck](docs/first-deck.md)
+- [Edit and present decks](docs/editing-and-presenting.md)
+- [Import and export](docs/import-export.md)
+- [Local data and backups](docs/local-data.md)
+- [Deployment](docs/deployment.md)
+- [Privacy and security](docs/privacy-security.md)
+
+## Runtime Configuration
+
+MikroSlides is a static local-first app. It does not need server credentials, an account system, or runtime secrets. Decks, templates, and recovery drafts are stored in the current browser profile for the current origin.
+
+Browser deployments use download-based import and export. A static host is enough for the app shell; remote image URLs inside a deck are loaded by the browser when the slide renders.
+
+## Development
+
+```bash
 npm install
 npm run dev:web
 ```
 
 Open `http://127.0.0.1:4175`.
 
-### Verification
+Run the full local check before shipping:
 
-```sh
+```bash
 npm run verify
+npm run smoke:ui
 ```
 
-The full suite runs Biome, TypeScript, Vitest with coverage, and the production build.
+## Release Downloads
 
-### Production build
+Latest release download:
 
-```sh
-npm run build
-```
+- `https://releases.mikrosuite.com/mikroslides_latest.zip`
 
-The static bundle is written to `dist/` and can be served from any static host.
-
-### Cloudflare deploy
-
-```sh
-npm run deploy:cloudflare
-```
-
-`wrangler.toml` is configured for Cloudflare Workers static assets.
+GitHub Releases provide versioned archives for pinned deployments.
 
 ## Technology
 
 - **Frontend**: Vanilla HTML, CSS, and TypeScript compiled with esbuild
-- **Storage**: IndexedDB for browser-local decks
-- **Architecture**: Clean Architecture and DDD-style boundaries in one `src/` tree
-- **File exchange**: MikroSlides JSON and portable deck envelopes with schema-version validation
-- **Distribution**: Browser print output for PDF export and client-side PNG export
-- **Testing**: Vitest
-- **Tooling**: Biome, TypeScript, esbuild, Wrangler
-
-## Project Structure
-
-- `src/domain`, `src/application`, `src/infrastructure`, `src/interfaces`, and `src/shared` contain the app core
-- `src/presentation`, `src/config`, `src/ui`, and `src/public` contain the browser surface
-- `tests/` contains focused domain, application, and infrastructure tests
-- `docs/` contains manual QA and privacy/security notes
-
-## Local Data And Privacy
-
-MikroSlides is local-first. Decks, saved templates, focus-mode preference, and recovery drafts live in the browser via IndexedDB and localStorage. The app does not require an account or backend service.
-
-Exporting is initiated by the user. Portable export and PNG export may fetch remote image URLs already present in a deck so those assets can be embedded or rendered. Local image files inserted into a deck are stored as data URLs in the browser and can be included in exported files.
-
-See [Privacy And Security](docs/privacy-security.md) for operational notes.
-
-## Manual QA
-
-See [Manual QA](docs/manual-qa.md) for the release smoke checklist covering edit flows, outline import, storage, presenter mode, and all export formats.
+- **Storage**: IndexedDB and localStorage for browser-local decks and preferences
+- **Export**: Editable MikroSlides JSON, portable deck bundles, browser PDF, and client-side PNG
+- **Build**: Prebuilt static release archive
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](./LICENSE).

@@ -32,14 +32,20 @@ export function renderSlideThumbnails(
   return slides
     .map((slide, index) => {
       const current = slide.id === options.activeSlideId;
+      const slideLabel = `Slide ${index + 1}: ${slide.title}${slide.skipped ? " (skipped)" : ""}`;
+      const skipLabel = slide.skipped ? `Include slide ${index + 1}` : `Skip slide ${index + 1}`;
       return `
-        <button class="slide-thumb" type="button" draggable="true" data-slide-id="${escapeAttribute(slide.id)}" aria-current="${current}">
-          <span class="slide-number">${index + 1}</span>
-          <span class="thumb-preview" style="--thumb-bg:${escapeAttribute(slide.background)}">
-            ${renderSlideElements(slide, options)}
-          </span>
-          <span class="thumb-title">${escapeHtml(slide.title)}</span>
-        </button>
+        <div class="slide-thumb" draggable="true" data-slide-id="${escapeAttribute(slide.id)}" data-skipped="${slide.skipped}" aria-current="${current}">
+          <button class="slide-select-btn" type="button" aria-label="${escapeAttribute(slideLabel)}">
+            <span class="slide-number" aria-hidden="true">${index + 1}</span>
+            <span class="thumb-preview" style="--thumb-bg:${escapeAttribute(slide.background)}">
+              ${renderSlideElements(slide, options)}
+            </span>
+          </button>
+          <button class="slide-skip-btn" type="button" data-slide-skip="true" aria-pressed="${slide.skipped}" title="${escapeAttribute(skipLabel)}" aria-label="${escapeAttribute(skipLabel)}">
+            <svg class="icon" aria-hidden="true"><use href="#icon-skip-slide"></use></svg>
+          </button>
+        </div>
       `;
     })
     .join("");
@@ -73,7 +79,8 @@ export function renderSlideElement(
       `--text-align:${element.align}`,
       `--element-font:${options.resolveFontStack?.(element.fontFamily) ?? defaultFontStack}`,
     ].join(";");
-    body = `<div class="slide-text" data-text-editor="${escapeAttribute(element.id)}" data-list-style="${element.listStyle}" contenteditable="${isEditing}" spellcheck="true" style="${escapeAttribute(style)}">${renderTextElementContent(element)}</div>`;
+    const editableAttributes = isEditing ? ' contenteditable="true" spellcheck="true"' : "";
+    body = `<div class="slide-text" data-text-editor="${escapeAttribute(element.id)}" data-list-style="${element.listStyle}" data-align="${element.align}"${editableAttributes} style="${escapeAttribute(style)}"><div class="slide-text-content">${renderTextElementContent(element)}</div></div>`;
   }
 
   if (element.kind === "shape") {

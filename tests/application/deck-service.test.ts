@@ -90,6 +90,7 @@ describe("DeckService", () => {
     deck.slides[0] = {
       ...deck.slides[0],
       layout: "comparison",
+      skipped: true,
       transition: "fade",
     };
     const exported = service.exportJson(deck);
@@ -102,7 +103,11 @@ describe("DeckService", () => {
     expect(secondImport.id).not.toBe(imported.id);
     expect(imported.aspectRatio).toBe("4:3");
     expect(imported.theme.id).toBe("technical");
-    expect(imported.slides[0]).toMatchObject({ layout: "comparison", transition: "fade" });
+    expect(imported.slides[0]).toMatchObject({
+      layout: "comparison",
+      skipped: true,
+      transition: "fade",
+    });
     expect(imported.slides).toHaveLength(deck.slides.length);
     expect(imported.snapshots[0]).toMatchObject({ deckId: imported.id, reason: "import" });
     expect(await service.list()).toHaveLength(3);
@@ -400,7 +405,11 @@ describe("DeckService", () => {
     );
 
     expect(imported.aspectRatio).toBe("16:9");
-    expect(imported.slides[0]).toMatchObject({ layout: "blank", transition: "none" });
+    expect(imported.slides[0]).toMatchObject({
+      layout: "blank",
+      skipped: false,
+      transition: "none",
+    });
   });
 
   it("rejects unsupported MikroSlides schema versions", async () => {

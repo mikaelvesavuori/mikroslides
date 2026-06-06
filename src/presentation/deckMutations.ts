@@ -59,6 +59,35 @@ export function duplicateActiveSlide(deck: MikroDeckRecord) {
   return MikroDeck.fromRecord(deck).duplicateSlide().toRecord();
 }
 
+export function pasteSlidesAfterActiveSlide(
+  deck: MikroDeckRecord,
+  slidesToPaste: MikroSlideRecord[],
+  createSlideId = () => createId("slide"),
+  createElementId = () => createId("el"),
+) {
+  if (slidesToPaste.length === 0) {
+    return null;
+  }
+
+  const activeIndex = deck.slides.findIndex((slide) => slide.id === deck.activeSlideId);
+  const insertIndex = activeIndex >= 0 ? activeIndex + 1 : deck.slides.length;
+  const pastedSlides = slidesToPaste.map((slide) =>
+    cloneSlideForDeck(slide, createSlideId, createElementId),
+  );
+  const slides = [
+    ...deck.slides.slice(0, insertIndex),
+    ...pastedSlides,
+    ...deck.slides.slice(insertIndex),
+  ];
+
+  return {
+    deck: MikroDeck.fromRecord(deck)
+      .update({ slides, activeSlideId: pastedSlides[0].id })
+      .toRecord(),
+    selectedElementIds: [],
+  };
+}
+
 export function moveActiveSlide(deck: MikroDeckRecord, direction: -1 | 1) {
   return MikroDeck.fromRecord(deck).moveSlide(deck.activeSlideId, direction).toRecord();
 }
@@ -69,6 +98,15 @@ export function removeActiveSlide(deck: MikroDeckRecord) {
 
 export function setActiveSlide(deck: MikroDeckRecord, slideId: string) {
   return MikroDeck.fromRecord(deck).setActiveSlide(slideId).toRecord();
+}
+
+export function toggleSlideSkipped(deck: MikroDeckRecord, slideId: string) {
+  const slide = deck.slides.find((item) => item.id === slideId);
+  if (!slide) {
+    return null;
+  }
+
+  return MikroDeck.fromRecord(deck).updateSlide(slideId, { skipped: !slide.skipped }).toRecord();
 }
 
 export function reorderDeckSlides(
@@ -176,6 +214,27 @@ export function duplicateElementsInActiveSlide(
     cloneElementForDeck(element, {
       createElementId,
       offset: 4,
+    }),
+  );
+
+  return insertElements(deck, slide, duplicates);
+}
+
+export function duplicateElementsInPlaceInActiveSlide(
+  deck: MikroDeckRecord,
+  selectedElementIds: string[],
+  createElementId = () => createId("el"),
+) {
+  const slide = activeSlideForDeck(deck);
+  const elements = selectedElementsForDeck(deck, selectedElementIds);
+  if (!slide || elements.length === 0) {
+    return null;
+  }
+
+  const duplicates = elements.map((element) =>
+    cloneElementForDeck(element, {
+      createElementId,
+      offset: 0,
     }),
   );
 
@@ -473,4 +532,20 @@ function cloneElementForDeck(
         ? Math.min(element.y + options.offset, options.maxPosition)
         : element.y + options.offset,
   } as SlideElement;
+}
+
+function cloneSlideForDeck(
+  slide: MikroSlideRecord,
+  createSlideId: () => string,
+  createElementId: () => string,
+): MikroSlideRecord {
+  return {
+    ...structuredClone(slide),
+    id: createSlideId(),
+    title: `${slide.title} copy`,
+    elements: slide.elements.map((element) => ({
+      ...structuredClone(element),
+      id: createElementId(),
+    })) as SlideElement[],
+  };
 }

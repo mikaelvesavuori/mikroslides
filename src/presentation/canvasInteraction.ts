@@ -53,6 +53,7 @@ export function canvasPointerDownAction(options: {
   isResize: boolean;
   isSelected: boolean;
   multiSelect: boolean;
+  shiftKey?: boolean;
 }): CanvasPointerDownAction {
   if (options.button !== 0 || options.ctrlKey || options.isEditableTarget) {
     return { kind: "ignore" };
@@ -70,7 +71,7 @@ export function canvasPointerDownAction(options: {
     return { element: options.element, kind: "edit-text" };
   }
 
-  if (options.multiSelect && options.isSelected && !options.isResize) {
+  if (options.multiSelect && options.isSelected && !options.isResize && !options.shiftKey) {
     return { elementId: options.elementId, kind: "toggle-selection-off" };
   }
 
@@ -118,11 +119,20 @@ export function dragGeometryUpdates(
   const dy = ((clientY - dragState.startClientY) / Math.max(canvasRect.height, 1)) * 100;
 
   if (dragState.mode === "move") {
+    const constrainedDelta =
+      shiftKey && (dx !== 0 || dy !== 0)
+        ? constrainMoveDelta(
+            dx,
+            dy,
+            clientX - dragState.startClientX,
+            clientY - dragState.startClientY,
+          )
+        : { dx, dy };
     return dragState.selectedStarts.map((item) => ({
       id: item.id,
       patch: {
-        x: roundPercent(item.x + dx),
-        y: roundPercent(item.y + dy),
+        x: roundPercent(item.x + constrainedDelta.dx),
+        y: roundPercent(item.y + constrainedDelta.dy),
       },
     }));
   }
@@ -227,4 +237,8 @@ export function textElementIdFromTarget(target: HTMLElement | null) {
 
 function roundPercent(value: number) {
   return Math.round(value * 10) / 10;
+}
+
+function constrainMoveDelta(dx: number, dy: number, pixelDx: number, pixelDy: number) {
+  return Math.abs(pixelDx) >= Math.abs(pixelDy) ? { dx, dy: 0 } : { dx: 0, dy };
 }

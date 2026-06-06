@@ -129,17 +129,49 @@ export function keyboardShortcutActionFromEvent(
 }
 
 export function isKeyboardInputTarget(target: EventTarget | null) {
-  const candidate = target as {
+  const element = inputTargetElement(target);
+  const candidate = element as {
     isContentEditable?: boolean;
     tagName?: string;
   } | null;
   const tagName = candidate?.tagName?.toLowerCase();
-  return (
+  if (
     tagName === "input" ||
     tagName === "textarea" ||
     tagName === "select" ||
     candidate?.isContentEditable === true
+  ) {
+    return true;
+  }
+
+  const closest =
+    typeof (element as { closest?: unknown } | null)?.closest === "function"
+      ? (element as { closest: (selector: string) => unknown }).closest
+      : null;
+  return Boolean(
+    closest?.call(
+      element,
+      'input, textarea, select, [contenteditable="true"], [contenteditable="plaintext-only"]',
+    ),
   );
+}
+
+function inputTargetElement(target: EventTarget | null) {
+  const candidate = target as {
+    closest?: unknown;
+    isContentEditable?: boolean;
+    parentElement?: unknown;
+    tagName?: string;
+  } | null;
+  if (
+    candidate?.tagName ||
+    candidate?.isContentEditable === true ||
+    typeof candidate?.closest === "function"
+  ) {
+    return candidate;
+  }
+
+  return (candidate?.parentElement as EventTarget | null | undefined) ?? null;
 }
 
 export async function runKeyboardShortcutAction(

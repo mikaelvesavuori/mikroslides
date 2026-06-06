@@ -30,7 +30,6 @@ export type InspectorPanelElements = {
   shapeStrokeInput: HTMLInputElement;
   slideBackgroundInput: HTMLInputElement;
   slideInspector: HTMLElement;
-  slideTitleInput: HTMLInputElement;
   speakerNotes: HTMLTextAreaElement;
   textColorInput: HTMLInputElement;
   textContentInput: HTMLTextAreaElement;
@@ -55,9 +54,6 @@ export function renderInspectorPanel(options: {
     return;
   }
 
-  if (documentRef.activeElement !== elements.slideTitleInput) {
-    elements.slideTitleInput.value = slide.title;
-  }
   if (deck && documentRef.activeElement !== elements.deckThemeSelect) {
     elements.deckThemeSelect.value = deck.theme.id;
   }

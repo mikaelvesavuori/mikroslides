@@ -74,10 +74,12 @@ function harness() {
     },
     getDeck: () => deck,
     getSelectedElementIds: () => selectedElementIds,
-    getSelectedElements: () =>
-      selectedElementIds
-        .map((id) => deck.slides[0].elements.find((element) => element.id === id))
-        .filter((element): element is SlideElement => Boolean(element)),
+    getSelectedElements: () => {
+      const slide = deck.slides.find((item) => item.id === deck.activeSlideId);
+      return selectedElementIds
+        .map((id) => slide?.elements.find((element) => element.id === id))
+        .filter((element): element is SlideElement => Boolean(element));
+    },
     getSlide: () => deck.slides.find((slide) => slide.id === deck.activeSlideId) ?? null,
     polishDeck: (currentDeck) => ({
       ...currentDeck,
@@ -127,6 +129,32 @@ describe("deck actions controller", () => {
     test.controller.polishDeck();
     expect(test.getDeck().title).toBe("Deck polished");
     expect(test.calls).toContain("toast:Deck polished");
+
+    test.controller.toggleSlideSkipped("slide_2");
+    expect(test.getDeck().slides.find((slide) => slide.id === "slide_2")?.skipped).toBe(true);
+    expect(test.getDeck().activeSlideId).not.toBe("slide_2");
+  });
+
+  it("copies, pastes, cuts, and deletes slides from the active slide context", () => {
+    const test = harness();
+
+    test.controller.copySlide();
+    test.controller.pasteSlide();
+
+    const pastedSlide = test.getDeck().slides[1];
+    expect(test.getDeck().slides.map((slide) => slide.title)).toEqual(["One", "One copy", "Two"]);
+    expect(test.getDeck().activeSlideId).toBe(pastedSlide.id);
+    expect(test.getSelectedElementIds()).toEqual([]);
+    expect(pastedSlide.id).not.toBe("slide_1");
+    expect(pastedSlide.elements.map((element) => element.id)).not.toContain("text");
+    expect(pastedSlide.elements.map((element) => element.id)).not.toContain("shape");
+
+    test.controller.cutSlide();
+    expect(test.getDeck().slides.map((slide) => slide.title)).toEqual(["One", "Two"]);
+    expect(test.calls).toEqual(expect.arrayContaining(["toast:Slide copied", "toast:Slide cut"]));
+
+    test.controller.deleteSlide();
+    expect(test.getDeck().slides.map((slide) => slide.title)).toEqual(["One"]);
   });
 
   it("updates selected elements and text list style", () => {

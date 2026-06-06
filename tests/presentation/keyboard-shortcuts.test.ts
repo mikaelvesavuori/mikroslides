@@ -72,6 +72,23 @@ describe("keyboard shortcuts", () => {
     expect(shortcut({ key: "a", metaKey: true })?.kind).toBe("select-all-elements");
   });
 
+  it("does not delete selected objects while editing text", () => {
+    const editor = { isContentEditable: true, tagName: "DIV" } as unknown as EventTarget;
+    const nestedTextTarget = {
+      parentElement: {
+        closest: (selector: string) =>
+          selector.includes("[contenteditable") ? { tagName: "DIV" } : null,
+        tagName: "SPAN",
+      },
+    } as unknown as EventTarget;
+
+    expect(shortcut({ key: "Backspace", target: editor }, { hasSelection: true })).toBeNull();
+    expect(shortcut({ key: "Delete", target: editor }, { hasSelection: true })).toBeNull();
+    expect(
+      shortcut({ key: "Backspace", target: nestedTextTarget }, { hasSelection: true }),
+    ).toBeNull();
+  });
+
   it("nudges selected elements with arrow keys", () => {
     expect(shortcut({ key: "ArrowDown" })).toBeNull();
     expect(shortcut({ key: "ArrowDown" }, { hasSelection: true })).toEqual({
@@ -89,6 +106,12 @@ describe("keyboard shortcuts", () => {
   it("recognizes input-like targets", () => {
     expect(isKeyboardInputTarget({ tagName: "SELECT" } as unknown as EventTarget)).toBe(true);
     expect(isKeyboardInputTarget({ isContentEditable: true } as unknown as EventTarget)).toBe(true);
+    expect(
+      isKeyboardInputTarget({
+        closest: () => ({ tagName: "DIV" }),
+        tagName: "SPAN",
+      } as unknown as EventTarget),
+    ).toBe(true);
     expect(isKeyboardInputTarget({ tagName: "DIV" } as unknown as EventTarget)).toBe(false);
   });
 

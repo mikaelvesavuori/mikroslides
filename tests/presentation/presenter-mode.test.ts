@@ -13,10 +13,24 @@ describe("presenter mode", () => {
       .toRecord();
 
     expect(presenterStartIndex(deck)).toBe(1);
-    expect(nextPresenterIndex(deck.slides.length - 1, 1, deck.slides.length)).toBe(
-      deck.slides.length - 1,
-    );
-    expect(nextPresenterIndex(1, -1, deck.slides.length)).toBe(0);
+    expect(nextPresenterIndex(deck, deck.slides.length - 1, 1)).toBe(deck.slides.length - 1);
+    expect(nextPresenterIndex(deck, 1, -1)).toBe(0);
+  });
+
+  it("skips hidden slides in presenter navigation and metadata", () => {
+    const deck = MikroDeck.create({ title: "Deck" }).addSlide().toRecord();
+    const skippedDeck = {
+      ...deck,
+      activeSlideId: deck.slides[1].id,
+      slides: deck.slides.map((slide, index) =>
+        index === 1 ? { ...slide, skipped: true } : slide,
+      ),
+    };
+
+    expect(presenterStartIndex(skippedDeck)).toBe(2);
+    expect(nextPresenterIndex(skippedDeck, 0, 1)).toBe(2);
+    expect(nextPresenterIndex(skippedDeck, 2, -1)).toBe(0);
+    expect(presenterMetaText(skippedDeck, 2)).toContain(`2 / ${deck.slides.length - 1}`);
   });
 
   it("formats presenter metadata", () => {

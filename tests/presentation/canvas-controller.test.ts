@@ -168,4 +168,79 @@ describe("canvas controller", () => {
       expect.arrayContaining(["persist-draft", "render-inspector", "render-print", "autosave"]),
     );
   });
+
+  it("exits active text editing before handling a single-click object interaction", () => {
+    const test = harness();
+    const editor = new FakeHTMLElement();
+    editor.dataset.textEditor = "title";
+    const target = new FakeHTMLElement({
+      '[contenteditable="true"]': editor,
+      "[data-element-id]": { dataset: { elementId: "title" } },
+      "[data-text-editor]": editor,
+    });
+
+    test.controller.beginEditingTextElement("title");
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBeNull();
+    expect(test.calls).toEqual(expect.arrayContaining(["flush-history", "stage-history"]));
+  });
+
+  it("duplicates selected objects before option-dragging them", () => {
+    const test = harness();
+    const target = new FakeHTMLElement({
+      "[data-element-id]": { dataset: { elementId: "title" } },
+    });
+    const original = test.getDeck().slides[0].elements[0];
+
+    test.controller.handleCanvasPointerDown({
+      altKey: true,
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+
+    expect(test.getDeck().slides[0].elements).toHaveLength(2);
+    expect(test.getSelectedElementIds()).toHaveLength(1);
+    expect(test.getSelectedElementIds()).not.toEqual(["title"]);
+
+    const duplicateId = test.getSelectedElementIds()[0];
+    test.controller.handlePointerMove({
+      clientX: 200,
+      clientY: 150,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerUp({} as PointerEvent);
+
+    const elements = test.getDeck().slides[0].elements;
+    expect(elements.find((element) => element.id === "title")).toMatchObject({
+      x: original.x,
+      y: original.y,
+    });
+    expect(elements.find((element) => element.id === duplicateId)).toMatchObject({
+      x: original.x + 10,
+      y: original.y + 10,
+    });
+    expect(test.calls).toEqual(expect.arrayContaining(["stage-history", "flush-history"]));
+  });
 });

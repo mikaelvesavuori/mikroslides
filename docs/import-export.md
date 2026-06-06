@@ -1,0 +1,24 @@
+# Import And Export
+
+MikroSlides uses explicit files for handoff and backup. Browser storage is convenient for daily work, but important decks should also be exported.
+
+## Export Formats
+
+- **JSON** downloads editable `.mikroslides.json` deck data. Use it for backups, debugging, and moving a deck between MikroSlides installs.
+- **Portable** downloads a `.mikroslides` file with editable deck data plus embedded image and font assets where available. Use it when the deck should travel as one file.
+- **PDF** opens the browser print flow. Choose "Save as PDF" to create a presentation-ready document.
+- **PNG** downloads the current slide as a raster image for quick sharing.
+
+## Import
+
+MikroSlides imports current `.mikroslides.json` files and portable `.mikroslides` files. Imported decks are copied into local browser storage as new decks, so the source file remains an external backup.
+
+## Images And Fonts
+
+Local image files are stored in the browser and can be embedded in portable exports. Remote image URLs are loaded by the browser when the deck renders. Portable and PNG export may fetch remote URLs already present in the deck so they can be embedded or rendered.
+
+Local font files and selected remote font sources can be stored with the deck. Portable export includes local font assets where available.
+
+## Backup Habit
+
+For important decks, export a JSON or portable file and keep it with the project it supports. Browser storage is local to the current browser profile and origin.

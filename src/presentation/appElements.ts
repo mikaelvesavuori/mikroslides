@@ -58,7 +58,6 @@ export function createMikroSlidesElements(root: Document = document) {
     insertImageButton: queryElement<HTMLButtonElement>(root, "#insert-image-btn"),
     jsonFileInput: queryElement<HTMLInputElement>(root, "#json-file-input"),
     slideInspector: queryElement<HTMLElement>(root, "#slide-inspector"),
-    slideTitleInput: queryElement<HTMLInputElement>(root, "#slide-title-input"),
     deckThemeSelect: queryElement<HTMLSelectElement>(root, "#deck-theme-select"),
     deckAspectSelect: queryElement<HTMLSelectElement>(root, "#deck-aspect-select"),
     slideBackgroundInput: queryElement<HTMLInputElement>(root, "#slide-background-input"),

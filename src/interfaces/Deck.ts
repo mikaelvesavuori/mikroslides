@@ -99,6 +99,7 @@ export interface MikroSlideRecord {
   layout: SlideLayoutKind;
   background: string;
   speakerNotes: string;
+  skipped: boolean;
   transition: SlideTransition;
   elements: SlideElement[];
 }

@@ -274,8 +274,13 @@ const templateOutlineController = createTemplateOutlineController({
 
 const slideListInteraction = createSlideListInteraction({
   hasDeck: () => deckStateController.hasDeck(),
+  onCopySlide: copySlide,
+  onCutSlide: cutSlide,
+  onDeleteSlide: deleteSlide,
+  onPasteSlide: pasteSlide,
   onReorderSlide: reorderSlide,
   onSelectSlide: selectSlideById,
+  onToggleSlideSkipped: toggleSlideSkipped,
   slideList: elements.slideList,
 });
 
@@ -397,6 +402,7 @@ const appEventHandlers = {
   handleSlideDragStart: slideListInteraction.handleDragStart,
   handleSlideDrop: slideListInteraction.handleDrop,
   handleSlideListClick: slideListInteraction.handleClick,
+  handleSlideListKeyDown: slideListInteraction.handleKeyDown,
   importJsonFile,
   insertImageFromDialog,
   movePresenter,
@@ -470,6 +476,7 @@ function renderAll(options: RenderOptions = {}) {
   renderFontRuntimeStyles();
   renderDeckHeader();
   renderHistoryControls();
+  renderTemplateOptions();
   renderSlideList();
   renderCanvas();
   renderPrintDeck();
@@ -628,6 +635,18 @@ function duplicateSlide() {
   deckActionsController.duplicateSlide();
 }
 
+function copySlide() {
+  deckActionsController.copySlide();
+}
+
+function cutSlide() {
+  deckActionsController.cutSlide();
+}
+
+function pasteSlide() {
+  deckActionsController.pasteSlide();
+}
+
 function moveSlide(direction: -1 | 1) {
   deckActionsController.moveSlide(direction);
 }
@@ -721,6 +740,10 @@ function reorderSlide(
   placement: SlideDropPlacement,
 ) {
   deckActionsController.reorderSlide(draggedSlideIdValue, targetSlideId, placement);
+}
+
+function toggleSlideSkipped(slideId: string) {
+  deckActionsController.toggleSlideSkipped(slideId);
 }
 
 function handleLayerListClick(event: MouseEvent) {

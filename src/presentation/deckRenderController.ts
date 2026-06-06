@@ -168,6 +168,7 @@ export function createDeckRenderController(options: DeckRenderControllerOptions)
       options.elements.templateSelect.innerHTML = renderTemplateSelectOptions(
         options.templates,
         customOptions,
+        options.getSlide()?.layout ?? null,
       );
     },
     renderFontRuntimeStyles() {

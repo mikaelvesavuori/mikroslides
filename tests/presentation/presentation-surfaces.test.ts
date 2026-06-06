@@ -89,4 +89,35 @@ describe("presentation surfaces", () => {
     expect(presenterNextButton.disabled).toBe(true);
     expect(presenterPrevButton.disabled).toBe(false);
   });
+
+  it("renders the next presentable slide when the requested slide is skipped", () => {
+    const deck = MikroDeck.create({ title: "Deck" }).addSlide().toRecord();
+    const skippedDeck = {
+      ...deck,
+      slides: deck.slides.map((slide, index) =>
+        index === 0 ? { ...slide, skipped: true } : slide,
+      ),
+    };
+    const presenterSlide = styledElement();
+    const presenterMeta = styledElement();
+    const presenterPrevButton = buttonElement();
+    const presenterNextButton = buttonElement();
+
+    const nextIndex = renderPresenterSurface(
+      {
+        presenterMeta: presenterMeta as unknown as HTMLElement,
+        presenterNextButton: presenterNextButton as unknown as HTMLButtonElement,
+        presenterPrevButton: presenterPrevButton as unknown as HTMLButtonElement,
+        presenterSlide: presenterSlide as unknown as HTMLElement,
+      },
+      skippedDeck,
+      0,
+      true,
+      renderOptions,
+    );
+
+    expect(nextIndex).toBe(1);
+    expect(presenterMeta.textContent).toContain(`1 / ${deck.slides.length - 1}`);
+    expect(presenterPrevButton.disabled).toBe(true);
+  });
 });

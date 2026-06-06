@@ -82,6 +82,24 @@ describe("interaction helpers", () => {
     ]);
   });
 
+  it("constrains move geometry to the dominant pointer axis while shift is held", () => {
+    const element = createTextElement({ id: "text", x: 10, y: 15, width: 20, height: 10 });
+    const dragState = createDragState({
+      clientX: 100,
+      clientY: 100,
+      element,
+      mode: "move",
+      selectedElements: [element],
+    });
+
+    expect(dragGeometryUpdates(dragState, 150, 130, { width: 500, height: 300 }, true)).toEqual([
+      { id: "text", patch: { x: 20, y: 15 } },
+    ]);
+    expect(dragGeometryUpdates(dragState, 120, 190, { width: 500, height: 300 }, true)).toEqual([
+      { id: "text", patch: { x: 10, y: 45 } },
+    ]);
+  });
+
   it("classifies canvas pointer down actions", () => {
     const text = createTextElement({ id: "text" });
     const image = createImageElement({ id: "image" });
@@ -155,6 +173,21 @@ describe("interaction helpers", () => {
         multiSelect: false,
       }),
     ).toEqual({ element: image, kind: "start-drag", mode: "resize" });
+
+    expect(
+      canvasPointerDownAction({
+        button: 0,
+        ctrlKey: false,
+        detail: 1,
+        element: image,
+        elementId: "image",
+        isEditableTarget: false,
+        isResize: false,
+        isSelected: true,
+        multiSelect: true,
+        shiftKey: true,
+      }),
+    ).toEqual({ element: image, kind: "start-drag", mode: "move" });
   });
 
   it("keeps image resizing proportional while shift is held", () => {

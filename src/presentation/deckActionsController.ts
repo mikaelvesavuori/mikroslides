@@ -17,10 +17,12 @@ import {
   duplicateElementsInActiveSlide,
   moveActiveSlide,
   type ObjectAlignment,
+  pasteSlidesAfterActiveSlide,
   removeActiveSlide,
   reorderDeckSlides,
   reorderSelectedElementsInActiveSlide,
   setActiveSlide,
+  toggleSlideSkipped as toggleSlideSkippedInDeck,
   updateActiveSlide,
   updateDeckRecord,
   updateElementsInActiveSlide,
@@ -54,6 +56,8 @@ export type DeckActionsControllerOptions = {
 };
 
 export function createDeckActionsController(options: DeckActionsControllerOptions) {
+  let slideClipboard: { deckId: string; slides: MikroSlideRecord[] } | null = null;
+
   function selectedIds() {
     return options.getSelectedElementIds();
   }
@@ -95,6 +99,54 @@ export function createDeckActionsController(options: DeckActionsControllerOption
     updateSelectedElement({ listStyle: current === style ? "none" : style });
   }
 
+  function copySlideToClipboard(toastMessage: string) {
+    const deck = options.getDeck();
+    const slide = options.getSlide();
+    if (!deck || !slide) {
+      return false;
+    }
+
+    slideClipboard = { deckId: deck.id, slides: [structuredClone(slide)] };
+    options.showToast(toastMessage);
+    return true;
+  }
+
+  function copySlide() {
+    copySlideToClipboard("Slide copied");
+  }
+
+  function deleteSlide() {
+    const deck = options.getDeck();
+    if (deck) {
+      options.commitDeckMutation({ deck: removeActiveSlide(deck), selectedElementIds: [] });
+    }
+  }
+
+  function cutSlide() {
+    const slide = options.getSlide();
+    if (!slide) {
+      return;
+    }
+
+    if (copySlideToClipboard("Slide cut")) {
+      deleteSlide();
+    }
+  }
+
+  function pasteSlide() {
+    const deck = options.getDeck();
+    if (!deck || !slideClipboard || slideClipboard.slides.length === 0) {
+      return;
+    }
+
+    if (slideClipboard.deckId !== deck.id) {
+      options.showToast("Copy a slide from this deck first");
+      return;
+    }
+
+    options.commitDeckMutation(pasteSlidesAfterActiveSlide(deck, slideClipboard.slides));
+  }
+
   return {
     addShapeElement() {
       const deck = options.getDeck();
@@ -133,12 +185,9 @@ export function createDeckActionsController(options: DeckActionsControllerOption
 
       options.commitDeckMutation(deleteElementsFromActiveSlide(deck, selectedIds()));
     },
-    deleteSlide() {
-      const deck = options.getDeck();
-      if (deck) {
-        options.commitDeckMutation({ deck: removeActiveSlide(deck), selectedElementIds: [] });
-      }
-    },
+    copySlide,
+    cutSlide,
+    deleteSlide,
     duplicateSelectedElement() {
       const deck = options.getDeck();
       if (!deck || selectedIds().length === 0) {
@@ -153,6 +202,7 @@ export function createDeckActionsController(options: DeckActionsControllerOption
         options.commitDeckMutation({ deck: duplicateActiveSlide(deck), selectedElementIds: [] });
       }
     },
+    pasteSlide,
     handleLayerListClick(event: MouseEvent) {
       const target = event.target instanceof HTMLElement ? event.target : null;
       const button = target?.closest<HTMLButtonElement>("[data-layer-id]");
@@ -215,6 +265,12 @@ export function createDeckActionsController(options: DeckActionsControllerOption
       const deck = options.getDeck();
       if (deck) {
         options.commitDeckMutation({ deck: setActiveSlide(deck, slideId), selectedElementIds: [] });
+      }
+    },
+    toggleSlideSkipped(slideId: string) {
+      const deck = options.getDeck();
+      if (deck) {
+        options.commitDeckMutation(toggleSlideSkippedInDeck(deck, slideId), { inspector: false });
       }
     },
     toggleSelectedTextListStyle,

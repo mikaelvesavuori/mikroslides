@@ -18,7 +18,10 @@ import {
   trySetPointerCapture,
 } from "./canvasInteraction.js";
 import { canvasContextSelectionAction } from "./contextMenu.js";
-import { updateElementsInActiveSlide } from "./deckMutations.js";
+import {
+  duplicateElementsInPlaceInActiveSlide,
+  updateElementsInActiveSlide,
+} from "./deckMutations.js";
 import { canvasPointPercent, elementIdsInRect, type PercentRect } from "./interactionGeometry.js";
 import { isMultiSelectEvent, nextInteractionSelection } from "./selection.js";
 import { placeCaretAtPoint, readTextEditorContent, selectEditableContents } from "./textEditing.js";
@@ -103,6 +106,15 @@ export function createCanvasController(options: CanvasControllerOptions) {
         selectEditableContents(editor);
       }
     }, 0);
+  }
+
+  function finishEditingTextElement() {
+    if (!editingTextElementId) {
+      return;
+    }
+
+    editingTextElementId = null;
+    options.flushHistorySnapshot();
   }
 
   function startSelectionMarquee(event: PointerEvent) {
@@ -219,8 +231,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
         return;
       }
 
-      editingTextElementId = null;
-      options.flushHistorySnapshot();
+      finishEditingTextElement();
       options.renderCanvas();
       options.renderInspector();
     },
@@ -230,6 +241,15 @@ export function createCanvasController(options: CanvasControllerOptions) {
       const elementId = canvasElementIdFromTarget(target);
       const element = options.getSlide()?.elements.find((item) => item.id === elementId) ?? null;
       const isResize = Boolean(target?.closest("[data-resize]"));
+      const activeTextEditor = target?.closest<HTMLElement>("[data-text-editor]");
+      const isActiveTextEditorTarget = Boolean(
+        editingTextElementId && activeTextEditor?.dataset.textEditor === editingTextElementId,
+      );
+      const shouldExitTextEditingForObjectInteraction =
+        isActiveTextEditorTarget && event.detail < 2 && !isResize;
+      if (shouldExitTextEditingForObjectInteraction) {
+        finishEditingTextElement();
+      }
       const multiSelect = isMultiSelectEvent(event);
       const action = canvasPointerDownAction({
         button: event.button,
@@ -237,10 +257,12 @@ export function createCanvasController(options: CanvasControllerOptions) {
         detail: event.detail,
         element,
         elementId: elementId ?? null,
-        isEditableTarget: isEditableCanvasTarget(target),
+        isEditableTarget:
+          isEditableCanvasTarget(target) && !shouldExitTextEditingForObjectInteraction,
         isResize,
         isSelected: Boolean(elementId && options.getSelectedElementIds().includes(elementId)),
         multiSelect,
+        shiftKey: event.shiftKey,
       });
 
       if (action.kind === "ignore") {
@@ -268,14 +290,39 @@ export function createCanvasController(options: CanvasControllerOptions) {
         return;
       }
 
-      selectElementFromInteraction(action.element.id, multiSelect);
+      const selectionMultiSelect =
+        event.shiftKey && action.mode === "move" ? event.metaKey || event.ctrlKey : multiSelect;
+      selectElementFromInteraction(action.element.id, selectionMultiSelect);
       options.stageHistory();
+      let selectedElementsForDrag = options.getSelectedElements();
+
+      if (event.altKey && action.mode === "move") {
+        const deck = options.getDeck();
+        const duplicated = deck
+          ? duplicateElementsInPlaceInActiveSlide(deck, options.getSelectedElementIds())
+          : null;
+        if (duplicated) {
+          options.setDeck(duplicated.deck);
+          options.selectElements(duplicated.selectedElementIds);
+          selectedElementsForDrag = options.getSelectedElements();
+          void options.persistRecoveryDraft();
+          options.renderCanvas();
+          options.renderInspector();
+          options.renderPrintDeck();
+          options.scheduleAutosave();
+        }
+      }
+
+      const dragElement =
+        selectedElementsForDrag.find((item) => item.id === action.element.id) ??
+        selectedElementsForDrag[0] ??
+        action.element;
       dragState = createDragState({
         clientX: event.clientX,
         clientY: event.clientY,
-        element: action.element,
+        element: dragElement,
         mode: action.mode,
-        selectedElements: options.getSelectedElements(),
+        selectedElements: selectedElementsForDrag,
       });
       trySetPointerCapture(options.canvas, event.pointerId);
       options.renderCanvas();

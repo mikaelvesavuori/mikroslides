@@ -1,0 +1,27 @@
+# Local Data And Backups
+
+MikroSlides stores decks in browser IndexedDB. Saved templates, focus-mode preference, active deck id, and recovery drafts use localStorage.
+
+Data stays in the current browser profile for the current site unless you export it, import it elsewhere, or the browser syncs site data through its own features.
+
+## What Is Stored
+
+- Deck library and deck contents
+- Slide elements, speaker notes, skipped-slide state, themes, fonts, and assets
+- Saved slide templates
+- UI preferences such as focus mode
+- Recovery drafts for recent unsaved edits
+
+## Clearing Browser Data
+
+Clearing site data, browser storage, or the browser profile can remove local decks. Export important decks before clearing data or switching machines.
+
+For shared or managed machines, use a separate browser profile or clear site data when finished.
+
+## Backups
+
+Use JSON or portable export for durable backups. A portable file is best when the deck contains local images or fonts. JSON is best when you want a compact editable record.
+
+## Recovery Drafts
+
+MikroSlides keeps a local recovery draft while you work. If the page reloads before a normal save completes, the app can restore recent changes from that draft.

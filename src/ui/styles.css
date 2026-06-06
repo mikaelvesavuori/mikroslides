@@ -6,7 +6,7 @@
   --size-control-height: 32px;
   --size-dock-control: 34px;
   --size-header-height: 52px;
-  --size-slide-strip: 178px;
+  --size-slide-strip: 160px;
   --size-inspector: 288px;
 
   --space-1: 4px;
@@ -236,23 +236,31 @@ textarea:focus-visible,
 
 .app-shell {
   display: grid;
-  grid-template-rows: var(--size-header-height) minmax(0, 1fr);
+  grid-template-rows: calc(var(--size-header-height) + 12px) minmax(0, 1fr);
   height: 100vh;
 }
 
 .app-header {
+  position: relative;
+  z-index: 20;
+  justify-self: center;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-surface-raised) 80%, transparent) inset;
+  width: min(1040px, calc(100vw - 24px));
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  box-shadow: var(--shadow-overlay);
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .app-header {
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 6px;
 }
 
 .brand-block,
@@ -394,7 +402,9 @@ textarea:focus-visible,
 .workspace {
   display: grid;
   grid-template-columns: var(--size-slide-strip) minmax(0, 1fr) var(--size-inspector);
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
   background: var(--color-canvas-well);
 }
 
@@ -409,6 +419,7 @@ textarea:focus-visible,
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   border-right: 1px solid var(--color-border);
+  overflow: hidden;
   padding: 0;
 }
 
@@ -433,29 +444,41 @@ textarea:focus-visible,
 }
 
 .slide-list {
-  display: grid;
-  align-content: start;
-  gap: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   min-height: 0;
   overflow: auto;
-  padding: var(--space-3) var(--space-2);
+  overscroll-behavior: contain;
+  padding: 8px 7px 10px;
 }
 
 .slide-thumb {
   position: relative;
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: var(--space-2);
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   width: 100%;
-  min-height: 78px;
-  padding: var(--space-2);
+  min-height: 0;
+  padding: 5px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text);
   text-align: left;
-  box-shadow: var(--shadow-panel);
+  box-shadow: none;
   transition:
     border-color 120ms ease,
     background 120ms ease,
     opacity 120ms ease,
     transform 120ms ease;
+}
+
+.slide-thumb:hover,
+.slide-thumb:focus-within {
+  border-color: color-mix(in srgb, var(--color-border) 72%, transparent);
+  background: color-mix(in srgb, var(--color-surface-hover) 42%, transparent);
+  transform: none;
 }
 
 .slide-thumb[draggable="true"] {
@@ -468,11 +491,11 @@ textarea:focus-visible,
 
 .slide-thumb[aria-current="true"]::before {
   position: absolute;
-  top: 10px;
-  bottom: 10px;
-  left: -1px;
-  width: 3px;
-  border-radius: 0 999px 999px 0;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 2px;
+  border-radius: var(--radius-pill);
   background: var(--color-accent);
   content: "";
 }
@@ -496,10 +519,40 @@ textarea:focus-visible,
   bottom: -6px;
 }
 
+.slide-select-btn {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
 .slide-number {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 5px;
   color: var(--color-text-subtle);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
+  line-height: 1;
+}
+
+.slide-thumb[aria-current="true"] .slide-number {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
 .thumb-preview {
@@ -509,19 +562,92 @@ textarea:focus-visible,
   width: 100%;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--thumb-bg, #f8fafc);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.56) inset;
+  box-shadow: none;
 }
 
-.thumb-title {
-  grid-column: 2;
-  overflow: hidden;
-  color: var(--color-text-muted);
-  font-size: 11px;
-  font-weight: 620;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.slide-skip-btn {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 62%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-surface) 84%, transparent);
+  color: var(--color-text-subtle);
+  box-shadow: var(--shadow-control);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease,
+    opacity 120ms ease;
+}
+
+.slide-skip-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.slide-thumb:hover .slide-skip-btn,
+.slide-thumb:focus-within .slide-skip-btn {
+  opacity: 0.78;
+  pointer-events: auto;
+}
+
+.slide-skip-btn:hover,
+.slide-skip-btn:focus-visible {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  opacity: 1;
+}
+
+.slide-thumb[data-skipped="true"] {
+  color: var(--color-text-subtle);
+}
+
+.slide-thumb[data-skipped="true"] .slide-number::after {
+  position: absolute;
+  width: 18px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  content: "";
+  opacity: 0.78;
+  transform: rotate(-45deg);
+}
+
+.slide-thumb[data-skipped="true"] .thumb-preview {
+  border-style: dashed;
+  filter: saturate(0.36);
+  opacity: 0.48;
+}
+
+.slide-thumb[data-skipped="true"] .thumb-preview::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    color-mix(in srgb, var(--color-text-muted) 74%, transparent) 50%,
+    transparent calc(50% + 1px)
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.slide-thumb[data-skipped="true"] .slide-skip-btn {
+  border-color: color-mix(in srgb, var(--color-warning) 34%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+  color: var(--color-warning);
 }
 
 .add-slide-btn {
@@ -715,6 +841,8 @@ textarea:focus-visible,
 .slide-text {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -726,6 +854,20 @@ textarea:focus-visible,
   line-height: 1.14;
   text-align: var(--text-align);
   white-space: pre-wrap;
+}
+
+.slide-text[data-align="center"] {
+  justify-content: center;
+}
+
+.slide-text[data-align="right"] {
+  justify-content: flex-end;
+}
+
+.slide-text-content {
+  width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .slide-text[contenteditable="true"] {
@@ -994,12 +1136,6 @@ textarea:focus-visible,
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.inspector #slide-title-input {
-  color: var(--color-text);
-  font-size: 13px;
-  font-weight: 620;
 }
 
 .inspector input[type="color"] {
@@ -1580,11 +1716,11 @@ textarea:focus-visible,
 
 @media (max-width: 1080px) {
   :root {
-    --size-slide-strip: 138px;
+    --size-slide-strip: 128px;
     --size-inspector: 252px;
   }
 
-  .slide-thumb {
+  .slide-select-btn {
     grid-template-columns: 18px minmax(0, 1fr);
   }
 }
@@ -1599,6 +1735,10 @@ textarea:focus-visible,
     height: auto;
   }
 
+  .app-header {
+    width: calc(100vw - 16px);
+  }
+
   .workspace {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(420px, 62vh) auto;
@@ -1611,9 +1751,14 @@ textarea:focus-visible,
   }
 
   .slide-list {
-    grid-auto-flow: column;
-    grid-auto-columns: 138px;
+    flex-direction: row;
+    align-items: flex-start;
     overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .slide-thumb {
+    width: 138px;
   }
 
   .add-slide-btn {

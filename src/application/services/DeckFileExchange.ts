@@ -208,6 +208,7 @@ function readSlide(value: unknown, index: number): MikroSlideRecord | null {
     layout: readLayout(value.layout),
     background: readString(value.background, defaultDeckTheme.background),
     speakerNotes: typeof value.speakerNotes === "string" ? value.speakerNotes : "",
+    skipped: value.skipped === true,
     transition: readTransition(value.transition),
     elements,
   };

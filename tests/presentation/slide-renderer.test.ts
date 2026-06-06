@@ -49,10 +49,23 @@ describe("slide renderer", () => {
     });
 
     expect(html).toContain('data-selected="true"');
+    expect(html).toContain('data-align="left"');
     expect(html).toContain('contenteditable="true"');
+    expect(html).toContain('class="slide-text-content"');
     expect(html).toContain("&quot;Brand Sans&quot;, sans-serif");
     expect(html).toContain('src="blob:image_1"');
     expect(html).toContain("element-resize-handle");
+  });
+
+  it("omits contenteditable when text is not actively being edited", () => {
+    const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
+    slide.elements = [createTextElement({ align: "center", content: "Centered", id: "text_1" })];
+
+    const html = renderSlideElements(slide);
+
+    expect(html).toContain('data-align="center"');
+    expect(html).not.toContain("contenteditable");
+    expect(html).toContain('<div class="slide-text-content">Centered</div>');
   });
 
   it("creates stable layer labels", () => {
@@ -81,6 +94,9 @@ describe("slide renderer", () => {
     expect(html).toContain('data-slide-id="slide&amp;1"');
     expect(html).toContain('aria-current="true"');
     expect(html).toContain("Intro &lt;now&gt;");
+    expect(html).toContain('data-skipped="false"');
+    expect(html).toContain("slide-skip-btn");
     expect(html).toContain("thumb-preview");
+    expect(html).not.toContain("thumb-title");
   });
 });

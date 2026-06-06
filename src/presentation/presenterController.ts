@@ -44,7 +44,7 @@ export function createPresenterController(options: PresenterControllerOptions) {
         return;
       }
 
-      presenterIndex = nextPresenterIndex(presenterIndex, direction, deck.slides.length);
+      presenterIndex = nextPresenterIndex(deck, presenterIndex, direction);
       render();
     },
     open() {

@@ -1,6 +1,10 @@
 import type { DeckAspectRatio, MikroDeckRecord, TextFontFamily } from "../index.js";
 import { escapeAttribute } from "./htmlEscape.js";
-import { clampPresenterIndex, presenterMetaText } from "./presenterMode.js";
+import {
+  presentableSlideIndexes,
+  presenterIndexForDeck,
+  presenterMetaText,
+} from "./presenterMode.js";
 import { printCssForAspect, printDimensionsForAspect } from "./printSizing.js";
 import { renderSlideElements } from "./slideRenderer.js";
 
@@ -72,7 +76,16 @@ export function renderPresenterSurface(
     return index;
   }
 
-  const safeIndex = clampPresenterIndex(index, deck.slides.length);
+  const presentableIndexes = presentableSlideIndexes(deck);
+  if (presentableIndexes.length === 0) {
+    elements.presenterSlide.innerHTML = "";
+    elements.presenterMeta.textContent = "0 / 0";
+    elements.presenterPrevButton.disabled = true;
+    elements.presenterNextButton.disabled = true;
+    return 0;
+  }
+
+  const safeIndex = presenterIndexForDeck(deck, index);
   const slide = deck.slides[safeIndex];
   if (!slide) {
     elements.presenterSlide.innerHTML = "";
@@ -85,8 +98,9 @@ export function renderPresenterSurface(
   elements.presenterSlide.style.setProperty("--slide-bg", slide.background);
   elements.presenterSlide.innerHTML = renderSlideElements(slide, options);
   elements.presenterMeta.textContent = presenterMetaText(deck, safeIndex);
-  elements.presenterPrevButton.disabled = safeIndex === 0;
-  elements.presenterNextButton.disabled = safeIndex === deck.slides.length - 1;
+  elements.presenterPrevButton.disabled = presentableIndexes.indexOf(safeIndex) === 0;
+  elements.presenterNextButton.disabled =
+    presentableIndexes.indexOf(safeIndex) === presentableIndexes.length - 1;
   return safeIndex;
 }
 
