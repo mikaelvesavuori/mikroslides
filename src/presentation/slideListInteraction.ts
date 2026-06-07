@@ -7,6 +7,7 @@ export type SlideListInteractionOptions = {
   onCopySlide: () => void;
   onCutSlide: () => void;
   onDeleteSlide: () => void;
+  onOpenSlideContextMenu: (slideId: string, clientX: number, clientY: number) => void;
   onPasteSlide: () => void;
   onReorderSlide: (
     draggedSlideId: string,
@@ -77,6 +78,19 @@ export function createSlideListInteraction(options: SlideListInteractionOptions)
       options.onPasteSlide();
     }
 
+    focusActiveSlideButton();
+  }
+
+  function handleContextMenu(event: MouseEvent) {
+    const slideId = slideIdFromEvent(event);
+    if (!options.hasDeck() || !slideId) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    options.onSelectSlide(slideId);
+    options.onOpenSlideContextMenu(slideId, event.clientX, event.clientY);
     focusActiveSlideButton();
   }
 
@@ -160,6 +174,7 @@ export function createSlideListInteraction(options: SlideListInteractionOptions)
 
   return {
     handleClick,
+    handleContextMenu,
     handleDragEnd,
     handleDragLeave,
     handleDragOver,

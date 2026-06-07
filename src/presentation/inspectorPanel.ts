@@ -35,6 +35,7 @@ export type InspectorPanelElements = {
   textContentInput: HTMLTextAreaElement;
   textFields: HTMLElement;
   textFontSelect: HTMLSelectElement;
+  textLineHeightInput: HTMLInputElement;
   textSizeInput: HTMLInputElement;
   textWeightInput: HTMLInputElement;
 };
@@ -202,6 +203,11 @@ function renderTextInspector(
     sharedValue(textElements, (item) => item.fontWeight),
     documentRef,
   );
+  setNumberInputValueOrMixed(
+    elements.textLineHeightInput,
+    sharedValue(textElements, (item) => item.lineHeight),
+    documentRef,
+  );
   setColorInputValueOrMixed(
     elements.textColorInput,
     sharedValue(textElements, (item) => item.color),
@@ -211,6 +217,13 @@ function renderTextInspector(
   const align = sharedValue(textElements, (item) => item.align);
   for (const button of documentRef.querySelectorAll<HTMLButtonElement>("[data-align]")) {
     button.classList.toggle("is-active", align !== null && button.dataset.align === align);
+  }
+  const verticalAlign = sharedValue(textElements, (item) => item.verticalAlign);
+  for (const button of documentRef.querySelectorAll<HTMLButtonElement>("[data-valign]")) {
+    button.classList.toggle(
+      "is-active",
+      verticalAlign !== null && button.dataset.valign === verticalAlign,
+    );
   }
   const listStyle = sharedValue(textElements, (item) => item.listStyle);
   for (const button of documentRef.querySelectorAll<HTMLButtonElement>("[data-list-style]")) {

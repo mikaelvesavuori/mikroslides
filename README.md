@@ -1,18 +1,20 @@
 # MikroSlides
 
-**Local-first presentation decks without the SaaS ceremony.**
+**Minimal local-first presentation decks in the browser.**
+
+![MikroSlides product view](./mikroslides.png)
 
 MikroSlides is a minimalist presentation editor for modern browsers. It keeps decks in browser storage by default, gives you a focused slide canvas, and exports portable files, images, and PDFs when you need to move work elsewhere.
 
 _Use MikroSlides online for free at [slides.mikrosuite.com](https://slides.mikrosuite.com). It runs over HTTPS, needs no account, and stores decks privately in browser storage for that site unless you export them._
 
-## Why MikroSlides
+## What MikroSlides Includes
 
-- **Own the deck**: decks stay in browser-local storage until you export JSON, portable MikroSlides files, PNG, or PDF.
-- **Work directly**: add slides, text, shapes, images, notes, and layouts without a heavy workspace model.
-- **Move quickly**: start from Markdown outlines, reuse slide templates, and polish spacing locally.
-- **Present simply**: hide slides, keep speaker notes, and run a local presenter view from the browser.
-- **Deploy easily**: the app is static HTML, CSS, and JavaScript.
+- **Local storage**: decks stay in browser-local storage until you export JSON, portable MikroSlides files, PNG, or PDF.
+- **Direct editing**: add slides, text, shapes, images, notes, and layouts on the slide canvas.
+- **Outline import**: create a first deck from Markdown headings and bullets.
+- **Presentation mode**: hide slides, keep speaker notes, and present from the browser.
+- **Static deployment**: the app is static HTML, CSS, and JavaScript.
 
 ## Features
 
@@ -32,7 +34,7 @@ _Use MikroSlides online for free at [slides.mikrosuite.com](https://slides.mikro
 
 ## Quick Start
 
-Open [slides.mikrosuite.com](https://slides.mikrosuite.com) to use MikroSlides immediately, securely, and without an account.
+Open [slides.mikrosuite.com](https://slides.mikrosuite.com) to use MikroSlides without an account.
 
 ### Download the App
 
@@ -52,13 +54,7 @@ Open `http://127.0.0.1:8000`.
 
 ## Using MikroSlides
 
-- [Docs home](docs/index.md)
-- [Create your first deck](docs/first-deck.md)
-- [Edit and present decks](docs/editing-and-presenting.md)
-- [Import and export](docs/import-export.md)
-- [Local data and backups](docs/local-data.md)
-- [Deployment](docs/deployment.md)
-- [Privacy and security](docs/privacy-security.md)
+See the [documentation](https://mikrosuite.com/slides/docs/).
 
 ## Runtime Configuration
 
@@ -73,7 +69,7 @@ npm install
 npm run dev:web
 ```
 
-Open `http://127.0.0.1:4175`.
+Open `http://127.0.0.1:8000`.
 
 Run the full local check before shipping:
 

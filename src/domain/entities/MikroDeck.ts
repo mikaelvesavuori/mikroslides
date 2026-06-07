@@ -11,10 +11,12 @@ import type {
   ShapeSlideElement,
   SlideElement,
   SlideLayoutKind,
+  SlideShapeKind,
   SlideTransition,
   TextFontFamily,
   TextListStyle,
   TextSlideElement,
+  TextVerticalAlignment,
   UpdateDeckInput,
 } from "../../interfaces/index.js";
 import { createId, nowIso } from "../../shared/index.js";
@@ -97,6 +99,28 @@ function normalizeTextFontFamily(value: unknown): TextFontFamily {
 
 function normalizeTextListStyle(value: unknown): TextListStyle {
   return value === "bullet" ? "bullet" : "none";
+}
+
+function normalizeTextVerticalAlignment(value: unknown): TextVerticalAlignment {
+  return value === "top" || value === "bottom" ? value : "center";
+}
+
+function normalizeSlideShapeKind(value: unknown): SlideShapeKind {
+  return value === "capsule" ||
+    value === "chevron" ||
+    value === "database" ||
+    value === "diamond" ||
+    value === "document" ||
+    value === "ellipse" ||
+    value === "hexagon" ||
+    value === "line" ||
+    value === "octagon" ||
+    value === "parallelogram" ||
+    value === "rect" ||
+    value === "trapezoid" ||
+    value === "triangle"
+    ? value
+    : "rect";
 }
 
 function normalizeFontRecord(value: MikroFontRecord): MikroFontRecord | null {
@@ -205,8 +229,10 @@ export function createTextElement(input: Partial<TextSlideElement> = {}): TextSl
     fontFamily: normalizeTextFontFamily(input.fontFamily),
     fontSize: clamp(input.fontSize ?? 32, 8, 120),
     fontWeight: clamp(input.fontWeight ?? 650, 300, 900),
+    lineHeight: clamp(input.lineHeight ?? 1.14, 0.75, 3),
     italic: input.italic ?? false,
     align: input.align ?? "left",
+    verticalAlign: normalizeTextVerticalAlignment(input.verticalAlign),
     listStyle: normalizeTextListStyle(input.listStyle),
   });
 }
@@ -221,7 +247,7 @@ export function createShapeElement(input: Partial<ShapeSlideElement> = {}): Shap
     height: input.height ?? 22,
     rotation: input.rotation ?? 0,
     opacity: input.opacity ?? 1,
-    shape: input.shape ?? "rect",
+    shape: normalizeSlideShapeKind(input.shape),
     fill: input.fill ?? "#dbeafe",
     stroke: input.stroke ?? defaultDeckTheme.accent,
     strokeWidth: clamp(input.strokeWidth ?? 1, 0, 10),

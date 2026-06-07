@@ -63,6 +63,7 @@ describe("slide list interaction", () => {
       onCopySlide: () => calls.push("copy"),
       onCutSlide: () => calls.push("cut"),
       onDeleteSlide: () => calls.push("delete"),
+      onOpenSlideContextMenu: () => calls.push("open-menu"),
       onPasteSlide: () => calls.push("paste"),
       onReorderSlide: () => calls.push("reorder"),
       onSelectSlide: () => calls.push("select"),
@@ -77,6 +78,74 @@ describe("slide list interaction", () => {
     expect(calls).toEqual(["paste", "focus"]);
     expect(state.prevented).toBe(true);
     expect(state.stopped).toBe(true);
+  });
+
+  it("opens a slide context menu for the right-clicked thumbnail", () => {
+    const calls: string[] = [];
+    const previousHTMLElement = globalThis.HTMLElement;
+    class FakeElement {
+      dataset: { slideId?: string };
+
+      constructor(slideId?: string) {
+        this.dataset = { slideId };
+      }
+
+      closest() {
+        return this;
+      }
+    }
+    Object.defineProperty(globalThis, "HTMLElement", {
+      configurable: true,
+      value: FakeElement,
+    });
+    const slideList = {
+      querySelector: () => ({
+        focus: () => undefined,
+      }),
+    } as unknown as HTMLElement;
+    const windowRef = {
+      setTimeout: (callback: TimerHandler) => {
+        if (typeof callback === "function") {
+          callback();
+        }
+        return 1;
+      },
+    } as unknown as Pick<Window, "setTimeout">;
+    const interaction = createSlideListInteraction({
+      hasDeck: () => true,
+      onCopySlide: () => calls.push("copy"),
+      onCutSlide: () => calls.push("cut"),
+      onDeleteSlide: () => calls.push("delete"),
+      onOpenSlideContextMenu: (slideId, clientX, clientY) =>
+        calls.push(`open:${slideId}:${clientX}:${clientY}`),
+      onPasteSlide: () => calls.push("paste"),
+      onReorderSlide: () => calls.push("reorder"),
+      onSelectSlide: (slideId) => calls.push(`select:${slideId}`),
+      onToggleSlideSkipped: () => calls.push("skip"),
+      slideList,
+      windowRef,
+    });
+
+    try {
+      interaction.handleContextMenu({
+        clientX: 12,
+        clientY: 24,
+        preventDefault: () => undefined,
+        stopPropagation: () => undefined,
+        target: new FakeElement("slide-1"),
+      } as unknown as MouseEvent);
+
+      expect(calls).toEqual(["select:slide-1", "open:slide-1:12:24"]);
+    } finally {
+      if (previousHTMLElement) {
+        Object.defineProperty(globalThis, "HTMLElement", {
+          configurable: true,
+          value: previousHTMLElement,
+        });
+      } else {
+        Reflect.deleteProperty(globalThis, "HTMLElement");
+      }
+    }
   });
 
   it("places drops before or after vertical thumbnails", () => {

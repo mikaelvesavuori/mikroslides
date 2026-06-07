@@ -1,0 +1,20 @@
+---
+title: Authentication
+description: Account and authentication behavior in MikroSlides.
+---
+
+MikroSlides does not include an account system. The static app can be opened directly by anyone who can access the deployed URL.
+
+## App Access
+
+For personal or internal deployments, put MikroSlides behind the access controls provided by the host or network if you need restricted access. The app itself does not manage users, sessions, roles, or permissions.
+
+## Local Data
+
+Decks are stored in browser storage for the current site. Browser storage is not an authentication boundary. Anyone using the same browser profile and origin can access the local decks saved there.
+
+For shared computers, use a separate browser profile or clear site data after use.
+
+## File Sharing
+
+Exported `.mikroslides.json`, `.mikroslides`, PDF, and PNG files contain deck content. Share them through the file-sharing system you already trust for the material in the deck.

@@ -1,4 +1,9 @@
-import { createImageElement, createTextElement, MikroDeck } from "../../src/index.js";
+import {
+  createImageElement,
+  createShapeElement,
+  createTextElement,
+  MikroDeck,
+} from "../../src/index.js";
 import {
   getElementLabel,
   renderSlideElements,
@@ -32,6 +37,8 @@ describe("slide renderer", () => {
         id: "text_1",
         content: "Headline",
         fontFamily: "font:brand",
+        lineHeight: 1.35,
+        verticalAlign: "bottom",
       }),
       createImageElement({
         id: "image_1",
@@ -50,9 +57,11 @@ describe("slide renderer", () => {
 
     expect(html).toContain('data-selected="true"');
     expect(html).toContain('data-align="left"');
-    expect(html).toContain('contenteditable="true"');
+    expect(html).toContain('data-valign="bottom"');
+    expect(html).toContain('contenteditable="plaintext-only"');
     expect(html).toContain('class="slide-text-content"');
     expect(html).toContain("&quot;Brand Sans&quot;, sans-serif");
+    expect(html).toContain("--line-height:1.35");
     expect(html).toContain('src="blob:image_1"');
     expect(html).toContain("element-resize-handle");
   });
@@ -66,6 +75,22 @@ describe("slide renderer", () => {
     expect(html).toContain('data-align="center"');
     expect(html).not.toContain("contenteditable");
     expect(html).toContain('<div class="slide-text-content">Centered</div>');
+  });
+
+  it("renders shape elements as SVG paths", () => {
+    const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
+    slide.elements = [
+      createShapeElement({ id: "diamond", shape: "diamond" }),
+      createShapeElement({ id: "database", shape: "database" }),
+      createShapeElement({ id: "line", shape: "line" }),
+    ];
+
+    const html = renderSlideElements(slide);
+
+    expect(html).toContain('data-shape="diamond"');
+    expect(html).toContain('class="slide-shape-fill"');
+    expect(html).toContain('class="slide-shape-decoration"');
+    expect(html).toContain('class="slide-shape-line"');
   });
 
   it("creates stable layer labels", () => {

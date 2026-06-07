@@ -5,6 +5,7 @@ import type {
   TextAlignment,
   TextFontFamily,
   TextListStyle,
+  TextVerticalAlignment,
 } from "../index.js";
 import type { ObjectAlignment } from "./deckMutations.js";
 import type { FontManager } from "./fontManager.js";
@@ -68,6 +69,7 @@ export type AppEventElements = {
   shapeKindSelect: HTMLSelectElement;
   shapeStrokeInput: HTMLInputElement;
   slideBackgroundInput: HTMLInputElement;
+  slideContextMenu: HTMLElement;
   slideCanvas: HTMLElement;
   slideList: HTMLElement;
   speakerNotes: HTMLTextAreaElement;
@@ -75,6 +77,7 @@ export type AppEventElements = {
   textColorInput: HTMLInputElement;
   textContentInput: HTMLTextAreaElement;
   textFontSelect: HTMLSelectElement;
+  textLineHeightInput: HTMLInputElement;
   textSizeInput: HTMLInputElement;
   textWeightInput: HTMLInputElement;
   themeButton: HTMLButtonElement;
@@ -105,6 +108,8 @@ export type AppEventHandlers = {
   handleCanvasClick: (event: MouseEvent) => void;
   handleCanvasContextMenu: (event: MouseEvent) => void;
   handleCanvasDoubleClick: (event: MouseEvent) => void;
+  handleCanvasDragOver: (event: DragEvent) => void;
+  handleCanvasDrop: (event: DragEvent) => Promise<void>;
   handleCanvasFocusOut: (event: FocusEvent) => void;
   handleCanvasPointerDown: (event: PointerEvent) => void;
   handleCanvasTextInput: (event: Event) => void;
@@ -121,7 +126,9 @@ export type AppEventHandlers = {
   handleSlideDragOver: (event: DragEvent) => void;
   handleSlideDragStart: (event: DragEvent) => void;
   handleSlideDrop: (event: DragEvent) => void;
+  handleSlideContextMenuClick: (event: MouseEvent) => void;
   handleSlideListClick: (event: MouseEvent) => void;
+  handleSlideListContextMenu: (event: MouseEvent) => void;
   handleSlideListKeyDown: (event: KeyboardEvent) => void;
   importJsonFile: (event: Event) => Promise<void>;
   insertImageFromDialog: () => Promise<void>;
@@ -160,6 +167,12 @@ export function bindAppEvents(
   elements.deckTitleInput.addEventListener("input", () =>
     handlers.updateDeckTitle(elements.deckTitleInput.value),
   );
+  elements.deckTitleInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === "Escape") {
+      event.preventDefault();
+      elements.deckTitleInput.blur();
+    }
+  });
   elements.newDeckButton.addEventListener("click", () => void handlers.createDeck());
   elements.libraryButton.addEventListener("click", () =>
     handlers.openDialog(elements.libraryDialog),
@@ -216,18 +229,20 @@ export function bindAppEvents(
   bindLayerEvents(elements, handlers);
   fontManager.bindEvents();
   elements.contextMenu.addEventListener("click", handlers.handleContextMenuClick);
+  elements.slideContextMenu.addEventListener("click", handlers.handleSlideContextMenuClick);
   bindExportEvents(elements, handlers);
   elements.createOutlineDeckButton.addEventListener(
     "click",
     () => void handlers.createDeckFromOutlineText(elements.outlineInput.value),
   );
-  bindGlobalDelegates(handlers, documentRef);
+  bindGlobalDelegates(elements, handlers, documentRef);
   documentRef.addEventListener("keydown", (event) => void handlers.handleKeyboard(event));
   documentRef.addEventListener("paste", (event) => void handlers.handlePaste(event));
 }
 
 function bindSlideEvents(elements: AppEventElements, handlers: AppEventHandlers) {
   elements.slideList.addEventListener("click", handlers.handleSlideListClick);
+  elements.slideList.addEventListener("contextmenu", handlers.handleSlideListContextMenu);
   elements.slideList.addEventListener("keydown", handlers.handleSlideListKeyDown);
   elements.slideList.addEventListener("dragstart", handlers.handleSlideDragStart);
   elements.slideList.addEventListener("dragover", handlers.handleSlideDragOver);
@@ -244,8 +259,11 @@ function bindCanvasEvents(
 ) {
   elements.slideCanvas.addEventListener("pointerdown", handlers.handleCanvasPointerDown);
   elements.slideCanvas.addEventListener("contextmenu", handlers.handleCanvasContextMenu);
+  elements.slideCanvas.addEventListener("dragover", handlers.handleCanvasDragOver);
+  elements.slideCanvas.addEventListener("drop", (event) => void handlers.handleCanvasDrop(event));
   elements.slideCanvas.addEventListener("click", handlers.handleCanvasClick);
   elements.slideCanvas.addEventListener("dblclick", handlers.handleCanvasDoubleClick);
+  elements.slideCanvas.addEventListener("beforeinput", handlers.handleCanvasTextInput);
   elements.slideCanvas.addEventListener("input", handlers.handleCanvasTextInput);
   elements.slideCanvas.addEventListener("focusout", handlers.handleCanvasFocusOut);
   windowRef.addEventListener("pointermove", handlers.handlePointerMove);
@@ -300,6 +318,12 @@ function bindInspectorEvents(elements: AppEventElements, handlers: AppEventHandl
   elements.textWeightInput.addEventListener("input", () =>
     handlers.updateSelectedElement(
       { fontWeight: readNumber(elements.textWeightInput) },
+      { inspector: false },
+    ),
+  );
+  elements.textLineHeightInput.addEventListener("input", () =>
+    handlers.updateSelectedElement(
+      { lineHeight: readNumber(elements.textLineHeightInput) },
       { inspector: false },
     ),
   );
@@ -374,9 +398,15 @@ function bindExportEvents(elements: AppEventElements, handlers: AppEventHandlers
   elements.exportPngAction.addEventListener("click", () => void handlers.exportPng());
 }
 
-function bindGlobalDelegates(handlers: AppEventHandlers, documentRef: Document) {
+function bindGlobalDelegates(
+  elements: Pick<AppEventElements, "deckTitleInput">,
+  handlers: AppEventHandlers,
+  documentRef: Document,
+) {
   documentRef.addEventListener("click", (event) => {
     const target = event.target instanceof HTMLElement ? event.target : null;
+    blurDeckTitleFromOutsideClick(documentRef.activeElement, target, elements.deckTitleInput);
+
     const closeDialogId = target?.closest<HTMLElement>("[data-close-dialog]")?.dataset.closeDialog;
     if (closeDialogId) {
       handlers.queryDialog(`#${closeDialogId}`).close();
@@ -401,6 +431,14 @@ function bindGlobalDelegates(handlers: AppEventHandlers, documentRef: Document) 
       return;
     }
 
+    const verticalAlignButton = target?.closest<HTMLButtonElement>("[data-valign]");
+    if (verticalAlignButton?.dataset.valign) {
+      handlers.updateSelectedElement({
+        verticalAlign: verticalAlignButton.dataset.valign as TextVerticalAlignment,
+      });
+      return;
+    }
+
     const listStyleButton = target?.closest<HTMLButtonElement>("[data-list-style]");
     if (listStyleButton?.dataset.listStyle) {
       handlers.toggleSelectedTextListStyle(listStyleButton.dataset.listStyle as TextListStyle);
@@ -411,6 +449,19 @@ function bindGlobalDelegates(handlers: AppEventHandlers, documentRef: Document) 
       handlers.closeContextMenu();
     }
   });
+}
+
+export function blurDeckTitleFromOutsideClick(
+  activeElement: Element | null,
+  target: HTMLElement | null,
+  deckTitleInput: HTMLInputElement,
+) {
+  if (activeElement !== deckTitleInput || target === deckTitleInput) {
+    return false;
+  }
+
+  deckTitleInput.blur();
+  return true;
 }
 
 export function objectAlignmentFromTarget(target: HTMLElement | null): ObjectAlignment | null {

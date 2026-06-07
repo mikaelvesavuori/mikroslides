@@ -147,6 +147,11 @@ export function createDeckActionsController(options: DeckActionsControllerOption
     options.commitDeckMutation(pasteSlidesAfterActiveSlide(deck, slideClipboard.slides));
   }
 
+  function hasSlideClipboard() {
+    const deck = options.getDeck();
+    return Boolean(deck && slideClipboard?.deckId === deck.id && slideClipboard.slides.length > 0);
+  }
+
   return {
     addShapeElement() {
       const deck = options.getDeck();
@@ -202,6 +207,7 @@ export function createDeckActionsController(options: DeckActionsControllerOption
         options.commitDeckMutation({ deck: duplicateActiveSlide(deck), selectedElementIds: [] });
       }
     },
+    hasSlideClipboard,
     pasteSlide,
     handleLayerListClick(event: MouseEvent) {
       const target = event.target instanceof HTMLElement ? event.target : null;

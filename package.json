@@ -23,7 +23,11 @@
   "type": "module",
   "scripts": {
     "start": "npm run dev:web",
-    "dev:web": "npm run build && npx http-server dist -a ${HOST:-127.0.0.1} -p ${PORT:-4175} -c-1",
+    "dev:web": "npm run build && npx http-server dist -a ${HOST:-127.0.0.1} -p ${PORT:-8000} -c-1",
+    "docs": "npm run docs:install && npm --prefix docs run dev",
+    "docs:build": "npm run docs:install && npm --prefix docs run build",
+    "docs:preview": "npm run docs:install && npm --prefix docs run preview",
+    "docs:install": "npm --prefix docs ci",
     "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('coverage',{recursive:true,force:true})\"",
     "build": "tsx esbuild.config.mts",
     "test": "vitest run --config vitest.config.mts --coverage",

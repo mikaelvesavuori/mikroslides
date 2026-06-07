@@ -7,6 +7,35 @@ export function readTextEditorContent(textEditor: HTMLElement) {
   return normalizeTextEditorPlainText(textEditor.innerText);
 }
 
+export function isTextLineBreakInput(event: Event) {
+  const inputType = (event as { inputType?: unknown }).inputType;
+  return (
+    event.type === "beforeinput" &&
+    (inputType === "insertParagraph" || inputType === "insertLineBreak")
+  );
+}
+
+export function insertTextAtCurrentSelection(
+  text: string,
+  documentRef: Document = document,
+  windowRef: Window = window,
+) {
+  const selection = windowRef.getSelection();
+  if (!selection || selection.rangeCount === 0) {
+    return false;
+  }
+
+  const range = selection.getRangeAt(0);
+  range.deleteContents();
+  const textNode = documentRef.createTextNode(text);
+  range.insertNode(textNode);
+  range.setStartAfter(textNode);
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+  return true;
+}
+
 export function listTextFromItems(items: string[]) {
   return items
     .map((item) => item.replace(/\n+/g, " ").trim())
@@ -15,7 +44,7 @@ export function listTextFromItems(items: string[]) {
 }
 
 export function normalizeTextEditorPlainText(value: string) {
-  return value.replace(/\n\n+/g, "\n").trimEnd();
+  return value.replace(/\n{3,}/g, "\n\n");
 }
 
 export function selectEditableContents(element: HTMLElement | null) {

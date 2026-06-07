@@ -1,5 +1,10 @@
 import type { MikroSlideRecord, SlideElement, TextFontFamily, TextSlideElement } from "../index.js";
 import { escapeAttribute, escapeHtml } from "./htmlEscape.js";
+import {
+  pathCommandsToSvg,
+  shapeDecorationPathCommands,
+  shapePathCommands,
+} from "./shapeGeometry.js";
 
 export type SlideRenderOptions = {
   editingTextElementId?: string | null;
@@ -76,11 +81,14 @@ export function renderSlideElement(
       `--font-size-cqw:${element.fontSize / 10}cqw`,
       `--font-weight:${element.fontWeight}`,
       `--font-style:${element.italic ? "italic" : "normal"}`,
+      `--line-height:${element.lineHeight}`,
       `--text-align:${element.align}`,
       `--element-font:${options.resolveFontStack?.(element.fontFamily) ?? defaultFontStack}`,
     ].join(";");
-    const editableAttributes = isEditing ? ' contenteditable="true" spellcheck="true"' : "";
-    body = `<div class="slide-text" data-text-editor="${escapeAttribute(element.id)}" data-list-style="${element.listStyle}" data-align="${element.align}"${editableAttributes} style="${escapeAttribute(style)}"><div class="slide-text-content">${renderTextElementContent(element)}</div></div>`;
+    const editableAttributes = isEditing
+      ? ` data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true"`
+      : "";
+    body = `<div class="slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(style)}"><div class="slide-text-content"${editableAttributes}>${renderTextElementContent(element)}</div></div>`;
   }
 
   if (element.kind === "shape") {
@@ -90,7 +98,7 @@ export function renderSlideElement(
       `--stroke-width:${element.strokeWidth}`,
       `--radius:${element.radius}`,
     ].join(";");
-    body = `<div class="slide-shape" data-shape="${element.shape}" style="${escapeAttribute(style)}"></div>`;
+    body = renderShapeElementBody(element, style);
   }
 
   if (element.kind === "image") {
@@ -107,6 +115,21 @@ export function renderSlideElement(
       ${handle}
     </div>
   `;
+}
+
+function renderShapeElementBody(element: Extract<SlideElement, { kind: "shape" }>, style: string) {
+  if (element.shape === "line") {
+    return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><line class="slide-shape-line" x1="0" y1="50" x2="100" y2="50" /></svg>`;
+  }
+
+  const rect = { x: 0, y: 0, width: 100, height: 100 };
+  const path = pathCommandsToSvg(shapePathCommands(element.shape, rect, element.radius));
+  const decorationPath = shapeDecorationPathCommands(element.shape, rect);
+  const decoration = decorationPath
+    ? `<path class="slide-shape-decoration" d="${escapeAttribute(pathCommandsToSvg(decorationPath))}" />`
+    : "";
+
+  return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><path class="slide-shape-fill" d="${escapeAttribute(path)}" />${decoration}</svg>`;
 }
 
 export function renderTextElementContent(element: TextSlideElement) {

@@ -159,8 +159,13 @@ function readElement(value: unknown): SlideElement | null {
       fontFamily: readTextFontFamily(value.fontFamily),
       fontSize: readNumber(value.fontSize, 32),
       fontWeight: readNumber(value.fontWeight, 650),
+      lineHeight: readNumber(value.lineHeight, 1.14),
       italic: value.italic === true,
       align: value.align === "center" || value.align === "right" ? value.align : "left",
+      verticalAlign:
+        value.verticalAlign === "top" || value.verticalAlign === "bottom"
+          ? value.verticalAlign
+          : "center",
       listStyle: readTextListStyle(value.listStyle),
     };
   }
@@ -179,10 +184,7 @@ function readElement(value: unknown): SlideElement | null {
     return {
       ...base,
       kind: "shape",
-      shape:
-        value.shape === "ellipse" || value.shape === "line" || value.shape === "rect"
-          ? value.shape
-          : "rect",
+      shape: readShapeKind(value.shape),
       fill: readString(value.fill, "#dbeafe"),
       stroke: readString(value.stroke, defaultDeckTheme.accent),
       strokeWidth: readNumber(value.strokeWidth, 1),
@@ -191,6 +193,24 @@ function readElement(value: unknown): SlideElement | null {
   }
 
   return null;
+}
+
+function readShapeKind(value: unknown) {
+  return value === "capsule" ||
+    value === "chevron" ||
+    value === "database" ||
+    value === "diamond" ||
+    value === "document" ||
+    value === "ellipse" ||
+    value === "hexagon" ||
+    value === "line" ||
+    value === "octagon" ||
+    value === "parallelogram" ||
+    value === "rect" ||
+    value === "trapezoid" ||
+    value === "triangle"
+    ? value
+    : "rect";
 }
 
 function readSlide(value: unknown, index: number): MikroSlideRecord | null {

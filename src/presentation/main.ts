@@ -42,6 +42,7 @@ import { createFontManager } from "./fontManager.js";
 import { cssFontStackForFont } from "./fontRuntime.js";
 import { createFontRuntimeController } from "./fontRuntimeController.js";
 import { createPresenterController } from "./presenterController.js";
+import { createSlideContextMenuController } from "./slideContextMenuController.js";
 import { builtInTemplates } from "./slideLayouts.js";
 import { createSlideListInteraction } from "./slideListInteraction.js";
 import type { SlideDropPlacement } from "./slideReorder.js";
@@ -216,6 +217,25 @@ const contextMenuController = createContextMenuController({
   }),
 });
 
+const slideContextMenuController = createSlideContextMenuController({
+  actions: {
+    copy: (slideId) => withSlideContextSelection(slideId, copySlide),
+    cut: (slideId) => withSlideContextSelection(slideId, cutSlide),
+    delete: (slideId) => withSlideContextSelection(slideId, deleteSlide),
+    duplicate: (slideId) => withSlideContextSelection(slideId, duplicateSlide),
+    "move-down": (slideId) => withSlideContextSelection(slideId, () => moveSlide(1)),
+    "move-up": (slideId) => withSlideContextSelection(slideId, () => moveSlide(-1)),
+    "paste-after": (slideId) => withSlideContextSelection(slideId, pasteSlide),
+    "toggle-skip": (slideId) => toggleSlideSkipped(slideId),
+  },
+  contextMenu: elements.slideContextMenu,
+  getState: getSlideContextMenuState,
+  viewport: () => ({
+    height: window.innerHeight,
+    width: window.innerWidth,
+  }),
+});
+
 const canvasController = createCanvasController({
   canvas: elements.slideCanvas,
   closeContextMenu,
@@ -277,6 +297,7 @@ const slideListInteraction = createSlideListInteraction({
   onCopySlide: copySlide,
   onCutSlide: cutSlide,
   onDeleteSlide: deleteSlide,
+  onOpenSlideContextMenu: openSlideContextMenu,
   onPasteSlide: pasteSlide,
   onReorderSlide: reorderSlide,
   onSelectSlide: selectSlideById,
@@ -341,7 +362,7 @@ const commandController = createCommandController({
     undo,
     updateSelectedElementGeometry,
   },
-  contextMenuOpen: () => contextMenuController.isOpen(),
+  contextMenuOpen: () => contextMenuController.isOpen() || slideContextMenuController.isOpen(),
   elements,
   formatError,
   getSelectedElementIds: () => deckStateController.getSelectedElementIds(),
@@ -385,6 +406,8 @@ const appEventHandlers = {
   handleCanvasClick,
   handleCanvasContextMenu,
   handleCanvasDoubleClick,
+  handleCanvasDragOver,
+  handleCanvasDrop,
   handleCanvasFocusOut,
   handleCanvasPointerDown,
   handleCanvasTextInput,
@@ -401,7 +424,9 @@ const appEventHandlers = {
   handleSlideDragOver: slideListInteraction.handleDragOver,
   handleSlideDragStart: slideListInteraction.handleDragStart,
   handleSlideDrop: slideListInteraction.handleDrop,
+  handleSlideContextMenuClick,
   handleSlideListClick: slideListInteraction.handleClick,
+  handleSlideListContextMenu: slideListInteraction.handleContextMenu,
   handleSlideListKeyDown: slideListInteraction.handleKeyDown,
   importJsonFile,
   insertImageFromDialog,
@@ -691,6 +716,14 @@ async function handlePaste(event: ClipboardEvent) {
   await clipboardImageController.handlePaste(event);
 }
 
+function handleCanvasDragOver(event: DragEvent) {
+  clipboardImageController.handleDragOver(event);
+}
+
+async function handleCanvasDrop(event: DragEvent) {
+  await clipboardImageController.handleDrop(event);
+}
+
 function pasteElements() {
   clipboardImageController.pasteElements();
 }
@@ -767,15 +800,45 @@ function handleCanvasContextMenu(event: MouseEvent) {
 }
 
 function openContextMenu(clientX: number, clientY: number) {
+  slideContextMenuController.close();
   contextMenuController.open(clientX, clientY);
 }
 
 function closeContextMenu() {
   contextMenuController.close();
+  slideContextMenuController.close();
 }
 
 function handleContextMenuClick(event: MouseEvent) {
   contextMenuController.handleClick(event);
+}
+
+function openSlideContextMenu(slideId: string, clientX: number, clientY: number) {
+  contextMenuController.close();
+  slideContextMenuController.open(slideId, clientX, clientY);
+}
+
+function handleSlideContextMenuClick(event: MouseEvent) {
+  slideContextMenuController.handleClick(event);
+}
+
+function getSlideContextMenuState(slideId: string) {
+  const deck = deckStateController.getDeck();
+  const slideIndex = deck?.slides.findIndex((slide) => slide.id === slideId) ?? -1;
+  const slide = slideIndex >= 0 ? deck?.slides[slideIndex] : null;
+
+  return {
+    hasClipboard: deckActionsController.hasSlideClipboard(),
+    hasSlide: Boolean(slide),
+    isFirstSlide: slideIndex <= 0,
+    isLastSlide: !deck || slideIndex < 0 || slideIndex >= deck.slides.length - 1,
+    isSkipped: Boolean(slide?.skipped),
+  };
+}
+
+function withSlideContextSelection(slideId: string, action: () => void) {
+  selectSlideById(slideId);
+  action();
 }
 
 function handleCanvasDoubleClick(event: MouseEvent) {

@@ -31,5 +31,6 @@ export type {
   TextFontFamily,
   TextListStyle,
   TextSlideElement,
+  TextVerticalAlignment,
   UpdateDeckInput,
 } from "./Deck.js";

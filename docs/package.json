@@ -1,0 +1,36 @@
+{
+  "name": "mikroslides-docs",
+  "type": "module",
+  "version": "1.0.0",
+  "keywords": [
+    "mikroslides",
+    "documentation",
+    "docs",
+    "starlight"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikaelvesavuori/mikroslides.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikaelvesavuori/mikroslides/issues"
+  },
+  "homepage": "https://github.com/mikaelvesavuori/mikroslides#readme",
+  "private": true,
+  "description": "The documentation site for MikroSlides.",
+  "author": "MikroSlides",
+  "license": "MIT",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "latest",
+    "astro": "latest",
+    "remark-gfm": "4.0.1",
+    "typescript": "6"
+  }
+}

@@ -1,0 +1,22 @@
+---
+title: Architecture
+description: The MikroSlides runtime boundaries and storage model.
+---
+
+MikroSlides is a static browser app. The release archive contains the app shell, browser assets, icons, and scripts needed for static hosting.
+
+## Runtime boundaries
+
+- The app shell runs entirely in the browser.
+- IndexedDB stores deck content and assets for the current origin.
+- Local storage stores saved templates, recovery drafts, and preferences.
+- Import, export, polish, present, and print are explicit local actions.
+- No backend API is required for normal deck editing; a static hosting service is all that is needed.
+
+## App boundaries
+
+The source tree keeps domain, application, infrastructure, interface, presentation, and UI concerns separated. The browser surface is still intentionally small: no framework runtime, no server account model, and no remote collaboration service.
+
+## Hosting boundary
+
+Serve the extracted release archive from a stable origin. Browser storage is scoped to that origin, so moving the app to another domain gives the browser a separate deck library.

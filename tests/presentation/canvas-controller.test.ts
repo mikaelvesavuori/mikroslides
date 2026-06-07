@@ -48,17 +48,18 @@ afterAll(() => {
   }
 });
 
-function harness() {
+function harness(options: { elements?: SlideElement[]; selectedElementIds?: string[] } = {}) {
+  const elements = options.elements ?? [createTextElement({ content: "Old", id: "title" })];
   let deck = MikroDeck.create({
     slides: [
       {
         ...MikroDeck.create({ title: "Base" }).toRecord().slides[0],
-        elements: [createTextElement({ content: "Old", id: "title" })],
+        elements,
       },
     ],
     title: "Canvas",
   }).toRecord();
-  let selectedElementIds = ["title"];
+  let selectedElementIds = options.selectedElementIds ?? ["title"];
   const calls: string[] = [];
   const canvas = new FakeHTMLElement() as unknown as HTMLElement;
   const controller = createCanvasController({
@@ -131,6 +132,60 @@ describe("canvas controller", () => {
 
     expect(test.getSelectedElementIds()).toEqual([]);
     expect(test.calls).toEqual(expect.arrayContaining(["render-canvas", "render-inspector"]));
+  });
+
+  it("keeps object selection when the follow-up click lands on the rerendered canvas", () => {
+    const test = harness();
+    const target = new FakeHTMLElement({
+      "[data-element-id]": { dataset: { elementId: "title" } },
+    });
+
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+    test.controller.handleCanvasClick({
+      preventDefault: () => undefined,
+      target: test.canvas,
+    } as unknown as MouseEvent);
+
+    expect(test.getSelectedElementIds()).toEqual(["title"]);
+  });
+
+  it("adds unselected objects to the selection when shift-clicking them", () => {
+    const test = harness({
+      elements: [
+        createTextElement({ content: "Title", id: "title" }),
+        createTextElement({ content: "Body", id: "body" }),
+      ],
+      selectedElementIds: ["title"],
+    });
+    const target = new FakeHTMLElement({
+      "[data-element-id]": { dataset: { elementId: "body" } },
+    });
+
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => undefined,
+      shiftKey: true,
+      target,
+    } as unknown as PointerEvent);
+
+    expect(test.getSelectedElementIds()).toEqual(["body", "title"]);
   });
 
   it("selects object targets before opening the context menu", () => {

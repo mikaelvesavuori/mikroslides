@@ -33,9 +33,8 @@ export function presenterMetaText(deck: MikroDeckRecord, index: number) {
   }
 
   const safeIndex = presenterIndexForDeck(deck, index);
-  const slide = deck.slides[safeIndex];
   const position = indexes.indexOf(safeIndex) + 1;
-  return slide ? `${position} / ${indexes.length} · ${slide.title}` : "0 / 0";
+  return position > 0 ? `${position} / ${indexes.length}` : "0 / 0";
 }
 
 export function presenterIndexForDeck(deck: MikroDeckRecord, index: number) {

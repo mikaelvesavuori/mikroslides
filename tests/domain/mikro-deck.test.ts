@@ -55,6 +55,26 @@ describe("MikroDeck", () => {
     expect(updated.slides[0].elements.at(-1)?.kind).toBe("text");
   });
 
+  it("normalizes text line height", () => {
+    expect(createTextElement({ lineHeight: 1.4 }).lineHeight).toBe(1.4);
+    expect(createTextElement({ lineHeight: 0.2 }).lineHeight).toBe(0.75);
+    expect(createTextElement({ lineHeight: 5 }).lineHeight).toBe(3);
+    expect(createTextElement().lineHeight).toBe(1.14);
+  });
+
+  it("normalizes text vertical alignment", () => {
+    expect(createTextElement({ verticalAlign: "top" }).verticalAlign).toBe("top");
+    expect(createTextElement({ verticalAlign: "bottom" }).verticalAlign).toBe("bottom");
+    expect(createTextElement().verticalAlign).toBe("center");
+  });
+
+  it("normalizes supported shape kinds", () => {
+    expect(createShapeElement({ shape: "diamond" }).shape).toBe("diamond");
+    expect(createShapeElement({ shape: "database" }).shape).toBe("database");
+    expect(createShapeElement({ shape: "chevron" }).shape).toBe("chevron");
+    expect(createShapeElement({ shape: "nope" as never }).shape).toBe("rect");
+  });
+
   it("keeps snapshots for manual saves", () => {
     const saved = MikroDeck.create({ title: "Deck" })
       .update({ saveSnapshot: true, snapshotReason: "manual" })

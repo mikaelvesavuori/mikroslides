@@ -1,4 +1,7 @@
 import {
+  droppedImageFiles,
+  droppedImageGeometry,
+  hasDroppedImage,
   imageDialogSource,
   pasteActionFromEvent,
   pastedImageGeometry,
@@ -70,5 +73,21 @@ describe("image insertion", () => {
 
     expect(action).toEqual({ alt: "Clipboard image", file: image, kind: "image" });
     expect(pastedImageGeometry).toMatchObject({ height: 56, width: 50, x: 25, y: 18 });
+  });
+
+  it("recognizes dropped image files and computes drop geometry", () => {
+    const png = file("photo.png");
+    const pdf = new File(["pdf"], "deck.pdf", { type: "application/pdf" });
+
+    expect(droppedImageFiles({ files: [png, pdf] })).toEqual([png]);
+    expect(hasDroppedImage({ items: [{ kind: "file", type: "" }] })).toBe(true);
+    expect(
+      droppedImageGeometry(600, 300, { height: 500, left: 100, top: 50, width: 1000 }),
+    ).toEqual({
+      height: 44,
+      width: 38,
+      x: 31,
+      y: 28,
+    });
   });
 });

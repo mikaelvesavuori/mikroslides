@@ -19,8 +19,22 @@ export type SlideLayoutKind =
   | "closing";
 export type SlideTransition = "none" | "fade" | "slide";
 export type SlideElementKind = "text" | "shape" | "image";
-export type SlideShapeKind = "rect" | "ellipse" | "line";
+export type SlideShapeKind =
+  | "capsule"
+  | "chevron"
+  | "database"
+  | "diamond"
+  | "document"
+  | "ellipse"
+  | "hexagon"
+  | "line"
+  | "octagon"
+  | "parallelogram"
+  | "rect"
+  | "trapezoid"
+  | "triangle";
 export type TextAlignment = "left" | "center" | "right";
+export type TextVerticalAlignment = "top" | "center" | "bottom";
 export type ImageFit = "cover" | "contain";
 export type SystemTextFontFamily = "system" | "serif" | "mono";
 export type TextFontFamily = SystemTextFontFamily | `font:${string}`;
@@ -58,8 +72,10 @@ export interface TextSlideElement extends SlideElementBase {
   fontFamily: TextFontFamily;
   fontSize: number;
   fontWeight: number;
+  lineHeight: number;
   italic: boolean;
   align: TextAlignment;
+  verticalAlign: TextVerticalAlignment;
   listStyle: TextListStyle;
 }
 

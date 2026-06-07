@@ -30,13 +30,19 @@ describe("presenter mode", () => {
     expect(presenterStartIndex(skippedDeck)).toBe(2);
     expect(nextPresenterIndex(skippedDeck, 0, 1)).toBe(2);
     expect(nextPresenterIndex(skippedDeck, 2, -1)).toBe(0);
-    expect(presenterMetaText(skippedDeck, 2)).toContain(`2 / ${deck.slides.length - 1}`);
+    expect(presenterMetaText(skippedDeck, 2)).toBe(`2 / ${deck.slides.length - 1}`);
   });
 
-  it("formats presenter metadata", () => {
+  it("formats presenter metadata without slide titles", () => {
     const deck = MikroDeck.create({ title: "Deck" }).toRecord();
+    const titledDeck = {
+      ...deck,
+      slides: deck.slides.map((slide, index) =>
+        index === 0 ? { ...slide, title: "Ship it" } : slide,
+      ),
+    };
 
-    expect(presenterMetaText(deck, 0)).toContain(`1 / ${deck.slides.length}`);
+    expect(presenterMetaText(titledDeck, 0)).toBe(`1 / ${deck.slides.length}`);
     expect(presenterMetaText({ ...deck, slides: [] }, 0)).toBe("0 / 0");
   });
 });

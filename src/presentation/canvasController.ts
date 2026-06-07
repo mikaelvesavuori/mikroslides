@@ -24,7 +24,13 @@ import {
 } from "./deckMutations.js";
 import { canvasPointPercent, elementIdsInRect, type PercentRect } from "./interactionGeometry.js";
 import { isMultiSelectEvent, nextInteractionSelection } from "./selection.js";
-import { placeCaretAtPoint, readTextEditorContent, selectEditableContents } from "./textEditing.js";
+import {
+  insertTextAtCurrentSelection,
+  isTextLineBreakInput,
+  placeCaretAtPoint,
+  readTextEditorContent,
+  selectEditableContents,
+} from "./textEditing.js";
 
 type RenderOptions = {
   history?: boolean;
@@ -241,6 +247,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       const elementId = canvasElementIdFromTarget(target);
       const element = options.getSlide()?.elements.find((item) => item.id === elementId) ?? null;
       const isResize = Boolean(target?.closest("[data-resize]"));
+      const wasSelected = Boolean(elementId && options.getSelectedElementIds().includes(elementId));
       const activeTextEditor = target?.closest<HTMLElement>("[data-text-editor]");
       const isActiveTextEditorTarget = Boolean(
         editingTextElementId && activeTextEditor?.dataset.textEditor === editingTextElementId,
@@ -260,7 +267,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
         isEditableTarget:
           isEditableCanvasTarget(target) && !shouldExitTextEditingForObjectInteraction,
         isResize,
-        isSelected: Boolean(elementId && options.getSelectedElementIds().includes(elementId)),
+        isSelected: wasSelected,
         multiSelect,
         shiftKey: event.shiftKey,
       });
@@ -286,12 +293,15 @@ export function createCanvasController(options: CanvasControllerOptions) {
         );
         options.renderCanvas();
         options.renderInspector();
+        ignoreNextCanvasClick = true;
         event.preventDefault();
         return;
       }
 
-      const selectionMultiSelect =
-        event.shiftKey && action.mode === "move" ? event.metaKey || event.ctrlKey : multiSelect;
+      const constrainingSelectedMove = event.shiftKey && action.mode === "move" && wasSelected;
+      const selectionMultiSelect = constrainingSelectedMove
+        ? event.metaKey || event.ctrlKey
+        : multiSelect;
       selectElementFromInteraction(action.element.id, selectionMultiSelect);
       options.stageHistory();
       let selectedElementsForDrag = options.getSelectedElements();
@@ -327,9 +337,17 @@ export function createCanvasController(options: CanvasControllerOptions) {
       trySetPointerCapture(options.canvas, event.pointerId);
       options.renderCanvas();
       options.renderInspector();
+      ignoreNextCanvasClick = true;
       event.preventDefault();
     },
     handleCanvasTextInput(event: Event) {
+      if (isTextLineBreakInput(event)) {
+        event.preventDefault();
+        insertTextAtCurrentSelection("\n", options.documentRef);
+      } else if (event.type === "beforeinput") {
+        return;
+      }
+
       const target = eventTargetElement(event);
       const textEditor = target?.closest<HTMLElement>("[data-text-editor]");
       const elementId = textEditor?.dataset.textEditor;

@@ -1,8 +1,16 @@
 import type { MikroDeckRecord, MikroSlideRecord, SlideElement } from "../index.js";
 import { addImageElementToActiveSlide, pasteElementsIntoActiveSlide } from "./deckMutations.js";
-import { imageDialogSource, pasteActionFromEvent, pastedImageGeometry } from "./imageInsertion.js";
+import {
+  droppedImageFiles,
+  droppedImageGeometry,
+  hasDroppedImage,
+  imageDialogSource,
+  pasteActionFromEvent,
+  pastedImageGeometry,
+} from "./imageInsertion.js";
 
 type ImageDialogElements = {
+  slideCanvas: HTMLElement;
   imageDialog: HTMLDialogElement;
   imageFileInput: HTMLInputElement;
   imageUrlInput: HTMLInputElement;
@@ -107,6 +115,53 @@ export function createClipboardImageController(options: ClipboardImageController
     },
     hasClipboard() {
       return clipboardElements.length > 0;
+    },
+    handleDragOver(event: DragEvent) {
+      if (!hasDroppedImage(event.dataTransfer)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "copy";
+      }
+    },
+    async handleDrop(event: DragEvent) {
+      if (!hasDroppedImage(event.dataTransfer)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      const files = droppedImageFiles(event.dataTransfer);
+      if (files.length === 0) {
+        options.showToast("Drop image files to add them");
+        return;
+      }
+
+      const rect = options.elements.slideCanvas.getBoundingClientRect();
+      let inserted = 0;
+      for (const file of files) {
+        let src = "";
+        try {
+          src = await options.createStoredImageAsset(file, file.name);
+        } catch (error) {
+          options.showToast(options.formatError(error, "Could not store dropped image"));
+          continue;
+        }
+
+        addImageToSlide(
+          src,
+          file.name,
+          droppedImageGeometry(event.clientX, event.clientY, rect, inserted),
+        );
+        inserted += 1;
+      }
+
+      if (inserted > 0) {
+        options.showToast(`${inserted} image${inserted === 1 ? "" : "s"} added`);
+      }
     },
     async insertImageFromDialog() {
       const slide = options.getSlide();

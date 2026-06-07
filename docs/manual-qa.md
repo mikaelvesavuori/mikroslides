@@ -6,8 +6,10 @@ Use this checklist before tagging a build or deploying a preview.
 
 - Run `npm run verify`.
 - Run `npm run smoke:ui`.
-- Run `PORT=4175 npm run dev:web`.
-- Open `http://127.0.0.1:4175` in Chromium and one secondary browser.
+- Run `npm run dev:web`.
+- Open `http://127.0.0.1:8000` in Chromium and one secondary browser.
+- Run `npm run docs`.
+- Open `http://127.0.0.1:4321/slides/docs`.
 
 ## Core Editing
 

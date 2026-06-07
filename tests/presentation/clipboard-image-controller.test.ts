@@ -50,6 +50,14 @@ function harness(initialDeck: MikroDeckRecord = deckWithText()) {
       imageDialog: imageDialog as unknown as HTMLDialogElement,
       imageFileInput: imageFileInput as unknown as HTMLInputElement,
       imageUrlInput: imageUrlInput as unknown as HTMLInputElement,
+      slideCanvas: {
+        getBoundingClientRect: () => ({
+          height: 500,
+          left: 100,
+          top: 50,
+          width: 1000,
+        }),
+      } as unknown as HTMLElement,
     },
     formatError: (error, fallback) => (error instanceof Error ? error.message : fallback),
     getDeck: () => deck,
@@ -112,6 +120,45 @@ describe("clipboard image controller", () => {
       kind: "image",
       src: "asset:catalog.png",
     });
+  });
+
+  it("adds dropped image files at the drop location", async () => {
+    const test = harness();
+    const file = new File(["image"], "drop.png", { type: "image/png" });
+    const dataTransfer = {
+      dropEffect: "none",
+      files: [file],
+      items: [],
+    };
+    let prevented = false;
+
+    test.controller.handleDragOver({
+      dataTransfer,
+      preventDefault: () => {
+        prevented = true;
+      },
+      stopPropagation: () => undefined,
+    } as unknown as DragEvent);
+
+    expect(prevented).toBe(true);
+    expect(dataTransfer.dropEffect).toBe("copy");
+
+    await test.controller.handleDrop({
+      clientX: 600,
+      clientY: 300,
+      dataTransfer,
+      preventDefault: () => undefined,
+      stopPropagation: () => undefined,
+    } as unknown as DragEvent);
+
+    expect(test.getDeck().slides[0].elements.at(-1)).toMatchObject({
+      alt: "drop.png",
+      kind: "image",
+      src: "asset:drop.png",
+      x: 31,
+      y: 28,
+    });
+    expect(test.toast).toContain("1 image added");
   });
 
   it("routes outline paste into outline import", async () => {

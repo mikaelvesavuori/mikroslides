@@ -313,6 +313,10 @@
                   Weight
                   <input id="text-weight-input" type="number" min="300" max="900" step="50" />
                 </label>
+                <label>
+                  Line
+                  <input id="text-line-height-input" type="number" min="0.75" max="3" step="0.05" />
+                </label>
               </div>
               <label>
                 Color
@@ -324,6 +328,11 @@
                 <button class="segment-btn" type="button" data-align="right" title="Align right" aria-label="Align right"><svg class="icon" aria-hidden="true"><use href="#icon-align-right"></use></svg></button>
                 <button class="segment-btn" type="button" data-list-style="bullet" title="Bulleted list" aria-label="Bulleted list"><svg class="icon" aria-hidden="true"><use href="#icon-list"></use></svg></button>
               </div>
+              <div class="segmented" aria-label="Text vertical alignment">
+                <button class="segment-btn" type="button" data-valign="top" title="Align text top" aria-label="Align text top"><svg class="icon" aria-hidden="true"><use href="#icon-chevron-up"></use></svg></button>
+                <button class="segment-btn" type="button" data-valign="center" title="Align text center" aria-label="Align text center"><svg class="icon" aria-hidden="true"><use href="#icon-minus"></use></svg></button>
+                <button class="segment-btn" type="button" data-valign="bottom" title="Align text bottom" aria-label="Align text bottom"><svg class="icon" aria-hidden="true"><use href="#icon-chevron-down"></use></svg></button>
+              </div>
             </div>
 
             <div id="shape-fields" class="object-fields">
@@ -332,6 +341,16 @@
                 <select id="shape-kind-select">
                   <option value="rect">Rectangle</option>
                   <option value="ellipse">Ellipse</option>
+                  <option value="diamond">Diamond</option>
+                  <option value="triangle">Triangle</option>
+                  <option value="capsule">Capsule</option>
+                  <option value="document">Document</option>
+                  <option value="database">Database</option>
+                  <option value="parallelogram">Parallelogram</option>
+                  <option value="trapezoid">Trapezoid</option>
+                  <option value="hexagon">Hexagon</option>
+                  <option value="octagon">Octagon</option>
+                  <option value="chevron">Chevron</option>
                   <option value="line">Line</option>
                 </select>
               </label>
@@ -565,6 +584,20 @@
       <button type="button" role="menuitem" data-context-action="add-image">Add image</button>
       <span class="context-menu-separator" aria-hidden="true"></span>
       <button type="button" role="menuitem" data-context-action="delete" class="danger">Delete</button>
+    </div>
+
+    <div id="slide-context-menu" class="context-menu" role="menu" hidden>
+      <button type="button" role="menuitem" data-slide-context-action="duplicate">Duplicate slide</button>
+      <button type="button" role="menuitem" data-slide-context-action="copy">Copy slide</button>
+      <button type="button" role="menuitem" data-slide-context-action="cut">Cut slide</button>
+      <button type="button" role="menuitem" data-slide-context-action="paste-after">Paste after</button>
+      <span class="context-menu-separator" aria-hidden="true"></span>
+      <button type="button" role="menuitem" data-slide-context-action="move-up">Move up</button>
+      <button type="button" role="menuitem" data-slide-context-action="move-down">Move down</button>
+      <span class="context-menu-separator" aria-hidden="true"></span>
+      <button type="button" role="menuitem" data-slide-context-action="toggle-skip">Skip slide</button>
+      <span class="context-menu-separator" aria-hidden="true"></span>
+      <button type="button" role="menuitem" data-slide-context-action="delete" class="danger">Delete slide</button>
     </div>
 
     <dialog id="presenter-dialog" class="presenter-dialog" aria-label="Presentation mode">

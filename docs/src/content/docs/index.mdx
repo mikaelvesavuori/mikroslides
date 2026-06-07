@@ -1,0 +1,48 @@
+---
+title: MikroSlides
+description: Local-first presentation decks in the browser.
+template: splash
+hero:
+  tagline: MikroSlides is a minimalist, local-first presentation app for browser-based decks.
+  image:
+    light: ../../assets/logo.svg
+    dark: ../../assets/logo.svg
+  actions:
+    - text: Get Started
+      link: /slides/docs/getting-started/intro
+      icon: rocket
+    - text: Installation
+      link: /slides/docs/getting-started/installation
+      icon: laptop
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<CardGrid>
+  <Card title="Getting Started" icon="open-book">
+    Set up MikroSlides and create a deck.
+
+    <LinkCard title="What is MikroSlides?" href="/slides/docs/getting-started/intro" />
+    <LinkCard title="Installation" href="/slides/docs/getting-started/installation" />
+  </Card>
+
+  <Card title="Guides" icon="puzzle">
+    Deep dives into MikroSlides features.
+
+    <LinkCard title="Configuration" href="/slides/docs/guides/configuration" />
+    <LinkCard title="Authentication" href="/slides/docs/guides/authentication" />
+    <LinkCard title="Create Your First Deck" href="/slides/docs/guides/first-deck" />
+    <LinkCard title="Editing and Presenting" href="/slides/docs/guides/editing-and-presenting" />
+    <LinkCard title="Import and Export" href="/slides/docs/guides/import-export" />
+    <LinkCard title="Local Data and Backups" href="/slides/docs/guides/local-data" />
+    <LinkCard title="Deployment" href="/slides/docs/guides/deployment" />
+  </Card>
+
+  <Card title="References" icon="document">
+    Product behavior and operational notes.
+
+    <LinkCard title="Comparison" href="/slides/docs/reference/comparison" />
+    <LinkCard title="Privacy and Security" href="/slides/docs/reference/privacy-security" />
+    <LinkCard title="Architecture" href="/slides/docs/reference/architecture" />
+  </Card>
+</CardGrid>

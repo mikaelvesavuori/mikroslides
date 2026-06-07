@@ -7,6 +7,11 @@ import type {
   SlideElement,
   TextSlideElement,
 } from "../index.js";
+import {
+  shapeDecorationPathCommands,
+  shapePathCommands,
+  tracePathCommands,
+} from "./shapeGeometry.js";
 
 type PngExportOptions = {
   resolveFontFamily?: (fontFamily: TextSlideElement["fontFamily"]) => string;
@@ -130,7 +135,7 @@ function drawTextElement(
       : element.fontFamily === "mono"
         ? '"SFMono-Regular", Consolas, monospace'
         : 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif');
-  const lineHeight = fontSize * 1.14;
+  const lineHeight = fontSize * element.lineHeight;
   context.save();
   context.beginPath();
   context.rect(0, 0, box.width, box.height);
@@ -150,7 +155,7 @@ function drawTextElement(
     .split("\n")
     .flatMap((paragraph) => wrapText(context, paragraph, box.width));
   const x = element.align === "center" ? box.width / 2 : element.align === "right" ? box.width : 0;
-  let y = Math.max(fontSize, (box.height - lines.length * lineHeight) / 2 + fontSize);
+  let y = textBlockStartY(element, box, Math.max(1, lines.length), fontSize, lineHeight);
 
   for (const line of lines) {
     context.fillText(line, x, y, box.width);
@@ -175,7 +180,7 @@ function drawBulletTextElement(
     wrapText(context, item, maxLineWidth),
   );
   const totalLines = itemLines.reduce((count, lines) => count + Math.max(1, lines.length), 0);
-  let y = Math.max(fontSize, (box.height - totalLines * lineHeight) / 2 + fontSize);
+  let y = textBlockStartY(element, box, Math.max(1, totalLines), fontSize, lineHeight);
 
   for (const lines of itemLines) {
     context.fillText("•", bulletX, y, textX * 0.8);
@@ -184,6 +189,25 @@ function drawBulletTextElement(
       y += lineHeight;
     }
   }
+}
+
+function textBlockStartY(
+  element: TextSlideElement,
+  box: ElementBox,
+  lineCount: number,
+  fontSize: number,
+  lineHeight: number,
+) {
+  if (element.verticalAlign === "top") {
+    return fontSize;
+  }
+
+  const contentHeight = lineCount * lineHeight;
+  if (element.verticalAlign === "bottom") {
+    return Math.max(fontSize, box.height - contentHeight + fontSize);
+  }
+
+  return Math.max(fontSize, (box.height - contentHeight) / 2 + fontSize);
 }
 
 function textListItems(content: string) {
@@ -235,46 +259,29 @@ function drawShapeElement(
     return;
   }
 
-  if (element.shape === "ellipse") {
-    context.beginPath();
-    context.ellipse(
-      box.width / 2,
-      box.height / 2,
-      box.width / 2,
-      box.height / 2,
-      0,
-      0,
-      Math.PI * 2,
-    );
-    context.fill();
-    context.stroke();
-    return;
-  }
-
-  roundedRectPath(context, 0, 0, box.width, box.height, element.radius * scale);
+  context.beginPath();
+  tracePathCommands(
+    context,
+    shapePathCommands(
+      element.shape,
+      { x: 0, y: 0, width: box.width, height: box.height },
+      element.radius * scale,
+    ),
+  );
   context.fill();
   context.stroke();
-}
 
-function roundedRectPath(
-  context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
-) {
-  const safeRadius = Math.max(0, Math.min(radius, width / 2, height / 2));
-  context.beginPath();
-  context.moveTo(x + safeRadius, y);
-  context.lineTo(x + width - safeRadius, y);
-  context.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
-  context.lineTo(x + width, y + height - safeRadius);
-  context.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
-  context.lineTo(x + safeRadius, y + height);
-  context.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
-  context.lineTo(x, y + safeRadius);
-  context.quadraticCurveTo(x, y, x + safeRadius, y);
+  const decoration = shapeDecorationPathCommands(element.shape, {
+    x: 0,
+    y: 0,
+    width: box.width,
+    height: box.height,
+  });
+  if (decoration) {
+    context.beginPath();
+    tracePathCommands(context, decoration);
+    context.stroke();
+  }
 }
 
 async function drawImageElement(

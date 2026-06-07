@@ -226,7 +226,7 @@ export function canvasElementIdFromTarget(target: HTMLElement | null) {
 }
 
 export function isEditableCanvasTarget(target: HTMLElement | null) {
-  return Boolean(target?.closest('[contenteditable="true"]'));
+  return Boolean(target?.closest('[contenteditable="true"], [contenteditable="plaintext-only"]'));
 }
 
 export function textElementIdFromTarget(target: HTMLElement | null) {
