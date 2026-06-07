@@ -10,10 +10,14 @@ import type {
 import type { ObjectAlignment } from "./deckMutations.js";
 import type { FontManager } from "./fontManager.js";
 import { readNumber } from "./inspectorPanel.js";
+import { isSlideShapeKind } from "./shapeGeometry.js";
 
 export type AppEventElements = {
   addImageButton: HTMLButtonElement;
-  addShapeButton: HTMLButtonElement;
+  addShapeButton: HTMLElement;
+  currentShapeIcon: SVGUseElement;
+  shapeOptions: HTMLElement;
+  shapeSelector: HTMLDetailsElement;
   addSlideButton: HTMLButtonElement;
   addTextButton: HTMLButtonElement;
   commandButton: HTMLButtonElement;
@@ -28,6 +32,7 @@ export type AppEventElements = {
   duplicateElementButton: HTMLButtonElement;
   duplicateSlideButton: HTMLButtonElement;
   elementHeightInput: HTMLInputElement;
+  elementLockedInput: HTMLInputElement;
   elementOpacityInput: HTMLInputElement;
   elementWidthInput: HTMLInputElement;
   elementXInput: HTMLInputElement;
@@ -88,7 +93,7 @@ export type AppEventElements = {
 };
 
 export type AppEventHandlers = {
-  addShapeElement: () => void;
+  addShapeElement: (shape?: SlideShapeKind) => void;
   addSlide: () => void;
   addTextElement: () => void;
   alignSelectedElements: (alignment: ObjectAlignment) => void;
@@ -188,7 +193,17 @@ export function bindAppEvents(
   elements.undoButton.addEventListener("click", handlers.undo);
   elements.redoButton.addEventListener("click", handlers.redo);
   elements.addTextButton.addEventListener("click", handlers.addTextElement);
-  elements.addShapeButton.addEventListener("click", handlers.addShapeElement);
+  elements.shapeOptions.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const button = target?.closest<HTMLButtonElement>("[data-shape-tool]");
+    const shape = button?.dataset.shapeTool;
+    if (!isSlideShapeKind(shape) || shape === "line") {
+      return;
+    }
+
+    handlers.addShapeElement(shape);
+    elements.shapeSelector.open = false;
+  });
   elements.addImageButton.addEventListener("click", () =>
     handlers.openDialog(elements.imageDialog),
   );
@@ -296,6 +311,12 @@ function bindInspectorEvents(elements: AppEventElements, handlers: AppEventHandl
       { inspector: false },
     ),
   );
+  elements.elementLockedInput.addEventListener("change", () =>
+    handlers.updateSelectedElement(
+      { locked: elements.elementLockedInput.checked },
+      { inspector: false },
+    ),
+  );
   elements.textContentInput.addEventListener("input", () =>
     handlers.updateSelectedElement(
       { content: elements.textContentInput.value },
@@ -399,13 +420,16 @@ function bindExportEvents(elements: AppEventElements, handlers: AppEventHandlers
 }
 
 function bindGlobalDelegates(
-  elements: Pick<AppEventElements, "deckTitleInput">,
+  elements: Pick<AppEventElements, "deckTitleInput" | "shapeSelector">,
   handlers: AppEventHandlers,
   documentRef: Document,
 ) {
   documentRef.addEventListener("click", (event) => {
     const target = event.target instanceof HTMLElement ? event.target : null;
     blurDeckTitleFromOutsideClick(documentRef.activeElement, target, elements.deckTitleInput);
+    if (!target?.closest(".shape-selector")) {
+      elements.shapeSelector.open = false;
+    }
 
     const closeDialogId = target?.closest<HTMLElement>("[data-close-dialog]")?.dataset.closeDialog;
     if (closeDialogId) {

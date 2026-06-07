@@ -7,6 +7,7 @@ import {
   type MikroFontRecord,
   type MikroSlideRecord,
   type SlideElement,
+  type SlideShapeKind,
   type TextFontFamily,
   type TextSlideElement,
 } from "../index.js";
@@ -141,12 +142,13 @@ export function addDefaultTextElement(deck: MikroDeckRecord) {
   return addElementToActiveSlide(deck, element);
 }
 
-export function addDefaultShapeElement(deck: MikroDeckRecord) {
+export function addDefaultShapeElement(deck: MikroDeckRecord, shape: SlideShapeKind = "rect") {
   const element = createShapeElement({
     x: 50,
     y: 36,
     width: 26,
     height: 20,
+    shape,
   });
   return addElementToActiveSlide(deck, element);
 }

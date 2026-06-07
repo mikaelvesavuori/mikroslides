@@ -9,6 +9,7 @@ import {
   type MikroSlideRecord,
   OutlineImportService,
   type SlideElement,
+  type SlideShapeKind,
   type TextListStyle,
 } from "../index.js";
 import { createId, nowIso } from "../shared/index.js";
@@ -42,6 +43,10 @@ import { createFontManager } from "./fontManager.js";
 import { cssFontStackForFont } from "./fontRuntime.js";
 import { createFontRuntimeController } from "./fontRuntimeController.js";
 import { createPresenterController } from "./presenterController.js";
+import {
+  renderShapeSelector,
+  type ShapeSelectorTool,
+} from "./shapeSelectorView.js";
 import { createSlideContextMenuController } from "./slideContextMenuController.js";
 import { builtInTemplates } from "./slideLayouts.js";
 import { createSlideListInteraction } from "./slideListInteraction.js";
@@ -62,6 +67,7 @@ const userTemplateStorageController = createUserTemplateStorageController({
 });
 let libraryDecks: MikroDeckRecord[] = [];
 let userTemplates: UserTemplate[] = [];
+let activeShapeTool: ShapeSelectorTool = "rect";
 let storageAvailable = true;
 
 const deckStateController = createDeckStateController({
@@ -203,13 +209,17 @@ const contextMenuController = createContextMenuController({
     cut: cutSelectedElements,
     delete: deleteSelectedElement,
     duplicate: duplicateSelectedElement,
+    lock: () => updateSelectedElement({ locked: true }),
     paste: pasteElements,
     "send-back": () => reorderSelectedElements("back"),
+    unlock: () => updateSelectedElement({ locked: false }),
   },
   contextMenu: elements.contextMenu,
   getState: () => ({
     hasClipboard: clipboardImageController.hasClipboard(),
+    hasLockedSelection: getSelectedElements().some((element) => element.locked),
     hasSelection: deckStateController.getSelectedElementIds().length > 0,
+    hasUnlockedSelection: getSelectedElements().some((element) => !element.locked),
   }),
   viewport: () => ({
     height: window.innerHeight,
@@ -461,6 +471,7 @@ async function boot() {
   applyTheme(loadTheme());
   applyFocusMode();
   userTemplates = loadUserTemplates();
+  renderShapeTools();
   bindEvents();
   renderBackgroundSwatches();
   renderTemplateOptions();
@@ -575,6 +586,14 @@ function renderBackgroundSwatches() {
   deckRenderController.renderBackgroundSwatches();
 }
 
+function renderShapeTools() {
+  renderShapeSelector({
+    activeShape: activeShapeTool,
+    currentShapeIcon: elements.currentShapeIcon,
+    shapeOptions: elements.shapeOptions,
+  });
+}
+
 function stageHistory() {
   deckStateController.stageHistory();
 }
@@ -684,8 +703,12 @@ function addTextElement() {
   deckActionsController.addTextElement();
 }
 
-function addShapeElement() {
-  deckActionsController.addShapeElement();
+function addShapeElement(shape?: SlideShapeKind) {
+  if (shape && shape !== "line") {
+    activeShapeTool = shape;
+    renderShapeTools();
+  }
+  deckActionsController.addShapeElement(shape ?? activeShapeTool);
 }
 
 function alignSelectedElements(alignment: ObjectAlignment) {

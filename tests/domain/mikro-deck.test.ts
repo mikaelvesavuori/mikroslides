@@ -75,6 +75,15 @@ describe("MikroDeck", () => {
     expect(createShapeElement({ shape: "nope" as never }).shape).toBe("rect");
   });
 
+  it("normalizes shape labels", () => {
+    const shape = createShapeElement({ content: "Decision", align: "left", verticalAlign: "top" });
+
+    expect(shape.content).toBe("Decision");
+    expect(shape.align).toBe("left");
+    expect(shape.verticalAlign).toBe("top");
+    expect(createShapeElement().align).toBe("center");
+  });
+
   it("keeps snapshots for manual saves", () => {
     const saved = MikroDeck.create({ title: "Deck" })
       .update({ saveSnapshot: true, snapshotReason: "manual" })

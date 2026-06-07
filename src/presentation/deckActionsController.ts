@@ -4,6 +4,7 @@ import {
   type MikroDeckRecord,
   type MikroSlideRecord,
   type SlideElement,
+  type SlideShapeKind,
   type TextListStyle,
   type TextSlideElement,
 } from "../index.js";
@@ -62,6 +63,19 @@ export function createDeckActionsController(options: DeckActionsControllerOption
     return options.getSelectedElementIds();
   }
 
+  function unlockedSelectedElements() {
+    return options.getSelectedElements().filter((element) => !element.locked);
+  }
+
+  function unlockedSelectedIds() {
+    return unlockedSelectedElements().map((element) => element.id);
+  }
+
+  function lockPatchOnly(patch: Partial<SlideElement>) {
+    const keys = Object.keys(patch);
+    return keys.length === 1 && keys[0] === "locked";
+  }
+
   function updateSelectedElementGeometry(
     updates: Array<{ id: string; patch: Partial<SlideElement> }>,
     renderOptions: RenderOptions = {},
@@ -72,7 +86,15 @@ export function createDeckActionsController(options: DeckActionsControllerOption
       return;
     }
 
-    options.commitDeckMutation(updateElementsInActiveSlide(deck, updates), renderOptions);
+    const nextUpdates = updates.filter((update) => {
+      const element = slide.elements.find((item) => item.id === update.id);
+      return Boolean(element && (!element.locked || lockPatchOnly(update.patch)));
+    });
+    if (nextUpdates.length === 0) {
+      return;
+    }
+
+    options.commitDeckMutation(updateElementsInActiveSlide(deck, nextUpdates), renderOptions);
   }
 
   function updateSelectedElement(patch: Partial<SlideElement>, renderOptions: RenderOptions = {}) {
@@ -81,8 +103,9 @@ export function createDeckActionsController(options: DeckActionsControllerOption
       return;
     }
 
+    const editable = lockPatchOnly(patch) ? selected : selected.filter((element) => !element.locked);
     updateSelectedElementGeometry(
-      selected.map((element) => ({ id: element.id, patch })),
+      editable.map((element) => ({ id: element.id, patch })),
       renderOptions,
     );
   }
@@ -153,10 +176,10 @@ export function createDeckActionsController(options: DeckActionsControllerOption
   }
 
   return {
-    addShapeElement() {
+    addShapeElement(shape: SlideShapeKind = "rect") {
       const deck = options.getDeck();
       if (deck) {
-        options.commitDeckMutation(addDefaultShapeElement(deck));
+        options.commitDeckMutation(addDefaultShapeElement(deck, shape));
       }
     },
     addSlide() {
@@ -173,33 +196,36 @@ export function createDeckActionsController(options: DeckActionsControllerOption
     },
     alignSelectedElements(alignment: ObjectAlignment) {
       const deck = options.getDeck();
-      if (!deck || selectedIds().length === 0) {
+      const ids = unlockedSelectedIds();
+      if (!deck || ids.length === 0) {
         return;
       }
 
-      const nextDeck = alignElementsInActiveSlide(deck, selectedIds(), alignment);
+      const nextDeck = alignElementsInActiveSlide(deck, ids, alignment);
       if (nextDeck) {
         options.commitDeckMutation({ deck: nextDeck, selectedElementIds: selectedIds() });
       }
     },
     deleteSelectedElement() {
       const deck = options.getDeck();
-      if (!deck || selectedIds().length === 0) {
+      const ids = unlockedSelectedIds();
+      if (!deck || ids.length === 0) {
         return;
       }
 
-      options.commitDeckMutation(deleteElementsFromActiveSlide(deck, selectedIds()));
+      options.commitDeckMutation(deleteElementsFromActiveSlide(deck, ids));
     },
     copySlide,
     cutSlide,
     deleteSlide,
     duplicateSelectedElement() {
       const deck = options.getDeck();
-      if (!deck || selectedIds().length === 0) {
+      const ids = unlockedSelectedIds();
+      if (!deck || ids.length === 0) {
         return;
       }
 
-      options.commitDeckMutation(duplicateElementsInActiveSlide(deck, selectedIds()));
+      options.commitDeckMutation(duplicateElementsInActiveSlide(deck, ids));
     },
     duplicateSlide() {
       const deck = options.getDeck();
@@ -243,11 +269,12 @@ export function createDeckActionsController(options: DeckActionsControllerOption
     },
     reorderSelectedElements(action: "back" | "backward" | "forward" | "front") {
       const deck = options.getDeck();
-      if (!deck || selectedIds().length === 0) {
+      const ids = unlockedSelectedIds();
+      if (!deck || ids.length === 0) {
         return;
       }
 
-      const nextDeck = reorderSelectedElementsInActiveSlide(deck, selectedIds(), action);
+      const nextDeck = reorderSelectedElementsInActiveSlide(deck, ids, action);
       if (nextDeck) {
         options.commitDeckMutation({ deck: nextDeck, selectedElementIds: selectedIds() });
       }

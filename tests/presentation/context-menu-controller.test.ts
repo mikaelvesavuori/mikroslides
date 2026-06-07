@@ -24,7 +24,7 @@ describe("context menu controller", () => {
     const controller = createContextMenuController({
       actions: actions(),
       contextMenu: element as unknown as HTMLElement,
-      getState: () => ({ hasClipboard: false, hasSelection: true }),
+      getState: () => availability({ hasClipboard: false, hasSelection: true }),
       viewport: () => ({ height: 200, width: 240 }),
     });
 
@@ -48,7 +48,7 @@ describe("context menu controller", () => {
     const controller = createContextMenuController({
       actions: actions({ delete: () => calls.push("delete") }),
       contextMenu: element as unknown as HTMLElement,
-      getState: () => ({ hasClipboard: true, hasSelection: true }),
+      getState: () => availability({ hasClipboard: true, hasSelection: true }),
       viewport: () => ({ height: 800, width: 1000 }),
     });
 
@@ -75,8 +75,27 @@ function actions(overrides: Partial<Record<ContextMenuAction, () => void>> = {})
     cut: noop,
     delete: noop,
     duplicate: noop,
+    lock: noop,
     paste: noop,
     "send-back": noop,
+    unlock: noop,
+    ...overrides,
+  };
+}
+
+function availability(
+  overrides: Partial<{
+    hasClipboard: boolean;
+    hasLockedSelection: boolean;
+    hasSelection: boolean;
+    hasUnlockedSelection: boolean;
+  }> = {},
+) {
+  return {
+    hasClipboard: false,
+    hasLockedSelection: false,
+    hasSelection: false,
+    hasUnlockedSelection: false,
     ...overrides,
   };
 }

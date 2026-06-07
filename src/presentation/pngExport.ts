@@ -107,6 +107,9 @@ async function drawElement(
 
   if (element.kind === "shape") {
     drawShapeElement(context, element, box, scale);
+    if (element.content) {
+      drawTextElement(context, element, box, slide, scale, options);
+    }
   }
 
   if (element.kind === "image") {
@@ -118,7 +121,7 @@ async function drawElement(
 
 function drawTextElement(
   context: CanvasRenderingContext2D,
-  element: TextSlideElement,
+  element: TextSlideElement | ShapeSlideElement,
   box: ElementBox,
   slide: SlideDimensions,
   scale: number,
@@ -167,7 +170,7 @@ function drawTextElement(
 
 function drawBulletTextElement(
   context: CanvasRenderingContext2D,
-  element: TextSlideElement,
+  element: TextSlideElement | ShapeSlideElement,
   box: ElementBox,
   fontSize: number,
   lineHeight: number,
@@ -192,7 +195,7 @@ function drawBulletTextElement(
 }
 
 function textBlockStartY(
-  element: TextSlideElement,
+  element: TextSlideElement | ShapeSlideElement,
   box: ElementBox,
   lineCount: number,
   fontSize: number,

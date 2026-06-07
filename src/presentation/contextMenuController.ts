@@ -11,7 +11,9 @@ export type ContextMenuControllerOptions = {
   contextMenu: HTMLElement;
   getState: () => {
     hasClipboard: boolean;
+    hasLockedSelection: boolean;
     hasSelection: boolean;
+    hasUnlockedSelection: boolean;
   };
   viewport: () => {
     height: number;

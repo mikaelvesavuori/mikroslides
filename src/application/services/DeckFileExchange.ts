@@ -1,4 +1,4 @@
-import { defaultDeckTheme, MikroDeck } from "../../domain/index.js";
+import { createShapeElement, defaultDeckTheme, MikroDeck } from "../../domain/index.js";
 import type {
   DeckAspectRatio,
   MikroAssetRecord,
@@ -148,6 +148,7 @@ function readElement(value: unknown): SlideElement | null {
     height: readNumber(value.height, 20),
     rotation: readNumber(value.rotation, 0),
     opacity: readNumber(value.opacity, 1),
+    locked: value.locked === true,
   };
 
   if (value.kind === "text") {
@@ -181,15 +182,27 @@ function readElement(value: unknown): SlideElement | null {
   }
 
   if (value.kind === "shape") {
-    return {
+    return createShapeElement({
       ...base,
-      kind: "shape",
       shape: readShapeKind(value.shape),
       fill: readString(value.fill, "#dbeafe"),
       stroke: readString(value.stroke, defaultDeckTheme.accent),
       strokeWidth: readNumber(value.strokeWidth, 1),
       radius: readNumber(value.radius, 8),
-    };
+      content: typeof value.content === "string" ? value.content : "",
+      color: readString(value.color, defaultDeckTheme.text),
+      fontFamily: readTextFontFamily(value.fontFamily),
+      fontSize: readNumber(value.fontSize, 20),
+      fontWeight: readNumber(value.fontWeight, 650),
+      lineHeight: readNumber(value.lineHeight, 1.1),
+      italic: value.italic === true,
+      align: value.align === "left" || value.align === "right" ? value.align : "center",
+      verticalAlign:
+        value.verticalAlign === "top" || value.verticalAlign === "bottom"
+          ? value.verticalAlign
+          : "center",
+      listStyle: readTextListStyle(value.listStyle),
+    });
   }
 
   return null;

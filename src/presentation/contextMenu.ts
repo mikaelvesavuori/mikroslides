@@ -3,6 +3,8 @@ export type ContextMenuAction =
   | "cut"
   | "paste"
   | "duplicate"
+  | "lock"
+  | "unlock"
   | "bring-front"
   | "send-back"
   | "add-text"
@@ -12,7 +14,9 @@ export type ContextMenuAction =
 
 export type ContextMenuAvailability = {
   hasClipboard: boolean;
+  hasLockedSelection: boolean;
   hasSelection: boolean;
+  hasUnlockedSelection: boolean;
 };
 
 export type ContextMenuCallbacks = Record<ContextMenuAction, () => void>;
@@ -27,6 +31,8 @@ const selectionActions = new Set<ContextMenuAction>([
   "cut",
   "duplicate",
   "delete",
+  "lock",
+  "unlock",
   "bring-front",
   "send-back",
 ]);
@@ -37,6 +43,14 @@ export function isContextActionDisabled(
 ) {
   if (selectionActions.has(action) && !availability.hasSelection) {
     return true;
+  }
+
+  if (action === "lock") {
+    return !availability.hasUnlockedSelection;
+  }
+
+  if (action === "unlock") {
+    return !availability.hasLockedSelection;
   }
 
   return action === "paste" && !availability.hasClipboard;
@@ -93,6 +107,8 @@ function isContextMenuAction(value: string | undefined): value is ContextMenuAct
     value === "cut" ||
     value === "paste" ||
     value === "duplicate" ||
+    value === "lock" ||
+    value === "unlock" ||
     value === "bring-front" ||
     value === "send-back" ||
     value === "add-text" ||

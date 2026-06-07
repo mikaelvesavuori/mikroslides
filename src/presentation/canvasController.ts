@@ -1,4 +1,4 @@
-import type { MikroDeckRecord, SlideElement, TextSlideElement } from "../index.js";
+import type { MikroDeckRecord, SlideElement } from "../index.js";
 import {
   canvasElementIdFromTarget,
   canvasPointerDownAction,
@@ -298,6 +298,15 @@ export function createCanvasController(options: CanvasControllerOptions) {
         return;
       }
 
+      if (action.element.locked) {
+        selectElementFromInteraction(action.element.id, multiSelect);
+        options.renderCanvas();
+        options.renderInspector();
+        ignoreNextCanvasClick = true;
+        event.preventDefault();
+        return;
+      }
+
       const constrainingSelectedMove = event.shiftKey && action.mode === "move" && wasSelected;
       const selectionMultiSelect = constrainingSelectedMove
         ? event.metaKey || event.ctrlKey
@@ -359,7 +368,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       const text = readTextEditorContent(textEditor);
       options.setDeck(
         updateElementsInActiveSlide(deck, [
-          { id: elementId, patch: { content: text } as Partial<TextSlideElement> },
+          { id: elementId, patch: { content: text } as Partial<SlideElement> },
         ]) ?? deck,
       );
       void options.persistRecoveryDraft();

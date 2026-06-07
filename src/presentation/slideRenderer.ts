@@ -1,4 +1,10 @@
-import type { MikroSlideRecord, SlideElement, TextFontFamily, TextSlideElement } from "../index.js";
+import type {
+  MikroSlideRecord,
+  ShapeSlideElement,
+  SlideElement,
+  TextFontFamily,
+  TextSlideElement,
+} from "../index.js";
 import { escapeAttribute, escapeHtml } from "./htmlEscape.js";
 import {
   pathCommandsToSvg,
@@ -68,7 +74,7 @@ export function renderSlideElement(
     `--rotation:${element.rotation}`,
     `--opacity:${element.opacity}`,
   ].join(";");
-  const handle = options.includeHandle
+  const handle = options.includeHandle && !element.locked
     ? '<span class="element-resize-handle" data-resize="true"></span>'
     : "";
   const selectedAttr = options.selected ? "true" : "false";
@@ -76,15 +82,7 @@ export function renderSlideElement(
 
   if (element.kind === "text") {
     const isEditing = options.editingTextElementId === element.id;
-    const style = [
-      `--text-color:${escapeAttribute(element.color)}`,
-      `--font-size-cqw:${element.fontSize / 10}cqw`,
-      `--font-weight:${element.fontWeight}`,
-      `--font-style:${element.italic ? "italic" : "normal"}`,
-      `--line-height:${element.lineHeight}`,
-      `--text-align:${element.align}`,
-      `--element-font:${options.resolveFontStack?.(element.fontFamily) ?? defaultFontStack}`,
-    ].join(";");
+    const style = textStyleForElement(element, options);
     const editableAttributes = isEditing
       ? ` data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true"`
       : "";
@@ -98,7 +96,7 @@ export function renderSlideElement(
       `--stroke-width:${element.strokeWidth}`,
       `--radius:${element.radius}`,
     ].join(";");
-    body = renderShapeElementBody(element, style);
+    body = renderShapeElementBody(element, style, options);
   }
 
   if (element.kind === "image") {
@@ -110,16 +108,36 @@ export function renderSlideElement(
   }
 
   return `
-    <div class="slide-element" data-element-id="${escapeAttribute(element.id)}" data-kind="${element.kind}" data-selected="${selectedAttr}" style="${escapeAttribute(baseStyle)}">
+    <div class="slide-element" data-element-id="${escapeAttribute(element.id)}" data-kind="${element.kind}" data-locked="${element.locked}" data-selected="${selectedAttr}" style="${escapeAttribute(baseStyle)}">
       ${body}
       ${handle}
     </div>
   `;
 }
 
-function renderShapeElementBody(element: Extract<SlideElement, { kind: "shape" }>, style: string) {
+function textStyleForElement(
+  element: TextSlideElement | ShapeSlideElement,
+  options: Omit<SlideRenderOptions, "selectedIds"> & { selected?: boolean } = {},
+) {
+  return [
+    `--text-color:${escapeAttribute(element.color)}`,
+    `--font-size-cqw:${element.fontSize / 10}cqw`,
+    `--font-weight:${element.fontWeight}`,
+    `--font-style:${element.italic ? "italic" : "normal"}`,
+    `--line-height:${element.lineHeight}`,
+    `--text-align:${element.align}`,
+    `--element-font:${options.resolveFontStack?.(element.fontFamily) ?? defaultFontStack}`,
+  ].join(";");
+}
+
+function renderShapeElementBody(
+  element: ShapeSlideElement,
+  style: string,
+  options: Omit<SlideRenderOptions, "selectedIds"> & { selected?: boolean } = {},
+) {
+  const label = renderShapeLabel(element, options);
   if (element.shape === "line") {
-    return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><line class="slide-shape-line" x1="0" y1="50" x2="100" y2="50" /></svg>`;
+    return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><line class="slide-shape-line" x1="0" y1="50" x2="100" y2="50" /></svg>${label}`;
   }
 
   const rect = { x: 0, y: 0, width: 100, height: 100 };
@@ -129,10 +147,26 @@ function renderShapeElementBody(element: Extract<SlideElement, { kind: "shape" }
     ? `<path class="slide-shape-decoration" d="${escapeAttribute(pathCommandsToSvg(decorationPath))}" />`
     : "";
 
-  return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><path class="slide-shape-fill" d="${escapeAttribute(path)}" />${decoration}</svg>`;
+  return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><path class="slide-shape-fill" d="${escapeAttribute(path)}" />${decoration}</svg>${label}`;
 }
 
-export function renderTextElementContent(element: TextSlideElement) {
+function renderShapeLabel(
+  element: ShapeSlideElement,
+  options: Omit<SlideRenderOptions, "selectedIds"> & { selected?: boolean } = {},
+) {
+  const isEditing = options.editingTextElementId === element.id;
+  if (!element.content && !isEditing) {
+    return "";
+  }
+
+  const style = textStyleForElement(element, options);
+  const editableAttributes = isEditing
+    ? ` data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true"`
+    : "";
+  return `<div class="slide-shape-label slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(style)}"><div class="slide-text-content"${editableAttributes}>${renderTextElementContent(element)}</div></div>`;
+}
+
+export function renderTextElementContent(element: TextSlideElement | ShapeSlideElement) {
   if (element.listStyle !== "bullet") {
     return escapeHtml(element.content);
   }
@@ -156,6 +190,10 @@ export function getElementLabel(element: SlideElement, index: number) {
 
   if (element.kind === "image") {
     return element.alt || `Image ${index + 1}`;
+  }
+
+  if (element.content.trim()) {
+    return element.content.trim().split(/\s+/).slice(0, 4).join(" ");
   }
 
   return `${element.shape[0].toUpperCase()}${element.shape.slice(1)} ${index + 1}`;

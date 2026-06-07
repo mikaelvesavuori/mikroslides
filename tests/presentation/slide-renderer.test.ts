@@ -80,7 +80,7 @@ describe("slide renderer", () => {
   it("renders shape elements as SVG paths", () => {
     const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
     slide.elements = [
-      createShapeElement({ id: "diamond", shape: "diamond" }),
+      createShapeElement({ id: "diamond", shape: "diamond", content: "Decision" }),
       createShapeElement({ id: "database", shape: "database" }),
       createShapeElement({ id: "line", shape: "line" }),
     ];
@@ -88,9 +88,21 @@ describe("slide renderer", () => {
     const html = renderSlideElements(slide);
 
     expect(html).toContain('data-shape="diamond"');
+    expect(html).toContain("slide-shape-label");
+    expect(html).toContain("Decision");
     expect(html).toContain('class="slide-shape-fill"');
     expect(html).toContain('class="slide-shape-decoration"');
     expect(html).toContain('class="slide-shape-line"');
+  });
+
+  it("renders editable shape labels", () => {
+    const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
+    slide.elements = [createShapeElement({ id: "shape", shape: "capsule" })];
+
+    const html = renderSlideElements(slide, { editingTextElementId: "shape" });
+
+    expect(html).toContain('data-text-editor="shape"');
+    expect(html).toContain('contenteditable="plaintext-only"');
   });
 
   it("creates stable layer labels", () => {
@@ -99,6 +111,9 @@ describe("slide renderer", () => {
     );
     expect(getElementLabel(createImageElement({ alt: "Product screenshot" }), 1)).toBe(
       "Product screenshot",
+    );
+    expect(getElementLabel(createShapeElement({ content: "Launch gate" }), 2)).toBe(
+      "Launch gate",
     );
   });
 

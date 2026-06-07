@@ -67,7 +67,11 @@ export function canvasPointerDownAction(options: {
     return { kind: "ignore" };
   }
 
-  if (!options.isResize && options.element.kind === "text" && options.detail >= 2) {
+  if (
+    !options.isResize &&
+    (options.element.kind === "text" || options.element.kind === "shape") &&
+    options.detail >= 2
+  ) {
     return { element: options.element, kind: "edit-text" };
   }
 
@@ -231,7 +235,9 @@ export function isEditableCanvasTarget(target: HTMLElement | null) {
 
 export function textElementIdFromTarget(target: HTMLElement | null) {
   const textEditor = target?.closest<HTMLElement>("[data-text-editor]");
-  const elementNode = target?.closest<HTMLElement>('[data-element-id][data-kind="text"]');
+  const elementNode = target?.closest<HTMLElement>(
+    '[data-element-id][data-kind="text"], [data-element-id][data-kind="shape"]',
+  );
   return textEditor?.dataset.textEditor ?? elementNode?.dataset.elementId;
 }
 

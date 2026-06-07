@@ -63,6 +63,7 @@ export interface SlideElementBase {
   height: number;
   rotation: number;
   opacity: number;
+  locked: boolean;
 }
 
 export interface TextSlideElement extends SlideElementBase {
@@ -86,6 +87,16 @@ export interface ShapeSlideElement extends SlideElementBase {
   stroke: string;
   strokeWidth: number;
   radius: number;
+  content: string;
+  color: string;
+  fontFamily: TextFontFamily;
+  fontSize: number;
+  fontWeight: number;
+  lineHeight: number;
+  italic: boolean;
+  align: TextAlignment;
+  verticalAlign: TextVerticalAlignment;
+  listStyle: TextListStyle;
 }
 
 export interface ImageSlideElement extends SlideElementBase {

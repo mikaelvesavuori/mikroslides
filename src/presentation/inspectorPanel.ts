@@ -2,6 +2,7 @@ import {
   defaultDeckTheme,
   type MikroDeckRecord,
   type MikroSlideRecord,
+  type ShapeSlideElement,
   type SlideElement,
   type TextSlideElement,
 } from "../index.js";
@@ -13,6 +14,7 @@ export type InspectorPanelElements = {
   deckThemeSelect: HTMLSelectElement;
   elementHeightInput: HTMLInputElement;
   elementInspector: HTMLElement;
+  elementLockedInput: HTMLInputElement;
   elementOpacityInput: HTMLInputElement;
   elementWidthInput: HTMLInputElement;
   elementXInput: HTMLInputElement;
@@ -74,6 +76,7 @@ export function renderInspectorPanel(options: {
   elements.layersSection.hidden = !element;
   renderLayersPanel(elements, slide, options.selectedElementIds);
   if (!element) {
+    setLockedControlState(elements, false, documentRef);
     return;
   }
 
@@ -105,11 +108,16 @@ export function renderInspectorPanel(options: {
     element.opacity,
     documentRef,
   );
+  setCheckboxValueOrMixed(
+    elements.elementLockedInput,
+    sharedValue(selectedElements, (item) => item.locked),
+  );
+  setLockedControlState(elements, selectedElements.every((item) => item.locked), documentRef);
 
   const selectedKind = sharedValue(selectedElements, (item) => item.kind);
   setVisibleObjectFields(elements, selectedKind);
 
-  if (selectedKind === "text") {
+  if (selectedKind === "text" || selectedKind === "shape") {
     renderTextInspector(options, documentRef);
   }
 
@@ -177,7 +185,8 @@ function renderTextInspector(
 ) {
   const { elements, selectedElements } = options;
   const textElements = selectedElements.filter(
-    (item): item is TextSlideElement => item.kind === "text",
+    (item): item is TextSlideElement | ShapeSlideElement =>
+      item.kind === "text" || item.kind === "shape",
   );
   if (documentRef.activeElement !== elements.textContentInput) {
     setTextAreaValueOrMixed(
@@ -292,7 +301,7 @@ function setVisibleObjectFields(
   elements: Pick<InspectorPanelElements, "imageFields" | "shapeFields" | "textFields">,
   kind: SlideElement["kind"] | null,
 ) {
-  elements.textFields.dataset.visible = String(kind === "text");
+  elements.textFields.dataset.visible = String(kind === "text" || kind === "shape");
   elements.shapeFields.dataset.visible = String(kind === "shape");
   elements.imageFields.dataset.visible = String(kind === "image");
 }
@@ -357,6 +366,45 @@ function setTextAreaValueOrMixed(
   input.placeholder = mixed ? "Mixed" : "";
   if (documentRef.activeElement !== input) {
     input.value = value ?? "";
+  }
+}
+
+function setCheckboxValueOrMixed(input: HTMLInputElement, value: boolean | null) {
+  input.indeterminate = value === null;
+  input.checked = value === true;
+}
+
+function setLockedControlState(
+  elements: InspectorPanelElements,
+  locked: boolean,
+  documentRef: Document,
+) {
+  const controls: Array<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> = [
+    elements.elementXInput,
+    elements.elementYInput,
+    elements.elementWidthInput,
+    elements.elementHeightInput,
+    elements.elementOpacityInput,
+    elements.textContentInput,
+    elements.textFontSelect,
+    elements.textSizeInput,
+    elements.textWeightInput,
+    elements.textLineHeightInput,
+    elements.textColorInput,
+    elements.shapeKindSelect,
+    elements.shapeFillInput,
+    elements.shapeStrokeInput,
+    elements.imageSrcInput,
+    elements.imageAltInput,
+    elements.imageFitSelect,
+  ];
+  for (const control of controls) {
+    control.disabled = locked;
+  }
+  for (const button of documentRef.querySelectorAll<HTMLButtonElement>(
+    "[data-align], [data-valign], [data-list-style], [data-object-align]",
+  )) {
+    button.disabled = locked;
   }
 }
 

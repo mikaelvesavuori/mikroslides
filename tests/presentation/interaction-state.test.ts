@@ -1,4 +1,9 @@
-import { createImageElement, createTextElement, MikroDeck } from "../../src/index.js";
+import {
+  createImageElement,
+  createShapeElement,
+  createTextElement,
+  MikroDeck,
+} from "../../src/index.js";
 import {
   canvasPointerDownAction,
   createDragState,
@@ -37,6 +42,24 @@ describe("interaction helpers", () => {
 
   it("prunes selection to the active slide", () => {
     expect(selectionForSlide(["a", "missing"], [createTextElement({ id: "a" })])).toEqual(["a"]);
+  });
+
+  it("starts editing shape labels on double click", () => {
+    const shape = createShapeElement({ id: "shape" });
+
+    expect(
+      canvasPointerDownAction({
+        button: 0,
+        ctrlKey: false,
+        detail: 2,
+        element: shape,
+        elementId: shape.id,
+        isEditableTarget: false,
+        isResize: false,
+        isSelected: true,
+        multiSelect: false,
+      }),
+    ).toEqual({ element: shape, kind: "edit-text" });
   });
 
   it("computes marquee geometry and intersections", () => {
@@ -237,13 +260,13 @@ describe("interaction helpers", () => {
     expect(
       constrainedMenuPosition(500, 500, { width: 120, height: 80 }, { width: 520, height: 520 }),
     ).toEqual({ x: 392, y: 432 });
-    expect(isContextActionDisabled("copy", { hasClipboard: true, hasSelection: false })).toBe(true);
-    expect(isContextActionDisabled("paste", { hasClipboard: false, hasSelection: true })).toBe(
+    expect(isContextActionDisabled("copy", menuAvailability({ hasSelection: false }))).toBe(true);
+    expect(isContextActionDisabled("paste", menuAvailability({ hasClipboard: false }))).toBe(
       true,
     );
-    expect(isContextActionDisabled("add-text", { hasClipboard: false, hasSelection: false })).toBe(
-      false,
-    );
+    expect(isContextActionDisabled("lock", menuAvailability({ hasUnlockedSelection: false }))).toBe(true);
+    expect(isContextActionDisabled("unlock", menuAvailability({ hasLockedSelection: false }))).toBe(true);
+    expect(isContextActionDisabled("add-text", menuAvailability({ hasSelection: false }))).toBe(false);
   });
 
   it("classifies canvas context-menu selection behavior", () => {
@@ -295,9 +318,28 @@ describe("interaction helpers", () => {
       cut: () => calls.push("cut"),
       delete: () => calls.push("delete"),
       duplicate: () => calls.push("duplicate"),
+      lock: () => calls.push("lock"),
       paste: () => calls.push("paste"),
       "send-back": () => calls.push("send-back"),
+      unlock: () => calls.push("unlock"),
     });
     expect(calls).toEqual(["delete"]);
   });
 });
+
+function menuAvailability(
+  overrides: Partial<{
+    hasClipboard: boolean;
+    hasLockedSelection: boolean;
+    hasSelection: boolean;
+    hasUnlockedSelection: boolean;
+  }> = {},
+) {
+  return {
+    hasClipboard: true,
+    hasLockedSelection: true,
+    hasSelection: true,
+    hasUnlockedSelection: true,
+    ...overrides,
+  };
+}
