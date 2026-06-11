@@ -36,6 +36,37 @@ export function renderSlideElements(slide: MikroSlideRecord, options: SlideRende
     .join("");
 }
 
+export function renderTextEditingOverlay(
+  slide: MikroSlideRecord,
+  options: Pick<SlideRenderOptions, "editingTextElementId" | "resolveFontStack"> = {},
+) {
+  const element = slide.elements.find((item) => item.id === options.editingTextElementId);
+  if (!element || (element.kind !== "text" && element.kind !== "shape")) {
+    return "";
+  }
+
+  const baseStyle = elementBaseStyle(element);
+  if (element.kind === "text") {
+    const textStyle = textStyleForElement(element, options);
+    return `
+      <div class="text-edit-overlay" data-text-edit-overlay="true" style="${escapeAttribute(baseStyle)}">
+        <div class="slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(textStyle)}">
+          <div class="slide-text-content" data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true">${renderTextElementContent(element)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  const textStyle = textStyleForElement(element, options);
+  return `
+    <div class="text-edit-overlay" data-text-edit-overlay="true" style="${escapeAttribute(baseStyle)}">
+      <div class="slide-shape-label slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(textStyle)}">
+        <div class="slide-text-content" data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true">${renderTextElementContent(element)}</div>
+      </div>
+    </div>
+  `;
+}
+
 export function renderSlideThumbnails(
   slides: MikroSlideRecord[],
   options: SlideRenderOptions & { activeSlideId: string | null },
@@ -66,27 +97,17 @@ export function renderSlideElement(
   element: SlideElement,
   options: Omit<SlideRenderOptions, "selectedIds"> & { selected?: boolean } = {},
 ) {
-  const baseStyle = [
-    `--x:${element.x}`,
-    `--y:${element.y}`,
-    `--w:${element.width}`,
-    `--h:${element.height}`,
-    `--rotation:${element.rotation}`,
-    `--opacity:${element.opacity}`,
-  ].join(";");
+  const baseStyle = elementBaseStyle(element);
   const handle = options.includeHandle && !element.locked
     ? '<span class="element-resize-handle" data-resize="true"></span>'
     : "";
   const selectedAttr = options.selected ? "true" : "false";
+  const editingAttr = options.editingTextElementId === element.id ? "true" : "false";
   let body = "";
 
   if (element.kind === "text") {
-    const isEditing = options.editingTextElementId === element.id;
     const style = textStyleForElement(element, options);
-    const editableAttributes = isEditing
-      ? ` data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true"`
-      : "";
-    body = `<div class="slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(style)}"><div class="slide-text-content"${editableAttributes}>${renderTextElementContent(element)}</div></div>`;
+    body = `<div class="slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(style)}"><div class="slide-text-content">${renderTextElementContent(element)}</div></div>`;
   }
 
   if (element.kind === "shape") {
@@ -108,7 +129,7 @@ export function renderSlideElement(
   }
 
   return `
-    <div class="slide-element" data-element-id="${escapeAttribute(element.id)}" data-kind="${element.kind}" data-locked="${element.locked}" data-selected="${selectedAttr}" style="${escapeAttribute(baseStyle)}">
+    <div class="slide-element" data-element-id="${escapeAttribute(element.id)}" data-kind="${element.kind}" data-locked="${element.locked}" data-selected="${selectedAttr}" data-editing="${editingAttr}" style="${escapeAttribute(baseStyle)}">
       ${body}
       ${handle}
     </div>
@@ -127,6 +148,17 @@ function textStyleForElement(
     `--line-height:${element.lineHeight}`,
     `--text-align:${element.align}`,
     `--element-font:${options.resolveFontStack?.(element.fontFamily) ?? defaultFontStack}`,
+  ].join(";");
+}
+
+function elementBaseStyle(element: SlideElement) {
+  return [
+    `--x:${element.x}`,
+    `--y:${element.y}`,
+    `--w:${element.width}`,
+    `--h:${element.height}`,
+    `--rotation:${element.rotation}`,
+    `--opacity:${element.opacity}`,
   ].join(";");
 }
 
@@ -160,10 +192,7 @@ function renderShapeLabel(
   }
 
   const style = textStyleForElement(element, options);
-  const editableAttributes = isEditing
-    ? ` data-text-editor="${escapeAttribute(element.id)}" contenteditable="plaintext-only" spellcheck="true"`
-    : "";
-  return `<div class="slide-shape-label slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(style)}"><div class="slide-text-content"${editableAttributes}>${renderTextElementContent(element)}</div></div>`;
+  return `<div class="slide-shape-label slide-text" data-list-style="${element.listStyle}" data-align="${element.align}" data-valign="${element.verticalAlign}" style="${escapeAttribute(style)}"><div class="slide-text-content">${renderTextElementContent(element)}</div></div>`;
 }
 
 export function renderTextElementContent(element: TextSlideElement | ShapeSlideElement) {

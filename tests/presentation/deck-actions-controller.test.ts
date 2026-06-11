@@ -81,10 +81,6 @@ function harness() {
         .filter((element): element is SlideElement => Boolean(element));
     },
     getSlide: () => deck.slides.find((slide) => slide.id === deck.activeSlideId) ?? null,
-    polishDeck: (currentDeck) => ({
-      ...currentDeck,
-      title: `${currentDeck.title} polished`,
-    }),
     renderCanvas: () => calls.push("render-canvas"),
     renderInspector: () => calls.push("render-inspector"),
     selectElements: (ids) => {
@@ -125,10 +121,6 @@ describe("deck actions controller", () => {
     test.controller.addSlide();
     expect(test.getDeck().slides).toHaveLength(3);
     expect(test.getSelectedElementIds()).toEqual([]);
-
-    test.controller.polishDeck();
-    expect(test.getDeck().title).toBe("Deck polished");
-    expect(test.calls).toContain("toast:Deck polished");
 
     test.controller.toggleSlideSkipped("slide_2");
     expect(test.getDeck().slides.find((slide) => slide.id === "slide_2")?.skipped).toBe(true);

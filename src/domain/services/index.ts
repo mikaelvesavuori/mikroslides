@@ -1,2 +1,2 @@
-export { DeckPolishService } from "./DeckPolishService.js";
+export { MarkdownDeckService } from "./MarkdownDeckService.js";
 export { OutlineImportService } from "./OutlineImportService.js";

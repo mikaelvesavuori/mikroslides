@@ -113,6 +113,30 @@ describe("DeckService", () => {
     expect(await service.list()).toHaveLength(3);
   });
 
+  it("imports Markdown decks through the file import API", async () => {
+    const service = new DeckService(new MemoryDeckRepository());
+
+    const imported = await service.importFile(
+      `---
+title: Markdown Launch
+aspect: 1:1
+---
+
+# Markdown Launch
+
+---
+layout: bullets
+# Why now
+- Customer demand`,
+      "launch.mikroslides.md",
+    );
+
+    expect(imported.title).toBe("Markdown Launch");
+    expect(imported.aspectRatio).toBe("1:1");
+    expect(imported.slides.map((slide) => slide.layout)).toEqual(["title", "bullets"]);
+    expect(imported.snapshots[0]).toMatchObject({ reason: "import" });
+  });
+
   it("exports and imports portable MikroSlides files", async () => {
     const repository = new MemoryDeckRepository();
     const service = new DeckService(repository);

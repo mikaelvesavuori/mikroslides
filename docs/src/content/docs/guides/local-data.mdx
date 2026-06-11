@@ -1,13 +1,13 @@
 ---
 title: Local Data and Backups
-description: How MikroSlides stores local decks.
+description: Understand browser storage, recovery drafts, and deck backups.
 ---
 
 MikroSlides stores decks in browser IndexedDB. Saved templates, focus-mode preference, active deck id, and recovery drafts use localStorage.
 
 Data stays in the current browser profile for the current site unless you export it, import it elsewhere, or the browser syncs site data through its own features.
 
-## What is stored
+## What Is Stored
 
 - Deck library and deck contents
 - Slide elements, speaker notes, skipped-slide state, themes, fonts, and assets
@@ -15,7 +15,7 @@ Data stays in the current browser profile for the current site unless you export
 - UI preferences such as focus mode
 - Recovery drafts for recent unsaved edits
 
-## Clearing browser data
+## Clearing Browser Data
 
 Clearing site data, browser storage, or the browser profile can remove local decks. Export important decks before clearing data or switching machines.
 
@@ -25,6 +25,22 @@ For shared or managed machines, use a separate browser profile or clear site dat
 
 Use JSON or portable export for durable backups. A portable file is best when the deck contains local images or fonts. JSON is best when you want a compact editable record.
 
-## Recovery drafts
+Keep backups for important decks. Browser-local storage can be removed by browser settings, profile cleanup, private browsing behavior, origin changes, or device loss.
+
+## Recovery Drafts
 
 MikroSlides keeps a local recovery draft while you work. If the page reloads before a normal save completes, the app can restore recent changes from that draft.
+
+## Moving Between Deployments
+
+Browser storage is scoped to the site origin. A deployment at `https://slides.example.com` cannot automatically see decks stored at `https://example.com`.
+
+Before changing domains or browser profiles:
+
+1. Export a JSON or portable deck file from the old origin.
+2. Open MikroSlides at the new origin.
+3. Import the exported file.
+
+## When Storage Fails
+
+If browser storage is unavailable, MikroSlides keeps the current deck in memory and shows an in-app warning. Export a JSON or portable file before leaving that session.

@@ -3,10 +3,7 @@ import {
   type BunnyFontCatalogItem,
   type FontCategory,
   fontCategoryChoices,
-  fontCategoryLabel,
   fontSourceLabel,
-  fontWeightsLabel,
-  quotedCssString,
   sourceFontChoices,
   systemFontChoices,
 } from "./fontCatalog.js";
@@ -31,6 +28,7 @@ export function renderFontListView(options: {
             <span class="font-row-title" style="font-family:${escapeAttribute(options.resolvers.cssFontStackForTextToken(font.token))}">${escapeHtml(font.label)}</span>
             <span class="font-row-meta">${escapeHtml(font.meta)}</span>
           </button>
+          ${fontRowStateIcon(options.currentFont === font.token, "Selected")}
         </div>
       `,
     )
@@ -44,6 +42,7 @@ export function renderFontListView(options: {
             <span class="font-row-title" style="font-family:${escapeAttribute(options.resolvers.cssFontStackForFont(font))}">${escapeHtml(font.label)}</span>
             <span class="font-row-meta">${escapeHtml(fontSourceLabel(font))}</span>
           </button>
+          ${fontRowStateIcon(options.currentFont === token, "Selected")}
           <button class="tool-btn icon-btn danger" type="button" data-action="delete-font" title="Delete font" aria-label="Delete font">
             <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
           </button>
@@ -77,13 +76,13 @@ export function renderSourceFontCatalogView(options: {
         );
         const token = existing ? (`font:${existing.id}` as TextFontFamily) : null;
         const selected = Boolean(token && options.currentFont === token);
-        const previewStack = `${quotedCssString(font.family)}, var(--font-family)`;
         return `
           <button class="font-catalog-row source-font-row" type="button" data-source-font-id="${escapeAttribute(font.id)}" aria-pressed="${selected}">
-            <span class="font-catalog-preview" style="font-family:${escapeAttribute(previewStack)}">${escapeHtml(font.label)}</span>
-            <span class="font-catalog-sample" style="font-family:${escapeAttribute(previewStack)}">${escapeHtml(font.sample)}</span>
-            <span class="font-catalog-meta">${escapeHtml(font.meta)}</span>
-            <span class="font-row-action">${selected ? "Selected" : existing ? "Apply" : "Add"}</span>
+            <span class="font-catalog-main">
+              <span class="font-catalog-preview">${escapeHtml(font.label)}</span>
+              <span class="font-catalog-meta">${existing ? "Installed" : "Available"}</span>
+            </span>
+            ${fontCatalogActionIcon(Boolean(existing), selected)}
           </button>
         `;
       })
@@ -111,13 +110,13 @@ export function renderBunnyFontCatalogView(options: {
           );
           const token = existing ? (`font:${existing.id}` as TextFontFamily) : null;
           const selected = Boolean(token && options.currentFont === token);
-          const previewStack = `${quotedCssString(font.family)}, var(--font-family)`;
           return `
             <button class="font-catalog-row" type="button" data-font-family="${escapeAttribute(font.family)}" aria-pressed="${selected}">
-              <span class="font-catalog-preview" style="font-family:${escapeAttribute(previewStack)}">${escapeHtml(font.family)}</span>
-              <span class="font-catalog-sample" style="font-family:${escapeAttribute(previewStack)}">${escapeHtml(font.sample)}</span>
-              <span class="font-catalog-meta">${escapeHtml(fontCategoryLabel(font.category))} / ${escapeHtml(fontWeightsLabel(font))}</span>
-              <span class="font-row-action">${selected ? "Selected" : existing ? "Apply" : "Add"}</span>
+              <span class="font-catalog-main">
+                <span class="font-catalog-preview">${escapeHtml(font.family)}</span>
+                <span class="font-catalog-meta">${existing ? "Installed" : "Available"}</span>
+              </span>
+              ${fontCatalogActionIcon(Boolean(existing), selected)}
             </button>
           `;
         })
@@ -127,11 +126,9 @@ export function renderBunnyFontCatalogView(options: {
     loadButtonText: options.bunnyFontCatalogLoading
       ? "Loading"
       : options.bunnyFontCatalogLoaded
-        ? "Refresh catalog"
-        : "Load catalog",
-    statusText: options.bunnyFontCatalogLoaded
-      ? `${options.bunnyFontCatalog.length} families`
-      : "Curated",
+        ? "Refresh online fonts"
+        : "Browse online fonts",
+    statusText: options.bunnyFontCatalogLoaded ? `${options.bunnyFontCatalog.length} families` : "",
   };
 }
 
@@ -145,4 +142,26 @@ function renderFontCategoriesView(activeFontCategory: FontCategory) {
       `,
     )
     .join("");
+}
+
+function fontCatalogActionIcon(installed: boolean, selected: boolean) {
+  const label = selected ? "Selected" : installed ? "Installed" : "Add font";
+  const icon = installed ? "icon-check" : "icon-plus";
+  return `
+    <span class="font-row-action" aria-label="${escapeAttribute(label)}" title="${escapeAttribute(label)}">
+      <svg class="icon" aria-hidden="true"><use href="#${icon}"></use></svg>
+    </span>
+  `;
+}
+
+function fontRowStateIcon(selected: boolean, label: string) {
+  if (!selected) {
+    return "";
+  }
+
+  return `
+    <span class="font-row-state" aria-label="${escapeAttribute(label)}" title="${escapeAttribute(label)}">
+      <svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+    </span>
+  `;
 }

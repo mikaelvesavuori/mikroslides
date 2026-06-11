@@ -64,6 +64,7 @@ function service(overrides: Partial<DeckPersistenceService> = {}): DeckPersisten
     delete: async () => undefined,
     deleteDraft: async () => undefined,
     duplicate: async () => undefined,
+    importFile: async (text) => makeDeck("imported", text),
     importJson: async (text) => makeDeck("imported", text),
     list: async () => decks,
     load: async (deckId) => decks.find((deck) => deck.id === deckId) ?? null,

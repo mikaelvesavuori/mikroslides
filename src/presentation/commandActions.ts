@@ -24,7 +24,6 @@ export type MikroSlidesCommandCallbacks = {
   openExport: () => Promise<void> | void;
   openLibrary: () => Promise<void> | void;
   openOutline: () => Promise<void> | void;
-  polishDeck: () => Promise<void> | void;
   present: () => Promise<void> | void;
   redo: () => Promise<void> | void;
   toggleTheme: () => Promise<void> | void;
@@ -62,17 +61,10 @@ export function buildMikroSlidesCommandActions(options: {
     },
     {
       id: "outline-deck",
-      title: "Deck from outline",
+      title: "Deck from Markdown",
       detail: "Create slides from pasted Markdown",
-      keywords: "markdown import notes gamma",
+      keywords: "markdown import notes outline",
       run: callbacks.openOutline,
-    },
-    {
-      id: "polish-deck",
-      title: "Polish deck",
-      detail: "Tighten layout, spacing, and type scale",
-      keywords: "beautify tidy align layout",
-      run: callbacks.polishDeck,
     },
     {
       id: "new-slide",

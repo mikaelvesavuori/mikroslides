@@ -1,4 +1,9 @@
-import { createShapeElement, defaultDeckTheme, MikroDeck } from "../../domain/index.js";
+import {
+  createShapeElement,
+  defaultDeckTheme,
+  MikroDeck,
+  OutlineImportService,
+} from "../../domain/index.js";
 import type {
   DeckAspectRatio,
   MikroAssetRecord,
@@ -304,6 +309,29 @@ export function readExportEnvelope(text: string): DeckImportEnvelope {
   }
 
   throw new Error("This JSON file is not a MikroSlides deck.");
+}
+
+function isMarkdownSourceName(sourceName: string | undefined) {
+  return /\.(md|markdown)$/i.test(sourceName ?? "");
+}
+
+function looksLikeJson(text: string) {
+  return /^[{\[]/.test(text.trim());
+}
+
+export function readDeckImportEnvelope(text: string, sourceName?: string): DeckImportEnvelope {
+  const outlineService = new OutlineImportService();
+  if (
+    isMarkdownSourceName(sourceName) ||
+    (!looksLikeJson(text) && outlineService.looksLikeOutline(text))
+  ) {
+    return {
+      deck: outlineService.createDeckFromMarkdown(text),
+      assets: [],
+    };
+  }
+
+  return readExportEnvelope(text);
 }
 
 function assetIdForImage(slideId: string, elementId: string) {

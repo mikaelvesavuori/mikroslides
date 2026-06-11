@@ -3,7 +3,7 @@ title: MikroSlides
 description: Local-first presentation decks in the browser.
 template: splash
 hero:
-  tagline: MikroSlides is a minimalist, local-first presentation app for browser-based decks.
+  tagline: Local-first presentation decks in the browser. Slides, notes, Markdown import, and portable exports.
   image:
     light: ../../assets/logo.svg
     dark: ../../assets/logo.svg
@@ -11,8 +11,8 @@ hero:
     - text: Get Started
       link: /slides/docs/getting-started/intro
       icon: rocket
-    - text: Installation
-      link: /slides/docs/getting-started/installation
+    - text: First Deck
+      link: /slides/docs/getting-started/first-deck
       icon: laptop
 ---
 
@@ -24,6 +24,7 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
     <LinkCard title="What is MikroSlides?" href="/slides/docs/getting-started/intro" />
     <LinkCard title="Installation" href="/slides/docs/getting-started/installation" />
+    <LinkCard title="Your First Deck" href="/slides/docs/getting-started/first-deck" />
   </Card>
 
   <Card title="Guides" icon="puzzle">
@@ -31,17 +32,17 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
     <LinkCard title="Configuration" href="/slides/docs/guides/configuration" />
     <LinkCard title="Authentication" href="/slides/docs/guides/authentication" />
-    <LinkCard title="Create Your First Deck" href="/slides/docs/guides/first-deck" />
-    <LinkCard title="Editing and Presenting" href="/slides/docs/guides/editing-and-presenting" />
+    <LinkCard title="Working with Slides" href="/slides/docs/guides/editing-and-presenting" />
     <LinkCard title="Import and Export" href="/slides/docs/guides/import-export" />
     <LinkCard title="Local Data and Backups" href="/slides/docs/guides/local-data" />
     <LinkCard title="Deployment" href="/slides/docs/guides/deployment" />
   </Card>
 
   <Card title="References" icon="document">
-    Product behavior and operational notes.
+    Product behavior and file-format reference.
 
     <LinkCard title="Comparison" href="/slides/docs/reference/comparison" />
+    <LinkCard title="File Formats" href="/slides/docs/reference/file-formats" />
     <LinkCard title="Privacy and Security" href="/slides/docs/reference/privacy-security" />
     <LinkCard title="Architecture" href="/slides/docs/reference/architecture" />
   </Card>

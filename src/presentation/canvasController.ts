@@ -69,6 +69,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
   let selectionMarquee: SelectionMarqueeState | null = null;
   let editingTextElementId: string | null = null;
   let ignoreNextCanvasClick = false;
+  let textEditPointerId: number | null = null;
 
   function selectElementFromInteraction(elementId: string, multiSelect: boolean) {
     options.selectElements(
@@ -94,7 +95,37 @@ export function createCanvasController(options: CanvasControllerOptions) {
       return [];
     }
 
-    return elementIdsInRect(rect, slide.elements);
+    return elementIdsInRect(
+      rect,
+      slide.elements.filter((element) => !element.locked),
+    );
+  }
+
+  function editableTextElementAtPoint(clientX: number, clientY: number) {
+    const slide = options.getSlide();
+    if (!slide) {
+      return null;
+    }
+
+    const point = getCanvasPointPercent(clientX, clientY);
+    for (const element of [...slide.elements].reverse()) {
+      const inside =
+        point.x >= element.x &&
+        point.x <= element.x + element.width &&
+        point.y >= element.y &&
+        point.y <= element.y + element.height;
+      if (!inside) {
+        continue;
+      }
+
+      if (element.locked || (element.kind !== "text" && element.kind !== "shape")) {
+        return null;
+      }
+
+      return element;
+    }
+
+    return null;
   }
 
   function beginEditingTextElement(elementId: string, clientX?: number, clientY?: number) {
@@ -105,7 +136,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
     options.renderInspector();
     options.windowRef.setTimeout(() => {
       const editor = options.canvas.querySelector<HTMLElement>(
-        `[data-text-editor="${CSS.escape(elementId)}"]`,
+        `[data-text-editor="${cssEscape(elementId)}"]`,
       );
       editor?.focus();
       if (!placeCaretAtPoint(editor, clientX, clientY)) {
@@ -179,13 +210,17 @@ export function createCanvasController(options: CanvasControllerOptions) {
       return editingTextElementId;
     },
     handleCanvasClick(event: MouseEvent) {
+      const target = eventTargetElement(event);
+      if (target?.closest("[data-text-editor]") || editingTextElementId) {
+        return;
+      }
+
       if (ignoreNextCanvasClick) {
         event.preventDefault();
         ignoreNextCanvasClick = false;
         return;
       }
 
-      const target = eventTargetElement(event);
       const elementId = canvasElementIdFromTarget(target);
       if (!elementId && target === options.canvas && !isMultiSelectEvent(event)) {
         options.selectElements([]);
@@ -223,7 +258,13 @@ export function createCanvasController(options: CanvasControllerOptions) {
       options.openContextMenu(event.clientX, event.clientY);
     },
     handleCanvasDoubleClick(event: MouseEvent) {
-      const elementId = textElementIdFromTarget(eventTargetElement(event));
+      if (eventTargetElement(event)?.closest("[data-text-editor]")) {
+        return;
+      }
+
+      const elementId =
+        textElementIdFromTarget(eventTargetElement(event)) ??
+        editableTextElementAtPoint(event.clientX, event.clientY)?.id;
       if (!elementId) {
         return;
       }
@@ -234,6 +275,10 @@ export function createCanvasController(options: CanvasControllerOptions) {
     handleCanvasFocusOut(event: FocusEvent) {
       const target = eventTargetElement(event);
       if (!target?.closest("[data-text-editor]")) {
+        return;
+      }
+
+      if (textEditPointerId !== null) {
         return;
       }
 
@@ -249,13 +294,36 @@ export function createCanvasController(options: CanvasControllerOptions) {
       const isResize = Boolean(target?.closest("[data-resize]"));
       const wasSelected = Boolean(elementId && options.getSelectedElementIds().includes(elementId));
       const activeTextEditor = target?.closest<HTMLElement>("[data-text-editor]");
+      const activeTextOverlay = target?.closest<HTMLElement>("[data-text-edit-overlay]");
       const isActiveTextEditorTarget = Boolean(
-        editingTextElementId && activeTextEditor?.dataset.textEditor === editingTextElementId,
+        editingTextElementId &&
+          (activeTextEditor?.dataset.textEditor === editingTextElementId || activeTextOverlay),
       );
-      const shouldExitTextEditingForObjectInteraction =
-        isActiveTextEditorTarget && event.detail < 2 && !isResize;
-      if (shouldExitTextEditingForObjectInteraction) {
+
+      if (isActiveTextEditorTarget && !isResize) {
+        if (!activeTextEditor && editingTextElementId) {
+          options.canvas
+            .querySelector<HTMLElement>(
+              `[data-text-editor="${cssEscape(editingTextElementId)}"]`,
+            )
+            ?.focus();
+        }
+        textEditPointerId = event.pointerId;
+        return;
+      }
+
+      if (editingTextElementId) {
         finishEditingTextElement();
+      }
+
+      const doubleClickEditableElement =
+        !elementId && event.detail >= 2
+          ? editableTextElementAtPoint(event.clientX, event.clientY)
+          : null;
+      if (doubleClickEditableElement) {
+        beginEditingTextElement(doubleClickEditableElement.id, event.clientX, event.clientY);
+        event.preventDefault();
+        return;
       }
       const multiSelect = isMultiSelectEvent(event);
       const action = canvasPointerDownAction({
@@ -264,8 +332,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
         detail: event.detail,
         element,
         elementId: elementId ?? null,
-        isEditableTarget:
-          isEditableCanvasTarget(target) && !shouldExitTextEditingForObjectInteraction,
+        isEditableTarget: isEditableCanvasTarget(target),
         isResize,
         isSelected: wasSelected,
         multiSelect,
@@ -299,11 +366,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       }
 
       if (action.element.locked) {
-        selectElementFromInteraction(action.element.id, multiSelect);
-        options.renderCanvas();
-        options.renderInspector();
-        ignoreNextCanvasClick = true;
-        event.preventDefault();
+        startSelectionMarquee(event);
         return;
       }
 
@@ -377,6 +440,11 @@ export function createCanvasController(options: CanvasControllerOptions) {
       options.scheduleAutosave();
     },
     handlePointerCancel(event: PointerEvent) {
+      if (textEditPointerId === event.pointerId) {
+        textEditPointerId = null;
+        return;
+      }
+
       if (selectionMarquee) {
         finishSelectionMarquee(event);
         return;
@@ -408,6 +476,11 @@ export function createCanvasController(options: CanvasControllerOptions) {
       );
     },
     handlePointerUp(event: PointerEvent) {
+      if (textEditPointerId === event.pointerId) {
+        textEditPointerId = null;
+        return;
+      }
+
       if (selectionMarquee) {
         finishSelectionMarquee(event);
         return;
@@ -423,4 +496,9 @@ export function createCanvasController(options: CanvasControllerOptions) {
       options.renderInspector();
     },
   };
+}
+
+function cssEscape(value: string) {
+  const css = (globalThis as { CSS?: { escape?: (value: string) => string } }).CSS;
+  return css?.escape?.(value) ?? value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 }

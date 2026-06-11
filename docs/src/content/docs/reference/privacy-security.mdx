@@ -5,13 +5,13 @@ description: Local storage, network access, and export behavior.
 
 MikroSlides is designed as a local-first browser app. There is no account system and no MikroSlides application backend in the current product.
 
-## Local storage
+## Local Storage
 
 - Decks are stored in browser IndexedDB.
 - Saved slide templates, focus-mode preference, active deck id, and recovery drafts are stored in localStorage.
 - Clearing browser site data removes local decks and preferences.
 
-## Network access
+## Network Access
 
 - The app shell can be served from any static host.
 - A deck can reference remote image URLs. The browser loads those images when the slide renders.
@@ -19,14 +19,14 @@ MikroSlides is designed as a local-first browser app. There is no account system
 - Remote font sources may load from their configured provider when a deck uses them.
 - The app does not send deck data to a MikroSlides service.
 
-## File exports
+## File Exports
 
 - `.mikroslides.json` contains editable deck data, including speaker notes.
 - `.mikroslides` contains editable deck data plus embedded image and font assets where available.
 - PNG export renders the current slide in the browser.
 - PDF export uses the browser print/save-to-PDF flow.
 
-## Sharing notes
+## Sharing Notes
 
 - Treat exported files as containing the full deck content, including speaker notes and embedded assets.
 - Review remote image and font usage before sharing portable files if source URLs are sensitive.

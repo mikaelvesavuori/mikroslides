@@ -3,7 +3,7 @@ title: Installation
 description: Download and run MikroSlides locally or on a static host.
 ---
 
-MikroSlides ships as a static browser app. No account server, database, or API is required.
+MikroSlides ships as a static browser app. No account server, database, API token, or runtime secret is required.
 
 :::tip[Use MikroSlides Online]
 Open [slides.mikrosuite.com](https://slides.mikrosuite.com) to use MikroSlides online for free. It runs directly in the browser over HTTPS and stores decks privately in browser storage for that site.
@@ -14,11 +14,18 @@ Open [slides.mikrosuite.com](https://slides.mikrosuite.com) to use MikroSlides o
 - Node.js 24 or later
 - A static file server for local testing
 
-## Quick Start
+## Download
 
 ```bash
 curl -sSL -o mikroslides.zip https://releases.mikrosuite.com/mikroslides_latest.zip
 unzip mikroslides.zip -d mikroslides
+```
+
+The extracted folder contains the static app files: `index.html`, `assets/main.js`, `assets/styles.css`, and copied static assets.
+
+## Serve Locally
+
+```bash
 cd mikroslides/*
 npx http-server . -a 127.0.0.1 -p 8000 -c-1
 ```

@@ -222,7 +222,12 @@ export function tryReleasePointerCapture(element: HTMLElement, pointerId: number
 }
 
 export function eventTargetElement(event: Event) {
-  return event.target instanceof HTMLElement ? event.target : null;
+  if (event.target instanceof HTMLElement) {
+    return event.target;
+  }
+
+  const parentElement = (event.target as { parentElement?: unknown } | null)?.parentElement;
+  return parentElement instanceof HTMLElement ? parentElement : null;
 }
 
 export function canvasElementIdFromTarget(target: HTMLElement | null) {

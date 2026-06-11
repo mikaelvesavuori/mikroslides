@@ -1,7 +1,6 @@
 import { readFileAsText } from "../config/index.js";
 import {
   type DeckAspectRatio,
-  DeckPolishService,
   DeckService,
   IndexedDbDeckRepository,
   MikroDeck,
@@ -59,7 +58,6 @@ const elements = createMikroSlidesElements();
 
 const service = new DeckService(new IndexedDbDeckRepository());
 const outlineService = new OutlineImportService();
-const polishService = new DeckPolishService();
 const toastController = createToastController(elements.toast);
 const userTemplateStorageController = createUserTemplateStorageController({
   localStorage,
@@ -192,7 +190,6 @@ const deckActionsController = createDeckActionsController({
   getSelectedElementIds: () => deckStateController.getSelectedElementIds(),
   getSelectedElements,
   getSlide: getActiveSlide,
-  polishDeck: (deck) => polishService.polish(deck),
   renderCanvas,
   renderInspector,
   selectElements,
@@ -361,7 +358,6 @@ const commandController = createCommandController({
     openLibrary: () => openDialog(elements.libraryDialog),
     openOutline: openOutlineDialog,
     openPresenter,
-    polishDeck,
     redo,
     renderCanvas,
     renderInspector,
@@ -448,7 +444,6 @@ const appEventHandlers = {
   openOutlineDialog,
   openPresenter,
   openTemplateDialog,
-  polishDeck,
   queryDialog: queryMikroSlidesElement,
   renderLibrary,
   reorderSelectedElements,
@@ -653,10 +648,6 @@ function updateDeckTheme() {
 
 function updateDeckAspect() {
   deckActionsController.updateDeckAspect(elements.deckAspectSelect.value as DeckAspectRatio);
-}
-
-function polishDeck() {
-  deckActionsController.polishDeck();
 }
 
 async function createDeck() {

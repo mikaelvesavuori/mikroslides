@@ -29,6 +29,8 @@ describe("font manager view", () => {
     expect(view.empty).toBe(false);
     expect(view.html).toContain("Inter");
     expect(view.html).toContain("Geist Sans");
-    expect(view.html).toContain("Add");
+    expect(view.html).toContain("Add font");
+    expect(view.html).not.toContain("Sharp product stories");
+    expect(view.html).not.toContain("rsms source");
   });
 });

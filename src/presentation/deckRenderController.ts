@@ -17,7 +17,11 @@ import {
   renderFontSelectOptions,
   renderTemplateSelectOptions,
 } from "./selectOptions.js";
-import { renderSlideElements, renderSlideThumbnails } from "./slideRenderer.js";
+import {
+  renderSlideElements,
+  renderSlideThumbnails,
+  renderTextEditingOverlay,
+} from "./slideRenderer.js";
 import { renderUserTemplateOptions, type UserTemplate } from "./userTemplates.js";
 
 export type DeckRenderElements = InspectorPanelElements &
@@ -84,17 +88,21 @@ export function createDeckRenderController(options: DeckRenderControllerOptions)
       const slide = options.getSlide();
       if (!slide) {
         options.elements.slideCanvas.innerHTML = "";
+        options.elements.slideCanvas.dataset.textEditing = "false";
         return;
       }
 
+      const editingTextElementId = options.getEditingTextElementId();
+      options.elements.slideCanvas.dataset.textEditing = String(Boolean(editingTextElementId));
       options.elements.slideCanvas.style.setProperty("--slide-bg", slide.background);
-      options.elements.slideCanvas.innerHTML = renderSlideElements(slide, {
-        editingTextElementId: options.getEditingTextElementId(),
+      const renderOptions = {
+        editingTextElementId,
         includeHandle: true,
         resolveFontStack: options.resolveFontStack,
         resolveImageSource: options.resolveImageSource,
         selectedIds: new Set(options.getSelectedElementIds()),
-      });
+      };
+      options.elements.slideCanvas.innerHTML = `${renderSlideElements(slide, renderOptions)}${renderTextEditingOverlay(slide, renderOptions)}`;
     },
     renderDeckChrome() {
       const aspect = options.getDeck()?.aspectRatio ?? "16:9";

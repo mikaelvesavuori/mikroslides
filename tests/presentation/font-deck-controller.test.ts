@@ -7,9 +7,7 @@ const sourceFont: SourceFontChoice = {
   id: "inter",
   label: "Inter",
   mediaType: "font/woff2",
-  meta: "source",
   remoteUrl: "https://example.test/inter.woff2",
-  sample: "Sample",
 };
 
 function deckWithText() {

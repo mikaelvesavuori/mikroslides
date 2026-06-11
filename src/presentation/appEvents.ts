@@ -61,7 +61,6 @@ export type AppEventElements = {
   newDeckButton: HTMLButtonElement;
   outlineButton: HTMLButtonElement;
   outlineInput: HTMLTextAreaElement;
-  polishButton: HTMLButtonElement;
   presentButton: HTMLButtonElement;
   presenterDialog: HTMLDialogElement;
   presenterNextButton: HTMLButtonElement;
@@ -145,7 +144,6 @@ export type AppEventHandlers = {
   openOutlineDialog: () => void;
   openPresenter: () => void;
   openTemplateDialog: () => void;
-  polishDeck: () => void;
   queryDialog: (selector: string) => HTMLDialogElement;
   renderLibrary: () => void;
   reorderSelectedElements: (action: "front" | "forward" | "backward" | "back") => void;
@@ -184,7 +182,6 @@ export function bindAppEvents(
   );
   elements.importJsonButton.addEventListener("click", () => elements.jsonFileInput.click());
   elements.outlineButton.addEventListener("click", handlers.openOutlineDialog);
-  elements.polishButton.addEventListener("click", handlers.polishDeck);
   elements.exportButton.addEventListener("click", handlers.openExportDialog);
   elements.presentButton.addEventListener("click", handlers.openPresenter);
   elements.commandButton.addEventListener("click", handlers.openCommandPalette);

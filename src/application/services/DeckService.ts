@@ -12,6 +12,7 @@ import {
   createDuplicatedAssetRecords,
   createImportedAssetRecords,
   createImportedDeckRecord,
+  readDeckImportEnvelope,
   readExportEnvelope,
   serializeDeckExport,
   serializePortableDeckExport,
@@ -132,6 +133,15 @@ export class DeckService {
 
   async importJson(text: string) {
     const envelope = readExportEnvelope(text);
+    return this.importEnvelope(envelope);
+  }
+
+  async importFile(text: string, sourceName?: string) {
+    const envelope = readDeckImportEnvelope(text, sourceName);
+    return this.importEnvelope(envelope);
+  }
+
+  private async importEnvelope(envelope: ReturnType<typeof readDeckImportEnvelope>) {
     const imported = MikroDeck.fromRecord(createImportedDeckRecord(envelope.deck)).update({
       saveSnapshot: true,
       snapshotReason: "import",

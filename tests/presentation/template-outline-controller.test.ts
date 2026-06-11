@@ -134,7 +134,7 @@ describe("template outline controller", () => {
       background: "#111111",
       title: "Template slide",
     });
-    expect(test.getDeck().slides[0].elements[0]).toMatchObject({ content: "From template" });
+    expect(test.getDeck().slides[0].elements[0]).toMatchObject({ content: "Original" });
   });
 
   it("saves the active slide as a user template", () => {
@@ -148,11 +148,11 @@ describe("template outline controller", () => {
     );
   });
 
-  it("validates and creates decks from outlines", async () => {
+  it("validates and creates decks from Markdown", async () => {
     const test = harness();
 
     await test.controller.createDeckFromOutlineText("   ");
-    expect(test.calls).toContain("toast:Paste an outline first");
+    expect(test.calls).toContain("toast:Paste Markdown first");
 
     await test.controller.createDeckFromOutlineText("# Launch");
     expect(test.getDeck()).toMatchObject({
@@ -170,7 +170,7 @@ describe("template outline controller", () => {
         "remember:outline",
         "sync-assets",
         "render-all",
-        "toast:Deck created from outline",
+        "toast:Deck created from Markdown",
       ]),
     );
   });

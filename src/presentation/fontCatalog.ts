@@ -15,7 +15,6 @@ export type BunnyFontCatalogItem = {
   weights: number[];
   styles: string[];
   isVariable: boolean;
-  sample: string;
 };
 
 export type SourceFontChoice = {
@@ -24,8 +23,6 @@ export type SourceFontChoice = {
   family: string;
   remoteUrl: string;
   mediaType: string;
-  meta: string;
-  sample: string;
 };
 
 export const systemFontChoices: Array<{ label: string; meta: string; token: TextFontFamily }> = [
@@ -76,35 +73,35 @@ export const recommendedBunnyFamilies = [
 ];
 
 export const fallbackBunnyFontCatalog: BunnyFontCatalogItem[] = [
-  bunnyFontCatalogItem("Manrope", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("DM Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Plus Jakarta Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Public Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("IBM Plex Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Source Sans 3", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Work Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Nunito Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Lato", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Open Sans", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Montserrat", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Poppins", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Space Grotesk", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Sora", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Urbanist", "sans-serif", "Make every slide feel crisp"),
-  bunnyFontCatalogItem("Merriweather", "serif", "A serious story needs a human voice"),
-  bunnyFontCatalogItem("Libre Baskerville", "serif", "A serious story needs a human voice"),
-  bunnyFontCatalogItem("Roboto Slab", "serif", "A serious story needs a human voice"),
-  bunnyFontCatalogItem("Playfair Display", "serif", "A serious story needs a human voice"),
-  bunnyFontCatalogItem("Fraunces", "serif", "A serious story needs a human voice"),
-  bunnyFontCatalogItem("Cormorant Garamond", "serif", "A serious story needs a human voice"),
-  bunnyFontCatalogItem("Oswald", "display", "Bold claims need bold type"),
-  bunnyFontCatalogItem("Bebas Neue", "display", "Bold claims need bold type"),
-  bunnyFontCatalogItem("Archivo Black", "display", "Bold claims need bold type"),
-  bunnyFontCatalogItem("JetBrains Mono", "monospace", "Metrics, code, and calm precision"),
-  bunnyFontCatalogItem("IBM Plex Mono", "monospace", "Metrics, code, and calm precision"),
-  bunnyFontCatalogItem("Fira Code", "monospace", "Metrics, code, and calm precision"),
-  bunnyFontCatalogItem("Caveat", "handwriting", "A note in the margin"),
-  bunnyFontCatalogItem("Permanent Marker", "handwriting", "A note in the margin"),
+  bunnyFontCatalogItem("Manrope", "sans-serif"),
+  bunnyFontCatalogItem("DM Sans", "sans-serif"),
+  bunnyFontCatalogItem("Plus Jakarta Sans", "sans-serif"),
+  bunnyFontCatalogItem("Public Sans", "sans-serif"),
+  bunnyFontCatalogItem("IBM Plex Sans", "sans-serif"),
+  bunnyFontCatalogItem("Source Sans 3", "sans-serif"),
+  bunnyFontCatalogItem("Work Sans", "sans-serif"),
+  bunnyFontCatalogItem("Nunito Sans", "sans-serif"),
+  bunnyFontCatalogItem("Lato", "sans-serif"),
+  bunnyFontCatalogItem("Open Sans", "sans-serif"),
+  bunnyFontCatalogItem("Montserrat", "sans-serif"),
+  bunnyFontCatalogItem("Poppins", "sans-serif"),
+  bunnyFontCatalogItem("Space Grotesk", "sans-serif"),
+  bunnyFontCatalogItem("Sora", "sans-serif"),
+  bunnyFontCatalogItem("Urbanist", "sans-serif"),
+  bunnyFontCatalogItem("Merriweather", "serif"),
+  bunnyFontCatalogItem("Libre Baskerville", "serif"),
+  bunnyFontCatalogItem("Roboto Slab", "serif"),
+  bunnyFontCatalogItem("Playfair Display", "serif"),
+  bunnyFontCatalogItem("Fraunces", "serif"),
+  bunnyFontCatalogItem("Cormorant Garamond", "serif"),
+  bunnyFontCatalogItem("Oswald", "display"),
+  bunnyFontCatalogItem("Bebas Neue", "display"),
+  bunnyFontCatalogItem("Archivo Black", "display"),
+  bunnyFontCatalogItem("JetBrains Mono", "monospace"),
+  bunnyFontCatalogItem("IBM Plex Mono", "monospace"),
+  bunnyFontCatalogItem("Fira Code", "monospace"),
+  bunnyFontCatalogItem("Caveat", "handwriting"),
+  bunnyFontCatalogItem("Permanent Marker", "handwriting"),
 ];
 
 export const sourceFontChoices: SourceFontChoice[] = [
@@ -114,8 +111,6 @@ export const sourceFontChoices: SourceFontChoice[] = [
     family: "Inter",
     remoteUrl: "https://rsms.me/inter/font-files/InterVariable.woff2?v=4.1",
     mediaType: "font/woff2",
-    meta: "rsms source",
-    sample: "Sharp product stories",
   },
   {
     id: "geist-sans",
@@ -124,8 +119,6 @@ export const sourceFontChoices: SourceFontChoice[] = [
     remoteUrl:
       "https://cdn.jsdelivr.net/npm/geist@1.7.2/dist/fonts/geist-sans/Geist-Variable.woff2",
     mediaType: "font/woff2",
-    meta: "Vercel package",
-    sample: "Developer-grade decks",
   },
   {
     id: "geist-mono",
@@ -134,8 +127,6 @@ export const sourceFontChoices: SourceFontChoice[] = [
     remoteUrl:
       "https://cdn.jsdelivr.net/npm/geist@1.7.2/dist/fonts/geist-mono/GeistMono-Variable.woff2",
     mediaType: "font/woff2",
-    meta: "Vercel package",
-    sample: "const ship = true;",
   },
 ];
 
@@ -197,7 +188,6 @@ export function readBunnyFontCatalogItem(slug: string, value: unknown) {
     weights,
     styles,
     isVariable: Boolean(record.isVariable),
-    sample: sampleForFontCategory(category),
   } satisfies BunnyFontCatalogItem;
 }
 
@@ -298,7 +288,6 @@ function isSupportedBunnyCategory(category: string) {
 function bunnyFontCatalogItem(
   family: string,
   category: BunnyFontCatalogItem["category"],
-  sample: string,
 ): BunnyFontCatalogItem {
   return {
     slug: family.toLowerCase().replace(/\s+/g, "-"),
@@ -307,22 +296,5 @@ function bunnyFontCatalogItem(
     weights: [300, 400, 500, 600, 700, 800, 900],
     styles: ["normal"],
     isVariable: true,
-    sample,
   };
-}
-
-function sampleForFontCategory(category: string) {
-  if (category === "serif") {
-    return "A serious story needs a human voice";
-  }
-  if (category === "display") {
-    return "Bold claims need bold type";
-  }
-  if (category === "monospace") {
-    return "Metrics, code, and calm precision";
-  }
-  if (category === "handwriting") {
-    return "A note in the margin";
-  }
-  return "Make every slide feel crisp";
 }

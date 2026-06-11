@@ -3,8 +3,10 @@ import type { FontCategory } from "./fontCatalog.js";
 
 export type FontManagerEventElements = {
   addLocalFontButton: HTMLButtonElement;
+  fontBrowseTab: HTMLButtonElement;
   fontCatalog: HTMLElement;
   fontCategoryList: HTMLElement;
+  fontCurrentTab: HTMLButtonElement;
   fontList: HTMLElement;
   fontSearchInput: HTMLInputElement;
   fontSourceCatalog: HTMLElement;
@@ -24,12 +26,16 @@ export function bindFontManagerEvents(
     changeBunnyCategory: (event: MouseEvent) => void;
     filterBunnyCatalog: () => void;
     loadBunnyCatalog: () => Promise<void>;
+    showBrowseFonts: () => void;
+    showCurrentFonts: () => void;
     selectBunnyFont: (event: MouseEvent) => void;
     selectDeckFont: (event: MouseEvent) => void;
     selectSourceFont: (event: MouseEvent) => void;
   },
 ) {
   elements.addLocalFontButton.addEventListener("click", () => void handlers.addLocalFont());
+  elements.fontCurrentTab.addEventListener("click", handlers.showCurrentFonts);
+  elements.fontBrowseTab.addEventListener("click", handlers.showBrowseFonts);
   elements.fontSourceCatalog.addEventListener("click", handlers.selectSourceFont);
   elements.loadFontCatalogButton.addEventListener("click", () => void handlers.loadBunnyCatalog());
   elements.fontSearchInput.addEventListener("input", handlers.filterBunnyCatalog);

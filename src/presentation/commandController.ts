@@ -39,7 +39,6 @@ type CommandControllerCallbacks = {
   openLibrary: () => void;
   openOutline: () => void;
   openPresenter: () => void;
-  polishDeck: () => void;
   redo: () => void;
   renderCanvas: () => void;
   renderInspector: () => void;
@@ -98,7 +97,6 @@ export function createCommandController(options: CommandControllerOptions) {
           openExport: options.callbacks.openExport,
           openLibrary: options.callbacks.openLibrary,
           openOutline: options.callbacks.openOutline,
-          polishDeck: options.callbacks.polishDeck,
           present: options.callbacks.openPresenter,
           redo: options.callbacks.redo,
           toggleTheme: options.callbacks.toggleTheme,

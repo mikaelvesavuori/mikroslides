@@ -1,15 +1,15 @@
 ---
-title: Editing and Presenting
+title: Working with Slides
 description: Work with slides, objects, notes, and presentation mode.
 ---
 
-MikroSlides uses direct canvas editing. Select an object, adjust it on the slide, and use the inspector for precise settings.
+MikroSlides uses direct slide editing. Select an object, adjust it on the canvas, and use the inspector for precise settings.
 
 ## Slides
 
 - Click a slide in the left rail to select it.
 - Drag slides in the rail to reorder them.
-- Use copy, cut, paste, duplicate, and delete from the rail or keyboard shortcuts.
+- Use the slide context menu, keyboard shortcuts, or rail actions to copy, cut, paste, duplicate, move, skip, and delete slides.
 - Hover a slide and use the skip control to hide it from presentation mode.
 - Skipped slides remain in the deck and can be shown again later.
 
@@ -26,16 +26,21 @@ Useful gestures:
 - Double-click text to edit the text content.
 - Single-click text to select and resize the text object.
 - Use arrow keys to nudge selected objects; hold **Shift** for larger nudges.
+- Lock objects from the context menu or inspector when they should stay in place.
 
-## Layouts and polish
+## Layouts
 
-Layouts replace the current slide with a structured starting point. Use them early when shaping a deck. Use **Polish deck** after rough content is in place to tighten spacing, type scale, color mapping, and slide composition.
+Layouts provide structured starting points for the current slide. Use them early when shaping a deck, then adjust the objects and slide settings directly.
 
-Polish is local and deterministic. It does not send the deck to a remote service.
+Changing a layout keeps the slide's existing text content where possible, but layout changes can still rearrange or replace objects. Export important decks before large layout passes.
 
 ## Speaker notes
 
 Speaker notes are stored with each slide and exported with editable deck files. Treat exported `.mikroslides.json` and `.mikroslides` files as containing the full deck, including notes.
+
+## Fonts
+
+Use the font selector in the object inspector to choose system fonts or deck fonts. Use the font manager to add common fonts, online fonts, or local font files to the current deck.
 
 ## Presentation mode
 

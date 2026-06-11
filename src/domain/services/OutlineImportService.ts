@@ -6,7 +6,7 @@ import {
   defaultDeckTheme,
   MikroDeck,
 } from "../entities/index.js";
-import { DeckPolishService } from "./DeckPolishService.js";
+import { MarkdownDeckService } from "./MarkdownDeckService.js";
 
 type ParsedSection = {
   body: string[];
@@ -182,7 +182,7 @@ function createTitleSlide(title: string, intro: string[], theme: DeckTheme): Mik
         fontWeight: 760,
       }),
       createTextElement({
-        content: subtitle || "A clear deck from a local outline.",
+        content: subtitle || "A clear deck from Markdown.",
         x: 24,
         y: 48,
         width: 52,
@@ -238,12 +238,14 @@ function createSectionSlide(section: ParsedSection, theme: DeckTheme): MikroSlid
 }
 
 /**
- * @description Converts a plain Markdown outline into a normalized local deck.
+ * @description Converts plain Markdown input into a normalized local deck.
  */
 export class OutlineImportService {
-  private readonly polishService = new DeckPolishService();
-
   createDeckFromMarkdown(markdown: string, options: OutlineDeckOptions = {}) {
+    if (this.looksLikeStructuredDeck(markdown)) {
+      return new MarkdownDeckService().createDeckFromMarkdown(markdown, options);
+    }
+
     const parsed = parseOutline(markdown);
     const theme = options.theme ?? defaultDeckTheme;
     const sections =
@@ -255,17 +257,20 @@ export class OutlineImportService {
       ...sections.map((section) => createSectionSlide(section, theme)),
     ];
 
-    const deck = MikroDeck.create({
+    return MikroDeck.create({
       title: options.title ?? parsed.deckTitle,
       slides,
       aspectRatio: options.aspectRatio,
       theme,
     }).toRecord();
-
-    return this.polishService.polish(deck);
   }
 
   looksLikeOutline(markdown: string) {
-    return /^#{1,2}\s+.+/m.test(markdown);
+    return /^#{1,2}\s+.+/m.test(markdown) || this.looksLikeStructuredDeck(markdown);
+  }
+
+  private looksLikeStructuredDeck(markdown: string) {
+    const text = markdown.trim();
+    return /^---\s*[\s\S]*?\n---/m.test(text) || /\n-{3,}\n/.test(text);
   }
 }

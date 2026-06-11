@@ -29,7 +29,6 @@ Use this checklist before tagging a build or deploying a preview.
 - Change deck theme and slide background.
 - Manage fonts, import a local font, and apply it to text.
 - Zoom out, fit, and in; verify the canvas remains scrollable and selectable.
-- Run Polish deck and verify layout, spacing, and type scale improve without losing slide content.
 
 ## Layouts And Templates
 
@@ -40,8 +39,8 @@ Use this checklist before tagging a build or deploying a preview.
 
 ## Import
 
-- Import a Markdown outline with headings, bullets, and speaker-note-like paragraphs.
-- Confirm imported outlines choose varied layouts for timelines, metrics, quotes, statements, and ordinary bullets.
+- Import a Markdown deck with frontmatter, slide separators, layout metadata, bullets, an image URL, and speaker notes.
+- Import an ordinary Markdown outline with `#` and `##` headings.
 - Import a `.mikroslides.json` file exported by the current build.
 - Import a `.mikroslides` portable file exported by the current build.
 - Try importing raw deck JSON without a MikroSlides envelope and confirm it is rejected.

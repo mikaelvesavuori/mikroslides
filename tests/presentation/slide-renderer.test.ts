@@ -8,6 +8,7 @@ import {
   getElementLabel,
   renderSlideElements,
   renderSlideThumbnails,
+  renderTextEditingOverlay,
   renderTextElementContent,
   textListItems,
 } from "../../src/presentation/slideRenderer.js";
@@ -56,9 +57,9 @@ describe("slide renderer", () => {
     });
 
     expect(html).toContain('data-selected="true"');
+    expect(html).toContain('data-editing="true"');
     expect(html).toContain('data-align="left"');
     expect(html).toContain('data-valign="bottom"');
-    expect(html).toContain('contenteditable="plaintext-only"');
     expect(html).toContain('class="slide-text-content"');
     expect(html).toContain("&quot;Brand Sans&quot;, sans-serif");
     expect(html).toContain("--line-height:1.35");
@@ -74,6 +75,7 @@ describe("slide renderer", () => {
 
     expect(html).toContain('data-align="center"');
     expect(html).not.toContain("contenteditable");
+    expect(html).toContain('data-editing="false"');
     expect(html).toContain('<div class="slide-text-content">Centered</div>');
   });
 
@@ -100,9 +102,27 @@ describe("slide renderer", () => {
     slide.elements = [createShapeElement({ id: "shape", shape: "capsule" })];
 
     const html = renderSlideElements(slide, { editingTextElementId: "shape" });
+    const overlay = renderTextEditingOverlay(slide, { editingTextElementId: "shape" });
 
-    expect(html).toContain('data-text-editor="shape"');
-    expect(html).toContain('contenteditable="plaintext-only"');
+    expect(html).toContain('data-editing="true"');
+    expect(html).not.toContain('data-text-editor="shape"');
+    expect(overlay).toContain('data-text-editor="shape"');
+    expect(overlay).toContain('contenteditable="plaintext-only"');
+    expect(overlay).toContain("slide-shape-label");
+  });
+
+  it("renders text editing as an overlay outside the slide element", () => {
+    const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
+    slide.elements = [createTextElement({ content: "Editable text", id: "text_1" })];
+
+    const html = renderSlideElements(slide, { editingTextElementId: "text_1" });
+    const overlay = renderTextEditingOverlay(slide, { editingTextElementId: "text_1" });
+
+    expect(html).toContain('data-editing="true"');
+    expect(html).not.toContain("contenteditable");
+    expect(overlay).toContain('class="text-edit-overlay"');
+    expect(overlay).toContain('data-text-editor="text_1"');
+    expect(overlay).toContain('contenteditable="plaintext-only"');
   });
 
   it("creates stable layer labels", () => {

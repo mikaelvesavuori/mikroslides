@@ -49,7 +49,6 @@ export type DeckActionsControllerOptions = {
   getSelectedElementIds: () => string[];
   getSelectedElements: () => SlideElement[];
   getSlide: () => MikroSlideRecord | null;
-  polishDeck: (deck: MikroDeckRecord) => MikroDeckRecord;
   renderCanvas: () => void;
   renderInspector: () => void;
   selectElements: (ids: string[]) => void;
@@ -254,18 +253,6 @@ export function createDeckActionsController(options: DeckActionsControllerOption
       if (deck) {
         options.commitDeckMutation(moveActiveSlide(deck, direction));
       }
-    },
-    polishDeck() {
-      const deck = options.getDeck();
-      if (!deck) {
-        return;
-      }
-
-      options.commitDeckMutation({
-        deck: options.polishDeck(deck),
-        selectedElementIds: [],
-      });
-      options.showToast("Deck polished");
     },
     reorderSelectedElements(action: "back" | "backward" | "forward" | "front") {
       const deck = options.getDeck();

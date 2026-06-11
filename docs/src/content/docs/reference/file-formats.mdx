@@ -1,0 +1,232 @@
+---
+title: File Formats
+description: MikroSlides Markdown, JSON, and portable deck files.
+---
+
+MikroSlides has one canonical editable deck format and one lighter authoring format.
+
+- Use MikroSlides Markdown for hand-written outlines, scripts, and generated first drafts.
+- Use JSON when a tool or script needs precise control over slides, objects, geometry, fonts, and assets.
+
+## MikroSlides Markdown
+
+Use MikroSlides Markdown to create a deck from text. It is intended for hand-written outlines, scripts, and AI-generated first drafts.
+
+Supported file extensions:
+
+- `.md`
+- `.markdown`
+- `.mikroslides.md`
+
+Deck frontmatter is optional:
+
+```md
+---
+title: Launch Plan
+aspect: 16:9
+accent: #1665d8
+background: #f8fafc
+---
+```
+
+Supported deck fields:
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>title</code></td>
+      <td>Deck title</td>
+    </tr>
+    <tr>
+      <td><code>aspect</code> or <code>aspectRatio</code></td>
+      <td><code>16:9</code>, <code>4:3</code>, <code>1:1</code></td>
+    </tr>
+    <tr>
+      <td><code>accent</code>, <code>background</code>, <code>muted</code>, <code>surface</code>, <code>text</code></td>
+      <td>CSS color values</td>
+    </tr>
+  </tbody>
+</table>
+
+Slides can be separated with `---`. Each slide can start with metadata:
+
+```md
+---
+layout: image-right
+image: https://example.com/chart.png
+alt: Chart
+skip: true
+
+# Results
+
+- Revenue improved
+- Retention improved
+
+notes:
+Pause before showing the numbers.
+```
+
+Supported slide fields:
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Values</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>layout</code></td>
+      <td><code>title</code>, <code>section</code>, <code>statement</code>, <code>bullets</code>, <code>image-left</code>, <code>image-right</code>, <code>quote</code>, <code>comparison</code>, <code>timeline</code>, <code>chart-data</code>, <code>closing</code></td>
+    </tr>
+    <tr>
+      <td><code>background</code></td>
+      <td>CSS color value</td>
+    </tr>
+    <tr>
+      <td><code>image</code></td>
+      <td>Image URL or data URL</td>
+    </tr>
+    <tr>
+      <td><code>alt</code></td>
+      <td>Image description</td>
+    </tr>
+    <tr>
+      <td><code>fit</code></td>
+      <td><code>cover</code>, <code>contain</code></td>
+    </tr>
+    <tr>
+      <td><code>skip</code> or <code>skipped</code></td>
+      <td><code>true</code>, <code>yes</code>, <code>skip</code>, <code>1</code></td>
+    </tr>
+    <tr>
+      <td><code>transition</code></td>
+      <td><code>none</code>, <code>fade</code>, <code>slide</code></td>
+    </tr>
+  </tbody>
+</table>
+
+Ordinary Markdown headings also work:
+
+```md
+# Launch Plan
+
+Intro text for the title slide.
+
+## Why now
+
+- Customer demand
+- Internal readiness
+
+## Next steps
+
+1. Pilot
+2. Measure
+3. Roll out
+```
+
+## JSON and Programmatic Decks
+
+`.mikroslides.json` is the canonical editable deck export. It contains the full deck record: slides, objects, theme, fonts, notes, skipped-slide state, and geometry.
+
+The schema envelope is:
+
+```json
+{
+  "schema": "mikroslides.deck",
+  "version": 1,
+  "exportedAt": "2026-06-11T00:00:00.000Z",
+  "deck": {
+    "id": "deck_example",
+    "title": "Example",
+    "slides": [],
+    "activeSlideId": "slide_example",
+    "aspectRatio": "16:9",
+    "theme": {}
+  }
+}
+```
+
+The repository includes a JSON Schema at `schemas/mikroslides-deck.schema.json`.
+
+Element geometry is stored in slide-relative units:
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>x</code></td>
+      <td>Percent from the left edge of the slide</td>
+    </tr>
+    <tr>
+      <td><code>y</code></td>
+      <td>Percent from the top edge of the slide</td>
+    </tr>
+    <tr>
+      <td><code>width</code></td>
+      <td>Percent of slide width</td>
+    </tr>
+    <tr>
+      <td><code>height</code></td>
+      <td>Percent of slide height</td>
+    </tr>
+    <tr>
+      <td><code>rotation</code></td>
+      <td>Degrees</td>
+    </tr>
+    <tr>
+      <td><code>opacity</code></td>
+      <td><code>0</code> to <code>1</code></td>
+    </tr>
+  </tbody>
+</table>
+
+Example text object:
+
+```json
+{
+  "id": "el_title",
+  "kind": "text",
+  "x": 10,
+  "y": 12,
+  "width": 72,
+  "height": 14,
+  "rotation": 0,
+  "opacity": 1,
+  "locked": false,
+  "content": "Launch Plan",
+  "color": "#1e293b",
+  "fontFamily": "system",
+  "fontSize": 42,
+  "fontWeight": 740,
+  "lineHeight": 1.1,
+  "italic": false,
+  "align": "left",
+  "verticalAlign": "center",
+  "listStyle": "none"
+}
+```
+
+JSON import is normalized by MikroSlides. Missing optional fields receive defaults, invalid layout and enum values fall back to safe values, and imported decks are copied into the local library as new decks.
+
+## Portable
+
+`.mikroslides` uses the same deck record as JSON and adds embedded assets where available. Use it when a deck should travel as one file with local images and local font assets.
+
+## Choosing a Format
+
+- Use Markdown for drafting and generated first versions.
+- Use JSON for editable backups, tests, and programmatic full-fidelity decks.
+- Use portable files when moving a deck with local assets between browsers or machines.

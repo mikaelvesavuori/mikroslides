@@ -58,7 +58,7 @@ export type TemplateOutlineControllerOptions = {
 };
 
 const defaultOutlineText =
-  "# Launch Plan\n\n## Why now\n- Customer demand\n- Internal readiness\n\n## Next steps\n- Pilot\n- Measure\n- Roll out";
+  "---\ntitle: Launch Plan\naspect: 16:9\n---\n\n# Launch Plan\nA short subtitle for the deck.\n\n---\nlayout: bullets\n# Why now\n- Customer demand\n- Internal readiness\n\n---\nlayout: bullets\n# Next steps\n- Pilot\n- Measure\n- Roll out\n\nnotes:\nMention owner and timing.";
 
 export function createTemplateOutlineController(options: TemplateOutlineControllerOptions) {
   return {
@@ -95,7 +95,7 @@ export function createTemplateOutlineController(options: TemplateOutlineControll
     async createDeckFromOutlineText(markdown: string) {
       const text = markdown.trim();
       if (!text) {
-        options.showToast("Paste an outline first");
+        options.showToast("Paste Markdown first");
         return;
       }
 
@@ -120,9 +120,9 @@ export function createTemplateOutlineController(options: TemplateOutlineControll
         options.elements.outlineDialog.close();
         await options.syncAssetObjectUrls();
         options.renderAll();
-        options.showToast("Deck created from outline");
+        options.showToast("Deck created from Markdown");
       } catch (error) {
-        options.showToast(options.formatError(error, "Could not create deck from outline"));
+        options.showToast(options.formatError(error, "Could not create deck from Markdown"));
       }
     },
     openOutlineDialog() {

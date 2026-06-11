@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mikrosuite.com/schemas/mikroslides-deck.schema.json",
+  "title": "MikroSlides Deck Export",
+  "type": "object",
+  "required": ["schema", "version", "deck"],
+  "properties": {
+    "schema": {
+      "const": "mikroslides.deck"
+    },
+    "version": {
+      "const": 1
+    },
+    "exportedAt": {
+      "type": "string"
+    },
+    "deck": {
+      "$ref": "#/$defs/deck"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "aspectRatio": {
+      "enum": ["16:9", "4:3", "1:1"]
+    },
+    "theme": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "accent",
+        "background",
+        "muted",
+        "surface",
+        "text",
+        "fontHeading",
+        "fontBody",
+        "fontMono"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "accent": { "type": "string" },
+        "background": { "type": "string" },
+        "muted": { "type": "string" },
+        "surface": { "type": "string" },
+        "text": { "type": "string" },
+        "fontHeading": { "$ref": "#/$defs/themeFont" },
+        "fontBody": { "$ref": "#/$defs/themeFont" },
+        "fontMono": { "$ref": "#/$defs/themeFont" }
+      },
+      "additionalProperties": true
+    },
+    "themeFont": {
+      "enum": ["system-sans", "system-serif", "system-mono"]
+    },
+    "deck": {
+      "type": "object",
+      "required": ["id", "title", "slides", "activeSlideId", "aspectRatio", "theme"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "slides": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/slide" }
+        },
+        "fonts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/font" },
+          "default": []
+        },
+        "activeSlideId": { "type": "string" },
+        "aspectRatio": { "$ref": "#/$defs/aspectRatio" },
+        "theme": { "$ref": "#/$defs/theme" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "lastSavedAt": {
+          "type": ["string", "null"]
+        },
+        "version": { "type": "number" },
+        "snapshots": {
+          "type": "array",
+          "items": { "type": "object" },
+          "default": []
+        }
+      },
+      "additionalProperties": true
+    },
+    "slide": {
+      "type": "object",
+      "required": ["id", "title", "layout", "background", "speakerNotes", "elements"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "layout": {
+          "enum": [
+            "blank",
+            "title",
+            "section",
+            "statement",
+            "bullets",
+            "two-column",
+            "image-left",
+            "image-right",
+            "quote",
+            "comparison",
+            "timeline",
+            "chart-data",
+            "closing"
+          ]
+        },
+        "background": { "type": "string" },
+        "speakerNotes": { "type": "string" },
+        "skipped": { "type": "boolean" },
+        "transition": {
+          "enum": ["none", "fade", "slide"]
+        },
+        "elements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/element" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "elementBase": {
+      "type": "object",
+      "required": ["id", "kind", "x", "y", "width", "height"],
+      "properties": {
+        "id": { "type": "string" },
+        "kind": { "enum": ["text", "shape", "image"] },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "rotation": { "type": "number", "default": 0 },
+        "opacity": { "type": "number", "default": 1 },
+        "locked": { "type": "boolean", "default": false }
+      }
+    },
+    "element": {
+      "oneOf": [
+        { "$ref": "#/$defs/textElement" },
+        { "$ref": "#/$defs/shapeElement" },
+        { "$ref": "#/$defs/imageElement" }
+      ]
+    },
+    "textElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "required": ["kind", "content"],
+          "properties": {
+            "kind": { "const": "text" },
+            "content": { "type": "string" },
+            "color": { "type": "string" },
+            "fontFamily": { "type": "string" },
+            "fontSize": { "type": "number" },
+            "fontWeight": { "type": "number" },
+            "lineHeight": { "type": "number" },
+            "italic": { "type": "boolean" },
+            "align": { "enum": ["left", "center", "right"] },
+            "verticalAlign": { "enum": ["top", "center", "bottom"] },
+            "listStyle": { "enum": ["none", "bullet"] }
+          }
+        }
+      ]
+    },
+    "shapeElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "required": ["kind", "shape"],
+          "properties": {
+            "kind": { "const": "shape" },
+            "shape": {
+              "enum": [
+                "capsule",
+                "chevron",
+                "database",
+                "diamond",
+                "document",
+                "ellipse",
+                "hexagon",
+                "line",
+                "octagon",
+                "parallelogram",
+                "rect",
+                "trapezoid",
+                "triangle"
+              ]
+            },
+            "fill": { "type": "string" },
+            "stroke": { "type": "string" },
+            "strokeWidth": { "type": "number" },
+            "radius": { "type": "number" },
+            "content": { "type": "string" },
+            "color": { "type": "string" },
+            "fontFamily": { "type": "string" },
+            "fontSize": { "type": "number" },
+            "fontWeight": { "type": "number" },
+            "lineHeight": { "type": "number" },
+            "italic": { "type": "boolean" },
+            "align": { "enum": ["left", "center", "right"] },
+            "verticalAlign": { "enum": ["top", "center", "bottom"] },
+            "listStyle": { "enum": ["none", "bullet"] }
+          }
+        }
+      ]
+    },
+    "imageElement": {
+      "allOf": [
+        { "$ref": "#/$defs/elementBase" },
+        {
+          "type": "object",
+          "required": ["kind", "src"],
+          "properties": {
+            "kind": { "const": "image" },
+            "src": { "type": "string" },
+            "alt": { "type": "string" },
+            "fit": { "enum": ["cover", "contain"] }
+          }
+        }
+      ]
+    },
+    "font": {
+      "type": "object",
+      "required": ["id", "source", "label", "family"],
+      "properties": {
+        "id": { "type": "string" },
+        "source": { "enum": ["local", "bunny", "source"] },
+        "label": { "type": "string" },
+        "family": { "type": "string" },
+        "assetId": { "type": ["string", "null"] },
+        "mediaType": { "type": ["string", "null"] },
+        "remoteUrl": { "type": ["string", "null"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -60,9 +60,6 @@ describe("command actions", () => {
         openOutline: () => {
           calls.push("openOutline");
         },
-        polishDeck: () => {
-          calls.push("polishDeck");
-        },
         present: () => {
           calls.push("present");
         },

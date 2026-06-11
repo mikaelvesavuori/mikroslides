@@ -3,19 +3,19 @@ title: Configuration
 description: Runtime configuration for MikroSlides.
 ---
 
-MikroSlides is a static browser app. The default release does not require runtime configuration, environment variables, server credentials, or an API endpoint.
+MikroSlides is a static local-first app. The default release does not require runtime configuration, environment variables, server credentials, or an API endpoint.
 
-## Static App Settings
+## Browser Runtime
+
+Decks, assets, templates, recovery drafts, and preferences are stored in browser storage for the current browser profile and origin. Deploying the app at a different origin creates a separate local deck library.
+
+## Static App Files
 
 The app shell is built into `dist/` by `npm run build`. Serve the generated files from a stable origin so browser storage remains attached to the same site.
 
-## Browser Storage
-
-Decks, assets, recovery drafts, templates, and preferences are scoped to the current browser profile and origin. Moving the same files to another domain creates a separate local deck library in the browser.
-
 ## Fonts and Remote Assets
 
-Decks can use local font files, configured remote font sources, local images, and remote image URLs. Remote assets are loaded by the browser when the deck renders or when an export needs to embed or rasterize them.
+Decks can use local font files, selected remote font sources, local images, and remote image URLs. Remote assets are loaded by the browser when the deck renders or when an export needs to embed or rasterize them.
 
 ## Build-Time Configuration
 

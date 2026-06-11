@@ -28,6 +28,10 @@ export type { SourceFontChoice };
 
 export type FontManagerElements = {
   fontDialog: HTMLDialogElement;
+  fontCurrentTab: HTMLButtonElement;
+  fontBrowseTab: HTMLButtonElement;
+  fontCurrentPanel: HTMLElement;
+  fontBrowsePanel: HTMLElement;
   fontList: HTMLElement;
   fontNameInput: HTMLInputElement;
   fontFileInput: HTMLInputElement;
@@ -69,11 +73,21 @@ export function createFontManager(options: FontManagerOptions): FontManager {
   let bunnyFontCatalogLoaded = false;
   let bunnyFontCatalogLoading = false;
   let activeFontCategory: FontCategory = "recommended";
+  let activeTab: "current" | "browse" = "current";
 
   function render() {
+    renderTabs();
     renderFontList();
     renderSourceFontCatalog();
     renderBunnyFontCatalog();
+  }
+
+  function renderTabs() {
+    const current = activeTab === "current";
+    elements.fontCurrentTab.setAttribute("aria-selected", String(current));
+    elements.fontBrowseTab.setAttribute("aria-selected", String(!current));
+    elements.fontCurrentPanel.hidden = !current;
+    elements.fontBrowsePanel.hidden = current;
   }
 
   function renderFontList() {
@@ -137,8 +151,19 @@ export function createFontManager(options: FontManagerOptions): FontManager {
     elements.fontFileInput.value = "";
     elements.fontSearchInput.value = "";
     activeFontCategory = "recommended";
+    activeTab = "current";
     options.openDialog(elements.fontDialog);
     render();
+  }
+
+  function showCurrentFonts() {
+    activeTab = "current";
+    renderTabs();
+  }
+
+  function showBrowseFonts() {
+    activeTab = "browse";
+    renderTabs();
   }
 
   async function addLocalFontFromDialog() {
@@ -244,6 +269,8 @@ export function createFontManager(options: FontManagerOptions): FontManager {
       changeBunnyCategory: handleFontCategoryClick,
       filterBunnyCatalog: renderBunnyFontCatalog,
       loadBunnyCatalog: loadBunnyFontCatalog,
+      showBrowseFonts,
+      showCurrentFonts,
       selectBunnyFont: handleFontCatalogClick,
       selectDeckFont: handleFontListClick,
       selectSourceFont: handleSourceFontCatalogClick,

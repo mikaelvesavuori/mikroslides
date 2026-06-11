@@ -15,6 +15,9 @@
       <symbol id="icon-plus" viewBox="0 0 24 24">
         <path d="M12 4.5v15m7.5-7.5h-15" stroke-linecap="round" stroke-linejoin="round" />
       </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path d="m5 12.5 4.25 4.25L19.5 6.5" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
       <symbol id="icon-minus" viewBox="0 0 24 24">
         <path d="M19.5 12h-15" stroke-linecap="round" stroke-linejoin="round" />
       </symbol>
@@ -68,9 +71,6 @@
       </symbol>
       <symbol id="icon-command" viewBox="0 0 24 24">
         <path d="M9 9H7.25A2.25 2.25 0 1 1 9 5.34V9Zm0 0v6m0 0H7.25A2.25 2.25 0 1 0 9 18.66V15Zm0 0h6m0 0v1.75A2.25 2.25 0 1 0 18.66 15H15Zm0 0V9m0 0v-1.75A2.25 2.25 0 1 1 18.66 9H15Zm0 0H9" stroke-linecap="round" stroke-linejoin="round" />
-      </symbol>
-      <symbol id="icon-sparkles" viewBox="0 0 24 24">
-        <path d="m12 3 1.7 5.1L19 10l-5.3 1.9L12 17l-1.7-5.1L5 10l5.3-1.9L12 3Zm6 10 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3ZM5.5 14 6.3 16.2 8.5 17l-2.2.8L5.5 20l-.8-2.2L2.5 17l2.2-.8.8-2.2Z" stroke-linecap="round" stroke-linejoin="round" />
       </symbol>
       <symbol id="icon-printer" viewBox="0 0 24 24">
         <path d="M6.75 9V4.5h10.5V9M6.75 18H5.25A2.25 2.25 0 0 1 3 15.75V12a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v3.75A2.25 2.25 0 0 1 18.75 18h-1.5m-10.5-3h10.5v6H6.75v-6Z" stroke-linecap="round" stroke-linejoin="round" />
@@ -163,14 +163,11 @@
           <button id="library-btn" class="header-btn icon-btn" type="button" title="Library" aria-label="Open library">
             <svg class="icon" aria-hidden="true"><use href="#icon-folder-open"></use></svg>
           </button>
-          <button id="import-json-btn" class="header-btn icon-btn" type="button" title="Import JSON" aria-label="Import JSON">
+          <button id="import-json-btn" class="header-btn icon-btn" type="button" title="Import deck" aria-label="Import deck">
             <svg class="icon" aria-hidden="true"><use href="#icon-upload"></use></svg>
           </button>
-          <button id="outline-btn" class="header-btn icon-btn" type="button" title="Deck from outline" aria-label="Deck from outline">
+          <button id="outline-btn" class="header-btn icon-btn" type="button" title="Deck from Markdown" aria-label="Deck from Markdown">
             <svg class="icon" aria-hidden="true"><use href="#icon-list"></use></svg>
-          </button>
-          <button id="polish-btn" class="header-btn icon-btn" type="button" title="Polish deck" aria-label="Polish deck">
-            <svg class="icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>
           </button>
           <button id="export-btn" class="header-btn icon-btn" type="button" title="Export" aria-label="Export">
             <svg class="icon" aria-hidden="true"><use href="#icon-download"></use></svg>
@@ -230,9 +227,6 @@
               <option value="chartData">Chart/data</option>
               <option value="closing">Closing</option>
             </select>
-            <button id="save-template-btn" class="tool-btn icon-btn" type="button" title="Save slide as template" aria-label="Save slide as template">
-              <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
-            </button>
             <span class="dock-separator" aria-hidden="true"></span>
             <button id="duplicate-element-btn" class="tool-btn icon-btn" type="button" title="Duplicate object" aria-label="Duplicate object">
               <svg class="icon" aria-hidden="true"><use href="#icon-copy-object"></use></svg>
@@ -285,6 +279,10 @@
               <input id="slide-background-input" type="color" />
             </label>
             <div id="background-swatches" class="swatch-row" aria-label="Background swatches"></div>
+            <button id="save-template-btn" class="inspector-action-btn" type="button">
+              <svg class="icon" aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+              <span>Save as template</span>
+            </button>
             <label>
               Notes
               <textarea id="speaker-notes" class="speaker-notes" rows="7" placeholder="Presenter notes"></textarea>
@@ -508,53 +506,60 @@
           <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
         </button>
       </div>
-      <section class="font-panel" aria-label="Current fonts">
-        <div class="font-panel-head">
-          <h3>Current</h3>
-        </div>
-        <div id="font-list" class="font-list"></div>
-      </section>
-      <section class="font-panel" aria-label="Source fonts">
-        <div class="font-panel-head">
-          <h3>Developer</h3>
-          <span class="font-source-pill">Source</span>
-        </div>
-        <div id="font-source-catalog" class="font-catalog compact-font-catalog"></div>
-      </section>
-      <section class="font-panel" aria-label="Bunny fonts">
-        <div class="font-panel-head">
-          <h3>Bunny</h3>
-          <div class="font-panel-head-actions">
-            <button id="load-font-catalog-btn" class="font-source-load-btn" type="button">Load catalog</button>
-            <span id="font-catalog-status" class="font-source-pill"></span>
+      <div class="font-tabs" role="tablist" aria-label="Font views">
+        <button id="font-current-tab" class="font-tab-btn" type="button" role="tab" aria-selected="true" aria-controls="font-current-panel">Current</button>
+        <button id="font-browse-tab" class="font-tab-btn" type="button" role="tab" aria-selected="false" aria-controls="font-browse-panel">Browse</button>
+      </div>
+      <div id="font-current-panel" class="font-tab-panel" role="tabpanel" aria-labelledby="font-current-tab">
+        <section class="font-panel" aria-label="Current fonts">
+          <div class="font-panel-head">
+            <h3>Available fonts</h3>
           </div>
-        </div>
-        <input id="font-search-input" class="search-input font-search-input" type="search" placeholder="Search fonts" aria-label="Search Bunny fonts" />
-        <div id="font-category-list" class="font-category-list" aria-label="Font categories"></div>
-        <div id="font-catalog" class="font-catalog"></div>
-      </section>
-      <details class="font-import-group">
-        <summary>Import font file</summary>
-        <div class="font-import-fields">
-          <label>
-            Name
-            <input id="font-name-input" type="text" placeholder="Font name" />
-          </label>
-          <label>
-            File
-            <input id="font-file-input" type="file" accept=".woff,.woff2,.ttf,.otf,font/woff,font/woff2,font/ttf,font/otf" />
-          </label>
-          <div class="dialog-actions">
-            <button id="add-local-font-btn" class="primary-btn" type="button">Import</button>
+          <div id="font-list" class="font-list"></div>
+        </section>
+      </div>
+      <div id="font-browse-panel" class="font-tab-panel" role="tabpanel" aria-labelledby="font-browse-tab" hidden>
+        <section class="font-panel" aria-label="Common fonts">
+          <div class="font-panel-head">
+            <h3>Common fonts</h3>
           </div>
-        </div>
-      </details>
+          <div id="font-source-catalog" class="font-catalog compact-font-catalog"></div>
+        </section>
+        <details class="font-import-group">
+          <summary>Import font file</summary>
+          <div class="font-import-fields">
+            <label>
+              Name
+              <input id="font-name-input" type="text" placeholder="Font name" />
+            </label>
+            <label>
+              File
+              <input id="font-file-input" type="file" accept=".woff,.woff2,.ttf,.otf,font/woff,font/woff2,font/ttf,font/otf" />
+            </label>
+            <div class="dialog-actions">
+              <button id="add-local-font-btn" class="primary-btn" type="button">Import</button>
+            </div>
+          </div>
+        </details>
+        <section class="font-panel" aria-label="Online fonts">
+          <div class="font-panel-head">
+            <h3>Online fonts</h3>
+            <div class="font-panel-head-actions">
+              <button id="load-font-catalog-btn" class="font-source-load-btn" type="button">Browse online fonts</button>
+              <span id="font-catalog-status" class="font-source-pill"></span>
+            </div>
+          </div>
+          <input id="font-search-input" class="search-input font-search-input" type="search" placeholder="Search fonts" aria-label="Search online fonts" />
+          <div id="font-category-list" class="font-category-list" aria-label="Font categories"></div>
+          <div id="font-catalog" class="font-catalog"></div>
+        </section>
+      </div>
     </dialog>
 
-    <dialog id="outline-dialog" class="settings-dialog wide-dialog" aria-label="Deck from outline">
+    <dialog id="outline-dialog" class="settings-dialog wide-dialog" aria-label="Deck from Markdown">
       <div class="dialog-head">
-        <h2>Outline</h2>
-        <button class="header-btn icon-btn" type="button" data-close-dialog="outline-dialog" aria-label="Close outline dialog">
+        <h2>Markdown</h2>
+        <button class="header-btn icon-btn" type="button" data-close-dialog="outline-dialog" aria-label="Close Markdown dialog">
           <svg class="icon" aria-hidden="true"><use href="#icon-x-mark"></use></svg>
         </button>
       </div>
@@ -563,7 +568,7 @@
         <textarea id="outline-input" rows="12" spellcheck="true"></textarea>
       </label>
       <div class="dialog-actions">
-        <button id="create-outline-deck-btn" class="primary-btn" type="button">Create</button>
+        <button id="create-outline-deck-btn" class="primary-btn" type="button">Create deck</button>
       </div>
     </dialog>
 
@@ -665,7 +670,7 @@
       </footer>
     </dialog>
 
-    <input id="json-file-input" class="visually-hidden" type="file" accept=".json,.mikroslides,application/json,application/vnd.mikroslides+json" />
+    <input id="json-file-input" class="visually-hidden" type="file" accept=".mikroslides,.mikroslides.json,.mikroslides.md,.json,.md,.markdown,application/json,application/vnd.mikroslides+json,text/markdown,text/plain" />
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="print-deck" class="print-deck" aria-hidden="true"></div>
     <script type="module" src="./assets/main.js"></script>

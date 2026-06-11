@@ -172,6 +172,7 @@ export async function readImportFileFromEvent(
   }
 
   return {
+    fileName: file.name,
     input,
     text: await readFileAsText(file),
   };

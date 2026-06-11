@@ -1,4 +1,5 @@
 import {
+  createImageElement,
   createTextElement,
   MikroDeck,
   type MikroDeckRecord,
@@ -20,7 +21,7 @@ class FakeHTMLElement {
     return this.closestMap[selector] ?? null;
   }
   getBoundingClientRect() {
-    return { height: 500, width: 1000 };
+    return { height: 500, left: 0, top: 0, width: 1000 };
   }
   hasPointerCapture() {
     return false;
@@ -32,6 +33,7 @@ class FakeHTMLElement {
     return [];
   }
   releasePointerCapture() {}
+  remove() {}
   setAttribute() {}
   setPointerCapture() {}
 }
@@ -188,6 +190,119 @@ describe("canvas controller", () => {
     expect(test.getSelectedElementIds()).toEqual(["body", "title"]);
   });
 
+  it("starts editing text when a double-click is retargeted to the canvas", () => {
+    const test = harness({
+      elements: [
+        createTextElement({
+          content: "Title",
+          height: 20,
+          id: "title",
+          width: 20,
+          x: 10,
+          y: 10,
+        }),
+      ],
+      selectedElementIds: ["title"],
+    });
+
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 150,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 2,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target: test.canvas,
+    } as unknown as PointerEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+    expect(test.calls).toEqual(expect.arrayContaining(["stage-history", "render-canvas"]));
+  });
+
+  it("does not start text editing through a higher object", () => {
+    const test = harness({
+      elements: [
+        createTextElement({
+          content: "Title",
+          height: 20,
+          id: "title",
+          width: 20,
+          x: 10,
+          y: 10,
+        }),
+        createImageElement({
+          height: 20,
+          id: "image",
+          src: "data:image/png;base64,a",
+          width: 20,
+          x: 10,
+          y: 10,
+        }),
+      ],
+      selectedElementIds: ["title"],
+    });
+
+    test.controller.handleCanvasDoubleClick({
+      clientX: 150,
+      clientY: 100,
+      preventDefault: () => undefined,
+      target: test.canvas,
+    } as unknown as MouseEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBeNull();
+  });
+
+  it("treats drag-starts on locked objects like empty canvas marquee", () => {
+    const test = harness({
+      elements: [
+        createTextElement({
+          content: "Background",
+          height: 100,
+          id: "background",
+          locked: true,
+          width: 100,
+          x: 0,
+          y: 0,
+        }),
+        createTextElement({ content: "Body", id: "body", x: 20, y: 20, width: 20, height: 20 }),
+      ],
+      selectedElementIds: ["background"],
+    });
+    const target = new FakeHTMLElement({
+      "[data-element-id]": { dataset: { elementId: "background" } },
+    });
+
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 10,
+      clientY: 10,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerMove({
+      clientX: 400,
+      clientY: 250,
+      pointerId: 1,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerUp({
+      clientX: 400,
+      clientY: 250,
+      pointerId: 1,
+    } as unknown as PointerEvent);
+
+    expect(test.getSelectedElementIds()).toEqual(["body"]);
+    expect(test.calls).not.toContain("select:background");
+    expect(test.calls).not.toContain("stage-history");
+  });
+
   it("selects object targets before opening the context menu", () => {
     const test = harness();
     const target = new FakeHTMLElement({
@@ -224,14 +339,191 @@ describe("canvas controller", () => {
     );
   });
 
-  it("exits active text editing before handling a single-click object interaction", () => {
+  it("leaves pointer interactions inside active text editing to the editor", () => {
     const test = harness();
     const editor = new FakeHTMLElement();
     editor.dataset.textEditor = "title";
     const target = new FakeHTMLElement({
-      '[contenteditable="true"]': editor,
+      '[contenteditable="true"], [contenteditable="plaintext-only"]': editor,
       "[data-element-id]": { dataset: { elementId: "title" } },
       "[data-text-editor]": editor,
+    });
+    let prevented = false;
+
+    test.controller.beginEditingTextElement("title");
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 1,
+      preventDefault: () => {
+        prevented = true;
+      },
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerMove({
+      clientX: 140,
+      clientY: 120,
+      pointerId: 1,
+      shiftKey: false,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerUp({ pointerId: 1 } as PointerEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+    expect(prevented).toBe(false);
+    expect(test.calls.filter((call) => call === "stage-history")).toHaveLength(1);
+    expect(test.calls).not.toContain("geometry");
+    expect(test.calls).not.toContain("flush-history");
+  });
+
+  it("keeps editing when contenteditable events target a text node", () => {
+    const test = harness();
+    const editor = new FakeHTMLElement();
+    editor.dataset.textEditor = "title";
+    const textNodeTarget = { parentElement: editor };
+    editor.closest = (selector: string) => {
+      if (selector === "[data-text-editor]") {
+        return editor;
+      }
+      if (selector === '[contenteditable="true"], [contenteditable="plaintext-only"]') {
+        return editor;
+      }
+      return null;
+    };
+
+    test.controller.beginEditingTextElement("title");
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 2,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target: textNodeTarget,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerUp({ pointerId: 2 } as PointerEvent);
+    test.controller.handleCanvasClick({
+      preventDefault: () => undefined,
+      target: textNodeTarget,
+    } as unknown as MouseEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+    expect(test.getSelectedElementIds()).toEqual(["title"]);
+    expect(test.calls).not.toContain("flush-history");
+  });
+
+  it("keeps editing when pointer events hit the editing overlay around the text", () => {
+    const test = harness();
+    const overlay = new FakeHTMLElement();
+    const target = new FakeHTMLElement({
+      "[data-text-edit-overlay]": overlay,
+    });
+
+    test.controller.beginEditingTextElement("title");
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 3,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+    test.controller.handlePointerUp({ pointerId: 3 } as PointerEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+    expect(test.getSelectedElementIds()).toEqual(["title"]);
+    expect(test.calls).not.toContain("flush-history");
+  });
+
+  it("does not exit text editing when a text-selection drag bubbles through the canvas", () => {
+    const test = harness();
+    const editor = new FakeHTMLElement();
+    editor.dataset.textEditor = "title";
+    const target = new FakeHTMLElement({
+      '[contenteditable="true"], [contenteditable="plaintext-only"]': editor,
+      "[data-element-id]": { dataset: { elementId: "title" } },
+      "[data-text-editor]": editor,
+    });
+    let clickPrevented = false;
+
+    test.controller.beginEditingTextElement("title");
+    test.controller.handleCanvasPointerDown({
+      button: 0,
+      clientX: 100,
+      clientY: 100,
+      ctrlKey: false,
+      detail: 1,
+      metaKey: false,
+      pointerId: 7,
+      preventDefault: () => undefined,
+      shiftKey: false,
+      target,
+    } as unknown as PointerEvent);
+    test.controller.handleCanvasFocusOut({ target } as unknown as FocusEvent);
+    test.controller.handlePointerUp({ pointerId: 7 } as PointerEvent);
+    test.controller.handleCanvasClick({
+      preventDefault: () => {
+        clickPrevented = true;
+      },
+      target: test.canvas,
+    } as unknown as MouseEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+    expect(test.getSelectedElementIds()).toEqual(["title"]);
+    expect(clickPrevented).toBe(false);
+    expect(test.calls).not.toContain("select:");
+    expect(test.calls).not.toContain("flush-history");
+  });
+
+  it("leaves double-clicks inside active text editing to the editor", () => {
+    const test = harness();
+    const editor = new FakeHTMLElement();
+    editor.dataset.textEditor = "title";
+    const target = new FakeHTMLElement({
+      "[data-text-editor]": editor,
+    });
+    let prevented = false;
+
+    test.controller.beginEditingTextElement("title");
+    test.controller.handleCanvasDoubleClick({
+      clientX: 100,
+      clientY: 100,
+      preventDefault: () => {
+        prevented = true;
+      },
+      target,
+    } as unknown as MouseEvent);
+
+    expect(test.controller.getEditingTextElementId()).toBe("title");
+    expect(prevented).toBe(false);
+    expect(test.calls.filter((call) => call === "stage-history")).toHaveLength(1);
+  });
+
+  it("exits active text editing before handling another object interaction", () => {
+    const test = harness({
+      elements: [
+        createTextElement({ content: "Title", id: "title" }),
+        createTextElement({ content: "Body", id: "body" }),
+      ],
+      selectedElementIds: ["title"],
+    });
+    const editor = new FakeHTMLElement();
+    editor.dataset.textEditor = "title";
+    const target = new FakeHTMLElement({
+      "[data-element-id]": { dataset: { elementId: "body" } },
     });
 
     test.controller.beginEditingTextElement("title");
@@ -252,6 +544,7 @@ describe("canvas controller", () => {
 
     expect(test.controller.getEditingTextElementId()).toBeNull();
     expect(test.calls).toEqual(expect.arrayContaining(["flush-history", "stage-history"]));
+    expect(test.getSelectedElementIds()).toEqual(["body"]);
   });
 
   it("duplicates selected objects before option-dragging them", () => {

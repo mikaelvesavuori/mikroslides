@@ -1,8 +1,9 @@
 import type { MikroFontRecord } from "../../src/index.js";
-import { createTextElement, MikroDeck } from "../../src/index.js";
+import { createImageElement, createShapeElement, createTextElement, MikroDeck } from "../../src/index.js";
 import {
   addDefaultTextElement,
   alignElementsInActiveSlide,
+  applyTemplateToActiveSlide,
   applyFontToSelectedText,
   duplicateElementsInActiveSlide,
   duplicateElementsInPlaceInActiveSlide,
@@ -71,6 +72,51 @@ describe("deck mutations", () => {
       x: 10,
       y: 12,
     });
+  });
+
+  it("preserves current slide content when applying a layout template", () => {
+    const deck = MikroDeck.create({ title: "Layouts" }).toRecord();
+    const slide = {
+      ...deck.slides[0],
+      elements: [
+        createTextElement({ content: "Existing headline", id: "headline" }),
+        createTextElement({ content: "First point\nSecond point", id: "body", listStyle: "bullet" }),
+        createImageElement({ alt: "Existing image", id: "image", src: "asset:image" }),
+        createShapeElement({ content: "Keep this label", id: "labelled-shape" }),
+        createShapeElement({ id: "decorative-shape" }),
+      ],
+    };
+    const currentDeck = { ...deck, slides: [slide], activeSlideId: slide.id };
+    const templateSlide = {
+      ...slide,
+      layout: "image-right" as const,
+      elements: [
+        createTextElement({ content: "Template title", id: "template-title" }),
+        createImageElement({ id: "template-image" }),
+      ],
+    };
+
+    const nextDeck = applyTemplateToActiveSlide(currentDeck, templateSlide);
+    const nextElements = nextDeck?.slides[0].elements ?? [];
+
+    expect(nextElements[0]).toMatchObject({
+      content: "Existing headline",
+      id: "template-title",
+      kind: "text",
+    });
+    expect(nextElements[1]).toMatchObject({
+      alt: "Existing image",
+      id: "template-image",
+      kind: "image",
+      src: "asset:image",
+    });
+    expect(nextElements).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ content: "First point\nSecond point", id: "body" }),
+        expect.objectContaining({ content: "Keep this label", id: "labelled-shape" }),
+      ]),
+    );
+    expect(nextElements.some((element) => element.id === "decorative-shape")).toBe(false);
   });
 
   it("pastes slides after the active slide with fresh slide and element ids", () => {

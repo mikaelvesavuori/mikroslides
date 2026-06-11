@@ -12,7 +12,7 @@ _Use MikroSlides online for free at [slides.mikrosuite.com](https://slides.mikro
 
 - **Local storage**: decks stay in browser-local storage until you export JSON, portable MikroSlides files, PNG, or PDF.
 - **Direct editing**: add slides, text, shapes, images, notes, and layouts on the slide canvas.
-- **Outline import**: create a first deck from Markdown headings and bullets.
+- **Markdown import**: create a first deck from Markdown headings, slide separators, metadata, bullets, and notes.
 - **Presentation mode**: hide slides, keep speaker notes, and present from the browser.
 - **Static deployment**: the app is static HTML, CSS, and JavaScript.
 
@@ -25,8 +25,7 @@ _Use MikroSlides online for free at [slides.mikrosuite.com](https://slides.mikro
 - **Familiar canvas gestures** including Shift-drag axis constraint and Option/Alt-drag duplication
 - **Text editing** by double-click, with normal object selection and resizing on single click
 - **Built-in slide layouts** plus saved local templates
-- **Markdown outline import** for turning notes into a first deck
-- **Local polish pass** that tightens layout, spacing, color, and type scale
+- **Markdown deck import** for turning notes or generated source files into a first deck
 - **Speaker notes and presentation mode** with skipped slides excluded
 - **Theme, aspect ratio, slide background, and font controls**
 - **JSON, portable `.mikroslides`, PDF, and current-slide PNG export**

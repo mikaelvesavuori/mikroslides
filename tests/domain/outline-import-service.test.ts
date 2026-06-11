@@ -57,7 +57,7 @@ Note: Mention pilot customers.
     ]);
   });
 
-  it("shrinks long outline bodies into a denser slide layout", () => {
+  it("creates readable bullet slides for long outline bodies", () => {
     const service = new OutlineImportService();
     const deck = service.createDeckFromMarkdown(`# Long
 
@@ -68,10 +68,10 @@ Note: Mention pilot customers.
       (element) => element.kind === "text" && element.content.includes("Long point"),
     );
 
-    expect(body).toMatchObject({ kind: "text", fontSize: 20 });
+    expect(body).toMatchObject({ kind: "text", fontSize: 21 });
   });
 
-  it("chooses presentation layouts from outline content", () => {
+  it("keeps outline sections as simple bullet slides", () => {
     const service = new OutlineImportService();
     const deck = service.createDeckFromMarkdown(`# Launch
 
@@ -88,12 +88,26 @@ Note: Mention pilot customers.
 > This made the decision obvious.
 Speaker notes: Pause before the quote.`);
 
-    expect(deck.slides.map((slide) => slide.layout)).toEqual([
-      "title",
-      "timeline",
-      "chart-data",
-      "quote",
-    ]);
+    expect(deck.slides.map((slide) => slide.layout)).toEqual(["title", "bullets", "bullets", "bullets"]);
     expect(deck.slides[3].speakerNotes).toBe("Pause before the quote.");
+  });
+
+  it("delegates structured Markdown decks to the Markdown deck parser", () => {
+    const service = new OutlineImportService();
+    const deck = service.createDeckFromMarkdown(`---
+title: Structured
+aspect: 1:1
+---
+
+# Structured
+
+---
+layout: statement
+# Point
+One thing.`);
+
+    expect(deck.title).toBe("Structured");
+    expect(deck.aspectRatio).toBe("1:1");
+    expect(deck.slides.map((slide) => slide.layout)).toEqual(["title", "statement"]);
   });
 });

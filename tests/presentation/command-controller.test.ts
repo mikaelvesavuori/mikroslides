@@ -77,7 +77,6 @@ function harness(selectedIds: string[] = ["text"]) {
       openLibrary: () => calls.push("open-library"),
       openOutline: () => calls.push("open-outline"),
       openPresenter: () => calls.push("present"),
-      polishDeck: () => calls.push("polish"),
       redo: () => calls.push("redo"),
       renderCanvas: () => calls.push("render-canvas"),
       renderInspector: () => calls.push("render-inspector"),

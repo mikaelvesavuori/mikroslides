@@ -3,9 +3,23 @@ title: Deployment
 description: Deploy MikroSlides as a static local-first web app.
 ---
 
-MikroSlides is a static browser app. Build it once and serve the files in `dist/` from any host that can serve HTML, CSS, and JavaScript.
+MikroSlides ships as static files and can be served from any static host.
 
-## Build
+## Download
+
+```bash
+curl -sSL -o mikroslides.zip https://releases.mikrosuite.com/mikroslides_latest.zip
+unzip mikroslides.zip -d mikroslides
+```
+
+Deploy the extracted app files:
+
+- `index.html`
+- `assets/main.js`
+- `assets/styles.css`
+- copied static assets
+
+## Build From Source
 
 ```bash
 npm install
@@ -14,7 +28,7 @@ npm run build
 
 The production app is written to `dist/`.
 
-## Static hosting
+## Serve Locally
 
 Serve `dist/` with a static server. For a quick local check:
 
@@ -23,6 +37,15 @@ npx http-server dist -a 127.0.0.1 -p 8000 -c-1
 ```
 
 Open `http://127.0.0.1:8000`.
+
+## Serving Online
+
+You can serve the app from `dist/` using any static hosting provider or static file server:
+
+- Cloudflare Pages
+- Netlify
+- Vercel
+- nginx, Caddy, Apache, or another static file server
 
 ## Cloudflare
 
@@ -34,7 +57,7 @@ npm run deploy:cloudflare
 
 The deploy command runs the full verification suite before publishing.
 
-## Runtime notes
+## Storage Origin
 
 MikroSlides does not need a database, auth service, API token, or server-side session. Browser storage is scoped to the deployed origin, so decks created on one host do not automatically appear on another host.
 

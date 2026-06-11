@@ -13,6 +13,7 @@ export type DeckPersistenceService = {
   delete: (deckId: string) => Promise<void>;
   deleteDraft: (deckId: string) => Promise<void>;
   duplicate: (deckId: string) => Promise<unknown>;
+  importFile: (text: string, sourceName?: string) => Promise<MikroDeckRecord>;
   importJson: (text: string) => Promise<MikroDeckRecord>;
   list: () => Promise<MikroDeckRecord[]>;
   load: (deckId: string) => Promise<MikroDeckRecord | null>;
@@ -187,7 +188,10 @@ export function createDeckPersistenceController(options: DeckPersistenceControll
       }
 
       try {
-        const importedDeck = await options.service.importJson(importFile.text);
+        const importedDeck = await options.service.importFile(
+          importFile.text,
+          importFile.fileName,
+        );
         options.setDeck(importedDeck);
         options.selectSlide();
         options.clearHistory();
@@ -197,7 +201,7 @@ export function createDeckPersistenceController(options: DeckPersistenceControll
         options.renderAll();
         options.showToast("Deck imported");
       } catch (error) {
-        options.showToast(options.formatError(error, "Could not import JSON"));
+        options.showToast(options.formatError(error, "Could not import deck"));
       } finally {
         importFile.input.value = "";
       }

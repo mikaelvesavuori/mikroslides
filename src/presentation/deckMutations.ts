@@ -269,6 +269,7 @@ export function applyTemplateToActiveSlide(deck: MikroDeckRecord, templateSlide:
   if (!slide) {
     return null;
   }
+  const elements = mergeTemplateElementsWithSlideContent(slide.elements, templateSlide.elements);
 
   return MikroDeck.fromRecord(deck)
     .updateSlide(slide.id, {
@@ -276,9 +277,77 @@ export function applyTemplateToActiveSlide(deck: MikroDeckRecord, templateSlide:
       layout: templateSlide.layout,
       background: templateSlide.background,
       transition: templateSlide.transition,
-      elements: templateSlide.elements,
+      elements,
     })
     .toRecord();
+}
+
+function mergeTemplateElementsWithSlideContent(
+  currentElements: SlideElement[],
+  templateElements: SlideElement[],
+) {
+  const textSources = currentElements.filter(isTextBearingElement).filter((element) =>
+    element.content.trim(),
+  );
+  const imageSources = currentElements.filter(
+    (element): element is Extract<SlideElement, { kind: "image" }> =>
+      element.kind === "image" && Boolean(element.src.trim()),
+  );
+  const consumed = new Set<string>();
+  let textIndex = 0;
+  let imageIndex = 0;
+
+  const merged = templateElements.map((element) => {
+    if (isTextBearingElement(element)) {
+      const source = textSources[textIndex];
+      textIndex += 1;
+      if (source) {
+        consumed.add(source.id);
+        return {
+          ...element,
+          content: source.content,
+          listStyle: source.listStyle,
+        } as SlideElement;
+      }
+    }
+
+    if (element.kind === "image") {
+      const source = imageSources[imageIndex];
+      imageIndex += 1;
+      if (source) {
+        consumed.add(source.id);
+        return {
+          ...element,
+          alt: source.alt,
+          fit: source.fit,
+          src: source.src,
+        } as SlideElement;
+      }
+    }
+
+    return element;
+  });
+
+  return [
+    ...merged,
+    ...currentElements
+      .filter((element) => !consumed.has(element.id) && shouldCarryElementAcrossLayout(element))
+      .map((element) => structuredClone(element) as SlideElement),
+  ];
+}
+
+function isTextBearingElement(
+  element: SlideElement,
+): element is Extract<SlideElement, { kind: "shape" | "text" }> {
+  return element.kind === "text" || element.kind === "shape";
+}
+
+function shouldCarryElementAcrossLayout(element: SlideElement) {
+  if (isTextBearingElement(element)) {
+    return Boolean(element.content.trim());
+  }
+
+  return element.kind === "image" && Boolean(element.src.trim());
 }
 
 export function addFontToDeckRecord(deck: MikroDeckRecord, font: MikroFontRecord) {
