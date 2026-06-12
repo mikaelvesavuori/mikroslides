@@ -80,7 +80,7 @@ export function renderSourceFontCatalogView(options: {
           <button class="font-catalog-row source-font-row" type="button" data-source-font-id="${escapeAttribute(font.id)}" aria-pressed="${selected}">
             <span class="font-catalog-main">
               <span class="font-catalog-preview">${escapeHtml(font.label)}</span>
-              <span class="font-catalog-meta">${existing ? "Installed" : "Available"}</span>
+              ${existing ? `<span class="font-catalog-meta">Installed</span>` : ""}
             </span>
             ${fontCatalogActionIcon(Boolean(existing), selected)}
           </button>
@@ -114,7 +114,7 @@ export function renderBunnyFontCatalogView(options: {
             <button class="font-catalog-row" type="button" data-font-family="${escapeAttribute(font.family)}" aria-pressed="${selected}">
               <span class="font-catalog-main">
                 <span class="font-catalog-preview">${escapeHtml(font.family)}</span>
-                <span class="font-catalog-meta">${existing ? "Installed" : "Available"}</span>
+                ${existing ? `<span class="font-catalog-meta">Installed</span>` : ""}
               </span>
               ${fontCatalogActionIcon(Boolean(existing), selected)}
             </button>

@@ -18,6 +18,7 @@ export type {
   MikroSlideId,
   MikroSlideRecord,
   PortableAssetInput,
+  ShapeArrowHead,
   ShapeSlideElement,
   SlideElement,
   SlideElementBase,

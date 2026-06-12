@@ -26,7 +26,6 @@ type ExportControllerElements = ExportPanelElements & {
 };
 
 export type ExportControllerOptions = {
-  baseHref: () => string;
   documentRef: Document;
   elements: ExportControllerElements;
   formatError: (error: unknown, fallback: string) => string;
@@ -47,7 +46,7 @@ export function createExportController(options: ExportControllerOptions) {
   function renderStatus() {
     renderExportPanelState(
       options.elements,
-      exportDialogState(options.getDeck(), options.getSlide(), options.baseHref()),
+      exportDialogState(options.getDeck(), options.getSlide()),
     );
   }
 

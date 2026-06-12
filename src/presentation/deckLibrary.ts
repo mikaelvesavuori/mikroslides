@@ -15,7 +15,7 @@ export function renderDeckLibraryRows(decks: MikroDeckRecord[], formatDate = for
         <div class="deck-row" data-deck-id="${escapeHtml(deck.id)}">
           <button class="deck-row-main" type="button" data-action="open-deck">
             <span class="deck-row-title">${escapeHtml(deck.title)}</span>
-            <span class="deck-row-meta">${deck.slides.length} slides / ${escapeHtml(formatDate(deck.updatedAt))}</span>
+            <span class="deck-row-meta">${escapeHtml(formatDate(deck.updatedAt))}</span>
           </button>
           <span class="deck-row-actions">
             <button class="tool-btn icon-btn" type="button" data-action="duplicate-deck" title="Duplicate" aria-label="Duplicate deck">

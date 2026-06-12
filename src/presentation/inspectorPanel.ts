@@ -16,6 +16,7 @@ export type InspectorPanelElements = {
   elementInspector: HTMLElement;
   elementLockedInput: HTMLInputElement;
   elementOpacityInput: HTMLInputElement;
+  elementRotationInput: HTMLInputElement;
   elementWidthInput: HTMLInputElement;
   elementXInput: HTMLInputElement;
   elementYInput: HTMLInputElement;
@@ -23,13 +24,19 @@ export type InspectorPanelElements = {
   imageFields: HTMLElement;
   imageFitSelect: HTMLSelectElement;
   imageSrcInput: HTMLInputElement;
+  lineFields: HTMLElement;
   layersList: HTMLElement;
   layersSection: HTMLElement;
   objectInspectorTitle: HTMLElement;
   shapeFields: HTMLElement;
   shapeFillInput: HTMLInputElement;
+  shapeFillNoneButton: HTMLButtonElement;
   shapeKindSelect: HTMLSelectElement;
+  shapeRadiusInput: HTMLInputElement;
+  shapeArrowHeadSelect: HTMLSelectElement;
+  shapeStrokeNoneButton: HTMLButtonElement;
   shapeStrokeInput: HTMLInputElement;
+  shapeStrokeWidthInput: HTMLInputElement;
   slideBackgroundInput: HTMLInputElement;
   slideInspector: HTMLElement;
   speakerNotes: HTMLTextAreaElement;
@@ -38,6 +45,7 @@ export type InspectorPanelElements = {
   textFields: HTMLElement;
   textFontSelect: HTMLSelectElement;
   textLineHeightInput: HTMLInputElement;
+  textListStyleSelect: HTMLSelectElement;
   textSizeInput: HTMLInputElement;
   textWeightInput: HTMLInputElement;
 };
@@ -66,6 +74,7 @@ export function renderInspectorPanel(options: {
   if (documentRef.activeElement !== elements.slideBackgroundInput) {
     elements.slideBackgroundInput.value = toColorInput(slide.background);
   }
+  setPaintSwatchState(documentRef, "background", slide.background);
   if (documentRef.activeElement !== elements.speakerNotes) {
     elements.speakerNotes.value = slide.speakerNotes;
   }
@@ -102,6 +111,11 @@ export function renderInspectorPanel(options: {
     sharedValue(selectedElements, (item) => item.height),
     documentRef,
   );
+  setNumberInputValueOrMixed(
+    elements.elementRotationInput,
+    sharedValue(selectedElements, (item) => item.rotation),
+    documentRef,
+  );
   setRangeInputValueOrMixed(
     elements.elementOpacityInput,
     sharedValue(selectedElements, (item) => item.opacity),
@@ -112,7 +126,11 @@ export function renderInspectorPanel(options: {
     elements.elementLockedInput,
     sharedValue(selectedElements, (item) => item.locked),
   );
-  setLockedControlState(elements, selectedElements.every((item) => item.locked), documentRef);
+  setLockedControlState(
+    elements,
+    selectedElements.every((item) => item.locked),
+    documentRef,
+  );
 
   const selectedKind = sharedValue(selectedElements, (item) => item.kind);
   setVisibleObjectFields(elements, selectedKind);
@@ -223,6 +241,11 @@ function renderTextInspector(
     textElements[0]?.color ?? defaultDeckTheme.text,
     documentRef,
   );
+  setPaintSwatchState(
+    documentRef,
+    "text",
+    sharedValue(textElements, (item) => item.color),
+  );
   const align = sharedValue(textElements, (item) => item.align);
   for (const button of documentRef.querySelectorAll<HTMLButtonElement>("[data-align]")) {
     button.classList.toggle("is-active", align !== null && button.dataset.align === align);
@@ -234,13 +257,12 @@ function renderTextInspector(
       verticalAlign !== null && button.dataset.valign === verticalAlign,
     );
   }
-  const listStyle = sharedValue(textElements, (item) => item.listStyle);
-  for (const button of documentRef.querySelectorAll<HTMLButtonElement>("[data-list-style]")) {
-    button.classList.toggle(
-      "is-active",
-      listStyle !== null && button.dataset.listStyle === listStyle,
-    );
-  }
+  setSelectValueOrMixed(
+    elements.textListStyleSelect,
+    sharedValue(textElements, (item) => item.listStyle),
+    textElements[0]?.listStyle ?? "none",
+    documentRef,
+  );
 }
 
 function renderShapeInspector(
@@ -249,6 +271,8 @@ function renderShapeInspector(
   documentRef: Document,
 ) {
   const shapeElements = selectedElements.filter((item) => item.kind === "shape");
+  const fill = sharedValue(shapeElements, (item) => item.fill);
+  const stroke = sharedValue(shapeElements, (item) => item.stroke);
   setSelectValueOrMixed(
     elements.shapeKindSelect,
     sharedValue(shapeElements, (item) => item.shape),
@@ -257,14 +281,38 @@ function renderShapeInspector(
   );
   setColorInputValueOrMixed(
     elements.shapeFillInput,
-    sharedValue(shapeElements, (item) => item.fill),
+    fill,
     shapeElements[0]?.fill ?? "#dbeafe",
     documentRef,
   );
+  setNoneColorButtonState(elements.shapeFillNoneButton, fill);
+  setPaintSwatchState(documentRef, "fill", fill);
   setColorInputValueOrMixed(
     elements.shapeStrokeInput,
-    sharedValue(shapeElements, (item) => item.stroke),
+    stroke,
     shapeElements[0]?.stroke ?? defaultDeckTheme.accent,
+    documentRef,
+  );
+  setNoneColorButtonState(elements.shapeStrokeNoneButton, stroke);
+  setPaintSwatchState(documentRef, "stroke", stroke);
+  setNumberInputValueOrMixed(
+    elements.shapeStrokeWidthInput,
+    sharedValue(shapeElements, (item) => item.strokeWidth),
+    documentRef,
+  );
+  setNumberInputValueOrMixed(
+    elements.shapeRadiusInput,
+    sharedValue(shapeElements, (item) => item.radius),
+    documentRef,
+  );
+  elements.lineFields.hidden = !shapeElements.some((item) => item.shape === "line");
+  setSelectValueOrMixed(
+    elements.shapeArrowHeadSelect,
+    sharedValue(
+      shapeElements.filter((item) => item.shape === "line"),
+      (item) => item.arrowHead,
+    ),
+    shapeElements.find((item) => item.shape === "line")?.arrowHead ?? "none",
     documentRef,
   );
 }
@@ -384,6 +432,7 @@ function setLockedControlState(
     elements.elementYInput,
     elements.elementWidthInput,
     elements.elementHeightInput,
+    elements.elementRotationInput,
     elements.elementOpacityInput,
     elements.textContentInput,
     elements.textFontSelect,
@@ -391,9 +440,13 @@ function setLockedControlState(
     elements.textWeightInput,
     elements.textLineHeightInput,
     elements.textColorInput,
+    elements.textListStyleSelect,
     elements.shapeKindSelect,
     elements.shapeFillInput,
     elements.shapeStrokeInput,
+    elements.shapeStrokeWidthInput,
+    elements.shapeRadiusInput,
+    elements.shapeArrowHeadSelect,
     elements.imageSrcInput,
     elements.imageAltInput,
     elements.imageFitSelect,
@@ -402,10 +455,59 @@ function setLockedControlState(
     control.disabled = locked;
   }
   for (const button of documentRef.querySelectorAll<HTMLButtonElement>(
-    "[data-align], [data-valign], [data-list-style], [data-object-align]",
+    "[data-align], [data-valign], [data-list-style], [data-object-align], [data-shape-fill], [data-shape-stroke], [data-text-color], #shape-fill-none-btn, #shape-stroke-none-btn",
   )) {
     button.disabled = locked;
   }
+}
+
+function setNoneColorButtonState(button: HTMLButtonElement, value: string | null) {
+  const active = value !== null && isNonePaint(value);
+  button.classList.toggle("is-active", active);
+  button.setAttribute("aria-pressed", String(active));
+}
+
+function setPaintSwatchState(
+  documentRef: Document,
+  kind: "background" | "fill" | "stroke" | "text",
+  value: string | null,
+) {
+  const selector =
+    kind === "fill"
+      ? "[data-shape-fill]"
+      : kind === "stroke"
+        ? "[data-shape-stroke]"
+        : kind === "text"
+          ? "[data-text-color]"
+          : "[data-background]";
+  const normalizedValue = normalizePaint(value);
+  for (const swatch of documentRef.querySelectorAll<HTMLButtonElement>(selector)) {
+    const color =
+      kind === "fill"
+        ? swatch.dataset.shapeFill
+        : kind === "stroke"
+          ? swatch.dataset.shapeStroke
+          : kind === "text"
+            ? swatch.dataset.textColor
+            : swatch.dataset.background;
+    const active = normalizedValue !== null && normalizePaint(color ?? null) === normalizedValue;
+    swatch.classList.toggle("is-active", active);
+    swatch.setAttribute("aria-pressed", String(active));
+  }
+
+  const customSwatch = documentRef.querySelector<HTMLElement>(`[data-custom-paint="${kind}"]`);
+  if (!customSwatch) {
+    return;
+  }
+  const isCustom =
+    normalizedValue !== null &&
+    !isNonePaint(normalizedValue) &&
+    !documentRef.querySelector(`${selector}.is-active`);
+  customSwatch.classList.toggle("is-custom", isCustom);
+  customSwatch.style.setProperty(
+    "--swatch",
+    normalizedValue !== null && !isNonePaint(normalizedValue) ? normalizedValue : "#ffffff",
+  );
 }
 
 function setColorInputValueOrMixed(
@@ -418,6 +520,14 @@ function setColorInputValueOrMixed(
   if (documentRef.activeElement !== input) {
     input.value = toColorInput(value ?? fallback);
   }
+}
+
+function isNonePaint(value: string) {
+  return value.trim().toLowerCase() === "none" || value.trim().toLowerCase() === "transparent";
+}
+
+function normalizePaint(value: string | null) {
+  return value?.trim().toLowerCase() ?? null;
 }
 
 function setSelectValueOrMixed(

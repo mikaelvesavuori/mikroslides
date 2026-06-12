@@ -1,5 +1,6 @@
 import type {
   MikroSlideRecord,
+  ShapeArrowHead,
   ShapeSlideElement,
   SlideElement,
   TextFontFamily,
@@ -98,9 +99,10 @@ export function renderSlideElement(
   options: Omit<SlideRenderOptions, "selectedIds"> & { selected?: boolean } = {},
 ) {
   const baseStyle = elementBaseStyle(element);
-  const handle = options.includeHandle && !element.locked
-    ? '<span class="element-resize-handle" data-resize="true"></span>'
-    : "";
+  const handles =
+    options.includeHandle && !element.locked
+      ? '<span class="element-rotate-handle" data-rotate="true" title="Rotate" aria-hidden="true"></span><span class="element-resize-handle" data-resize="true" title="Resize" aria-hidden="true"></span>'
+      : "";
   const selectedAttr = options.selected ? "true" : "false";
   const editingAttr = options.editingTextElementId === element.id ? "true" : "false";
   let body = "";
@@ -111,11 +113,16 @@ export function renderSlideElement(
   }
 
   if (element.kind === "shape") {
+    const arrowHeadSize = Math.max(10, element.strokeWidth * 4.4);
     const style = [
       `--fill:${escapeAttribute(element.fill)}`,
       `--stroke:${escapeAttribute(element.stroke)}`,
       `--stroke-width:${element.strokeWidth}`,
       `--radius:${element.radius}`,
+      `--arrow-head-size:${arrowHeadSize}px`,
+      `--arrow-head-height:${Math.max(8, arrowHeadSize * 0.72)}px`,
+      `--line-start-inset:${hasArrowHead(element.arrowHead, "start") ? arrowHeadSize * 0.72 : 0}px`,
+      `--line-end-inset:${hasArrowHead(element.arrowHead, "end") ? arrowHeadSize * 0.72 : 0}px`,
     ].join(";");
     body = renderShapeElementBody(element, style, options);
   }
@@ -131,7 +138,7 @@ export function renderSlideElement(
   return `
     <div class="slide-element" data-element-id="${escapeAttribute(element.id)}" data-kind="${element.kind}" data-locked="${element.locked}" data-selected="${selectedAttr}" data-editing="${editingAttr}" style="${escapeAttribute(baseStyle)}">
       ${body}
-      ${handle}
+      ${handles}
     </div>
   `;
 }
@@ -169,7 +176,11 @@ function renderShapeElementBody(
 ) {
   const label = renderShapeLabel(element, options);
   if (element.shape === "line") {
-    return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><line class="slide-shape-line" x1="0" y1="50" x2="100" y2="50" /></svg>${label}`;
+    const line =
+      isNonePaint(element.stroke) || element.strokeWidth <= 0
+        ? ""
+        : `<span class="slide-shape-line" aria-hidden="true"></span>${renderLineArrowHeads(element.arrowHead)}`;
+    return `<div class="slide-shape slide-line-shape" data-shape="${element.shape}" style="${escapeAttribute(style)}" aria-hidden="true">${line}</div>${label}`;
   }
 
   const rect = { x: 0, y: 0, width: 100, height: 100 };
@@ -180,6 +191,25 @@ function renderShapeElementBody(
     : "";
 
   return `<svg class="slide-shape" data-shape="${element.shape}" viewBox="0 0 100 100" preserveAspectRatio="none" style="${escapeAttribute(style)}" aria-hidden="true"><path class="slide-shape-fill" d="${escapeAttribute(path)}" />${decoration}</svg>${label}`;
+}
+
+function renderLineArrowHeads(arrowHead: ShapeArrowHead) {
+  const start = hasArrowHead(arrowHead, "start")
+    ? '<span class="slide-shape-arrow-head" data-endpoint="start" aria-hidden="true"></span>'
+    : "";
+  const end = hasArrowHead(arrowHead, "end")
+    ? '<span class="slide-shape-arrow-head" data-endpoint="end" aria-hidden="true"></span>'
+    : "";
+  return `${start}${end}`;
+}
+
+function hasArrowHead(arrowHead: ShapeArrowHead, endpoint: "start" | "end") {
+  return arrowHead === "both" || arrowHead === endpoint;
+}
+
+function isNonePaint(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return normalized === "none" || normalized === "transparent";
 }
 
 function renderShapeLabel(
@@ -196,12 +226,13 @@ function renderShapeLabel(
 }
 
 export function renderTextElementContent(element: TextSlideElement | ShapeSlideElement) {
-  if (element.listStyle !== "bullet") {
+  if (element.listStyle === "none") {
     return escapeHtml(element.content);
   }
 
   const items = textListItems(element.content);
-  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  const tag = element.listStyle === "numbered" ? "ol" : "ul";
+  return `<${tag}>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</${tag}>`;
 }
 
 export function textListItems(content: string) {

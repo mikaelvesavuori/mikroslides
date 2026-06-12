@@ -2,19 +2,24 @@ import type { SlideElement } from "../index.js";
 import { marqueeRectFromPoints, type PercentRect } from "./interactionGeometry.js";
 
 export type CanvasRectSize = Pick<DOMRectReadOnly, "height" | "width">;
+export type CanvasRect = Pick<DOMRectReadOnly, "height" | "left" | "top" | "width">;
 type PercentPoint = { x: number; y: number };
 
 export type DragState = {
   elementId: string;
-  mode: "move" | "resize";
+  mode: "move" | "resize" | "rotate";
   kind: SlideElement["kind"];
   startClientX: number;
   startClientY: number;
+  startCenterClientX: number;
+  startCenterClientY: number;
+  startAngle: number;
   startWidth: number;
   startHeight: number;
   aspectRatio: number;
   selectedStarts: Array<{
     id: string;
+    rotation: number;
     x: number;
     y: number;
     width: number;
@@ -24,7 +29,7 @@ export type DragState = {
 
 export type GeometryUpdate = {
   id: string;
-  patch: Partial<Pick<SlideElement, "height" | "width" | "x" | "y">>;
+  patch: Partial<Pick<SlideElement, "height" | "rotation" | "width" | "x" | "y">>;
 };
 
 export type SelectionMarqueeState = {
@@ -50,6 +55,7 @@ export function canvasPointerDownAction(options: {
   element: SlideElement | null;
   elementId: string | null;
   isEditableTarget: boolean;
+  isRotate?: boolean;
   isResize: boolean;
   isSelected: boolean;
   multiSelect: boolean;
@@ -68,6 +74,7 @@ export function canvasPointerDownAction(options: {
   }
 
   if (
+    !options.isRotate &&
     !options.isResize &&
     (options.element.kind === "text" || options.element.kind === "shape") &&
     options.detail >= 2
@@ -82,28 +89,34 @@ export function canvasPointerDownAction(options: {
   return {
     element: options.element,
     kind: "start-drag",
-    mode: options.isResize ? "resize" : "move",
+    mode: options.isRotate ? "rotate" : options.isResize ? "resize" : "move",
   };
 }
 
 export function createDragState(options: {
   clientX: number;
   clientY: number;
+  canvasRect?: CanvasRect;
   element: SlideElement;
   mode: DragState["mode"];
   selectedElements: SlideElement[];
 }): DragState {
+  const center = elementCenterClientPoint(options.element, options.canvasRect);
   return {
     elementId: options.element.id,
     mode: options.mode,
     kind: options.element.kind,
     startClientX: options.clientX,
     startClientY: options.clientY,
+    startCenterClientX: center.x,
+    startCenterClientY: center.y,
+    startAngle: angleBetweenPoints(center.x, center.y, options.clientX, options.clientY),
     startWidth: options.element.width,
     startHeight: options.element.height,
     aspectRatio: options.element.width / Math.max(options.element.height, 1),
     selectedStarts: options.selectedElements.map((item) => ({
       id: item.id,
+      rotation: item.rotation,
       x: item.x,
       y: item.y,
       width: item.width,
@@ -137,6 +150,24 @@ export function dragGeometryUpdates(
       patch: {
         x: roundPercent(item.x + constrainedDelta.dx),
         y: roundPercent(item.y + constrainedDelta.dy),
+      },
+    }));
+  }
+
+  if (dragState.mode === "rotate") {
+    const currentAngle = angleBetweenPoints(
+      dragState.startCenterClientX,
+      dragState.startCenterClientY,
+      clientX,
+      clientY,
+    );
+    const delta = currentAngle - dragState.startAngle;
+    return dragState.selectedStarts.map((item) => ({
+      id: item.id,
+      patch: {
+        rotation: roundDegrees(
+          shiftKey ? snapDegrees(item.rotation + delta, 15) : item.rotation + delta,
+        ),
       },
     }));
   }
@@ -248,6 +279,34 @@ export function textElementIdFromTarget(target: HTMLElement | null) {
 
 function roundPercent(value: number) {
   return Math.round(value * 10) / 10;
+}
+
+function roundDegrees(value: number) {
+  return Math.round(normalizeDegrees(value) * 10) / 10;
+}
+
+function normalizeDegrees(value: number) {
+  const normalized = (((((Number.isFinite(value) ? value : 0) + 180) % 360) + 360) % 360) - 180;
+  return Object.is(normalized, -0) ? 0 : normalized;
+}
+
+function snapDegrees(value: number, increment: number) {
+  return Math.round(value / increment) * increment;
+}
+
+function angleBetweenPoints(centerX: number, centerY: number, clientX: number, clientY: number) {
+  return (Math.atan2(clientY - centerY, clientX - centerX) * 180) / Math.PI;
+}
+
+function elementCenterClientPoint(element: SlideElement, canvasRect: CanvasRect | undefined) {
+  if (!canvasRect) {
+    return { x: element.x + element.width / 2, y: element.y + element.height / 2 };
+  }
+
+  return {
+    x: canvasRect.left + ((element.x + element.width / 2) / 100) * canvasRect.width,
+    y: canvasRect.top + ((element.y + element.height / 2) / 100) * canvasRect.height,
+  };
 }
 
 function constrainMoveDelta(dx: number, dy: number, pixelDx: number, pixelDy: number) {

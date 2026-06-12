@@ -50,15 +50,65 @@ export function elementIdsInRect(rect: PercentRect, elements: SlideElement[]) {
   }
 
   return elements
-    .filter((element) =>
-      rectsIntersect(rect, {
-        x: element.x,
-        y: element.y,
-        width: element.width,
-        height: element.height,
-      }),
-    )
+    .filter((element) => rectsIntersect(rect, rotatedElementBounds(element)))
     .map((element) => element.id);
+}
+
+export function pointInElementBounds(point: PercentPoint, element: SlideElement) {
+  const centerX = element.x + element.width / 2;
+  const centerY = element.y + element.height / 2;
+  const radians = (-element.rotation * Math.PI) / 180;
+  const dx = point.x - centerX;
+  const dy = point.y - centerY;
+  const localX = dx * Math.cos(radians) - dy * Math.sin(radians) + centerX;
+  const localY = dx * Math.sin(radians) + dy * Math.cos(radians) + centerY;
+
+  return (
+    localX >= element.x &&
+    localX <= element.x + element.width &&
+    localY >= element.y &&
+    localY <= element.y + element.height
+  );
+}
+
+function rotatedElementBounds(element: SlideElement): PercentRect {
+  if (element.rotation === 0) {
+    return {
+      x: element.x,
+      y: element.y,
+      width: element.width,
+      height: element.height,
+    };
+  }
+
+  const centerX = element.x + element.width / 2;
+  const centerY = element.y + element.height / 2;
+  const radians = (element.rotation * Math.PI) / 180;
+  const corners = [
+    { x: element.x, y: element.y },
+    { x: element.x + element.width, y: element.y },
+    { x: element.x + element.width, y: element.y + element.height },
+    { x: element.x, y: element.y + element.height },
+  ].map((point) => rotatePoint(point, centerX, centerY, radians));
+  const xs = corners.map((point) => point.x);
+  const ys = corners.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  return {
+    x: minX,
+    y: minY,
+    width: Math.max(...xs) - minX,
+    height: Math.max(...ys) - minY,
+  };
+}
+
+function rotatePoint(point: PercentPoint, centerX: number, centerY: number, radians: number) {
+  const dx = point.x - centerX;
+  const dy = point.y - centerY;
+  return {
+    x: dx * Math.cos(radians) - dy * Math.sin(radians) + centerX,
+    y: dx * Math.sin(radians) + dy * Math.cos(radians) + centerY,
+  };
 }
 
 function clamp(value: number, min: number, max: number) {

@@ -62,7 +62,6 @@ function controllerHarness() {
   const calls: string[] = [];
   const portableAssetPayloads: unknown[] = [];
   const controller = createExportController({
-    baseHref: () => "https://example.test/app",
     documentRef: doc as unknown as Document,
     elements: elements as unknown as Parameters<typeof createExportController>[0]["elements"],
     fontsReady: async () => undefined,
@@ -111,14 +110,14 @@ describe("export controller", () => {
     vi.clearAllMocks();
   });
 
-  it("renders status and opens the export dialog", () => {
+  it("renders actions and opens the export dialog", () => {
     const test = controllerHarness();
     test.dialog.open = false;
 
     test.controller.open();
 
     expect(test.dialog.showModal).toHaveBeenCalled();
-    expect(test.elements.exportStatus.textContent).toContain("slides");
+    expect(test.elements.exportStatus.textContent).toBe("");
     expect(test.elements.exportJsonAction.disabled).toBe(false);
   });
 

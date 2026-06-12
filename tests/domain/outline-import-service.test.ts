@@ -88,7 +88,12 @@ Note: Mention pilot customers.
 > This made the decision obvious.
 Speaker notes: Pause before the quote.`);
 
-    expect(deck.slides.map((slide) => slide.layout)).toEqual(["title", "bullets", "bullets", "bullets"]);
+    expect(deck.slides.map((slide) => slide.layout)).toEqual([
+      "title",
+      "bullets",
+      "bullets",
+      "bullets",
+    ]);
     expect(deck.slides[3].speakerNotes).toBe("Pause before the quote.");
   });
 

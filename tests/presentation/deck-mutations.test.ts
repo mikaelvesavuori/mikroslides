@@ -1,10 +1,15 @@
 import type { MikroFontRecord } from "../../src/index.js";
-import { createImageElement, createShapeElement, createTextElement, MikroDeck } from "../../src/index.js";
+import {
+  createImageElement,
+  createShapeElement,
+  createTextElement,
+  MikroDeck,
+} from "../../src/index.js";
 import {
   addDefaultTextElement,
   alignElementsInActiveSlide,
-  applyTemplateToActiveSlide,
   applyFontToSelectedText,
+  applyTemplateToActiveSlide,
   duplicateElementsInActiveSlide,
   duplicateElementsInPlaceInActiveSlide,
   pasteElementsIntoActiveSlide,
@@ -80,7 +85,11 @@ describe("deck mutations", () => {
       ...deck.slides[0],
       elements: [
         createTextElement({ content: "Existing headline", id: "headline" }),
-        createTextElement({ content: "First point\nSecond point", id: "body", listStyle: "bullet" }),
+        createTextElement({
+          content: "First point\nSecond point",
+          id: "body",
+          listStyle: "bullet",
+        }),
         createImageElement({ alt: "Existing image", id: "image", src: "asset:image" }),
         createShapeElement({ content: "Keep this label", id: "labelled-shape" }),
         createShapeElement({ id: "decorative-shape" }),

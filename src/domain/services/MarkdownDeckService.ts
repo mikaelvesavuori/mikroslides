@@ -557,7 +557,7 @@ function createImageSlide(slide: MarkdownSlide, theme: DeckTheme): MikroSlideRec
         color: theme.muted,
         fontSize: 22,
         fontWeight: 430,
-        listStyle: slide.body.some((line) => /^[-*•]|\d+[.)]/.test(line)) ? "bullet" : "none",
+        listStyle: listStyleForBody(slide.body),
       }),
       createImageElement({
         x: imageLeft ? 8 : 52,
@@ -570,6 +570,14 @@ function createImageSlide(slide: MarkdownSlide, theme: DeckTheme): MikroSlideRec
       }),
     ].filter((element) => element.kind !== "text" || element.content),
   });
+}
+
+function listStyleForBody(lines: string[]) {
+  const firstListLine = lines.find((line) => /^\s*(?:[-*•]|\d+[.)])\s+/.test(line));
+  if (!firstListLine) {
+    return "none";
+  }
+  return /^\s*\d+[.)]\s+/.test(firstListLine) ? "numbered" : "bullet";
 }
 
 function createBulletSlide(slide: MarkdownSlide, theme: DeckTheme): MikroSlideRecord {
@@ -636,7 +644,10 @@ function createSlide(slide: MarkdownSlide, theme: DeckTheme) {
   return createBulletSlide(slide, theme);
 }
 
-function parseMarkdownDeck(markdown: string, options: MarkdownDeckOptions = {}): ParsedMarkdownDeck {
+function parseMarkdownDeck(
+  markdown: string,
+  options: MarkdownDeckOptions = {},
+): ParsedMarkdownDeck {
   const frontMatter = readFrontMatter(markdown);
   const metadata = frontMatter.metadata;
   const theme = readTheme(metadata, options.theme ?? defaultDeckTheme);
@@ -683,9 +694,7 @@ export class MarkdownDeckService {
   looksLikeMarkdownDeck(markdown: string) {
     const text = markdown.trim();
     return (
-      /^---\s*[\s\S]*?\n---/m.test(text) ||
-      /^#{1,2}\s+.+/m.test(text) ||
-      /\n-{3,}\n/.test(text)
+      /^---\s*[\s\S]*?\n---/m.test(text) || /^#{1,2}\s+.+/m.test(text) || /\n-{3,}\n/.test(text)
     );
   }
 }

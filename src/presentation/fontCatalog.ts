@@ -215,22 +215,6 @@ export function fontSourceLabel(font: MikroFontRecord) {
   return "Imported file";
 }
 
-export function fontCategoryLabel(category: string) {
-  if (category === "sans-serif") {
-    return "Sans";
-  }
-  if (category === "serif") {
-    return "Serif";
-  }
-  if (category === "display") {
-    return "Display";
-  }
-  if (category === "monospace") {
-    return "Mono";
-  }
-  return "Script";
-}
-
 export function fontWeightsLabel(font: BunnyFontCatalogItem) {
   if (font.isVariable) {
     return "Variable";

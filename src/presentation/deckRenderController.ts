@@ -77,12 +77,18 @@ export function createDeckRenderController(options: DeckRenderControllerOptions)
 
   return {
     renderBackgroundSwatches() {
+      const customColor = options.elements.backgroundSwatches.querySelector(
+        "[data-custom-paint='background']",
+      );
       options.elements.backgroundSwatches.innerHTML = options.backgroundSwatches
         .map(
           (color) =>
-            `<button class="swatch-btn" type="button" data-background="${color}" style="--swatch:${color}" title="${color}" aria-label="${color}"></button>`,
+            `<button class="paint-swatch" type="button" data-background="${color}" style="--swatch:${color}" title="${color}" aria-label="${color}"></button>`,
         )
         .join("");
+      if (customColor) {
+        options.elements.backgroundSwatches.append(customColor);
+      }
     },
     renderCanvas() {
       const slide = options.getSlide();

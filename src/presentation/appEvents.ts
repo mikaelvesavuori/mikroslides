@@ -1,5 +1,6 @@
 import type {
   ImageFit,
+  ShapeArrowHead,
   SlideElement,
   SlideShapeKind,
   TextAlignment,
@@ -10,7 +11,7 @@ import type {
 import type { ObjectAlignment } from "./deckMutations.js";
 import type { FontManager } from "./fontManager.js";
 import { readNumber } from "./inspectorPanel.js";
-import { isSlideShapeKind } from "./shapeGeometry.js";
+import { isShapeSelectorTool, type ShapeSelectorTool } from "./shapeSelectorView.js";
 
 export type AppEventElements = {
   addImageButton: HTMLButtonElement;
@@ -20,7 +21,6 @@ export type AppEventElements = {
   shapeSelector: HTMLDetailsElement;
   addSlideButton: HTMLButtonElement;
   addTextButton: HTMLButtonElement;
-  commandButton: HTMLButtonElement;
   contextMenu: HTMLElement;
   createOutlineDeckButton: HTMLButtonElement;
   deckAspectSelect: HTMLSelectElement;
@@ -34,6 +34,7 @@ export type AppEventElements = {
   elementHeightInput: HTMLInputElement;
   elementLockedInput: HTMLInputElement;
   elementOpacityInput: HTMLInputElement;
+  elementRotationInput: HTMLInputElement;
   elementWidthInput: HTMLInputElement;
   elementXInput: HTMLInputElement;
   elementYInput: HTMLInputElement;
@@ -69,9 +70,15 @@ export type AppEventElements = {
   redoButton: HTMLButtonElement;
   saveTemplateButton: HTMLButtonElement;
   saveTemplateConfirmButton: HTMLButtonElement;
+  shapeFields: HTMLElement;
   shapeFillInput: HTMLInputElement;
+  shapeFillNoneButton: HTMLButtonElement;
   shapeKindSelect: HTMLSelectElement;
+  shapeRadiusInput: HTMLInputElement;
+  shapeArrowHeadSelect: HTMLSelectElement;
+  shapeStrokeNoneButton: HTMLButtonElement;
   shapeStrokeInput: HTMLInputElement;
+  shapeStrokeWidthInput: HTMLInputElement;
   slideBackgroundInput: HTMLInputElement;
   slideContextMenu: HTMLElement;
   slideCanvas: HTMLElement;
@@ -80,8 +87,10 @@ export type AppEventElements = {
   templateSelect: HTMLSelectElement;
   textColorInput: HTMLInputElement;
   textContentInput: HTMLTextAreaElement;
+  textFields: HTMLElement;
   textFontSelect: HTMLSelectElement;
   textLineHeightInput: HTMLInputElement;
+  textListStyleSelect: HTMLSelectElement;
   textSizeInput: HTMLInputElement;
   textWeightInput: HTMLInputElement;
   themeButton: HTMLButtonElement;
@@ -92,7 +101,7 @@ export type AppEventElements = {
 };
 
 export type AppEventHandlers = {
-  addShapeElement: (shape?: SlideShapeKind) => void;
+  addShapeElement: (shape?: ShapeSelectorTool) => void;
   addSlide: () => void;
   addTextElement: () => void;
   alignSelectedElements: (alignment: ObjectAlignment) => void;
@@ -184,7 +193,6 @@ export function bindAppEvents(
   elements.outlineButton.addEventListener("click", handlers.openOutlineDialog);
   elements.exportButton.addEventListener("click", handlers.openExportDialog);
   elements.presentButton.addEventListener("click", handlers.openPresenter);
-  elements.commandButton.addEventListener("click", handlers.openCommandPalette);
   elements.themeButton.addEventListener("click", handlers.toggleTheme);
   elements.addSlideButton.addEventListener("click", handlers.addSlide);
   elements.undoButton.addEventListener("click", handlers.undo);
@@ -194,7 +202,7 @@ export function bindAppEvents(
     const target = event.target instanceof Element ? event.target : null;
     const button = target?.closest<HTMLButtonElement>("[data-shape-tool]");
     const shape = button?.dataset.shapeTool;
-    if (!isSlideShapeKind(shape) || shape === "line") {
+    if (!isShapeSelectorTool(shape)) {
       return;
     }
 
@@ -223,10 +231,7 @@ export function bindAppEvents(
   elements.deckThemeSelect.addEventListener("change", handlers.updateDeckTheme);
   elements.deckAspectSelect.addEventListener("change", handlers.updateDeckAspect);
   elements.slideBackgroundInput.addEventListener("input", () =>
-    handlers.updateCurrentSlide(
-      { background: elements.slideBackgroundInput.value },
-      { inspector: false },
-    ),
+    handlers.updateCurrentSlide({ background: elements.slideBackgroundInput.value }),
   );
   elements.speakerNotes.addEventListener("input", () =>
     handlers.updateCurrentSlide(
@@ -302,6 +307,12 @@ function bindInspectorEvents(elements: AppEventElements, handlers: AppEventHandl
       { inspector: false },
     ),
   );
+  elements.elementRotationInput.addEventListener("input", () =>
+    handlers.updateSelectedElement(
+      { rotation: readNumber(elements.elementRotationInput) },
+      { inspector: false },
+    ),
+  );
   elements.elementOpacityInput.addEventListener("input", () =>
     handlers.updateSelectedElement(
       { opacity: readNumber(elements.elementOpacityInput) },
@@ -346,7 +357,20 @@ function bindInspectorEvents(elements: AppEventElements, handlers: AppEventHandl
     ),
   );
   elements.textColorInput.addEventListener("input", () =>
-    handlers.updateSelectedElement({ color: elements.textColorInput.value }, { inspector: false }),
+    handlers.updateSelectedElement({ color: elements.textColorInput.value }),
+  );
+  elements.textFields.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const colorSwatch = target?.closest<HTMLButtonElement>("[data-text-color]");
+    if (colorSwatch?.dataset.textColor) {
+      handlers.updateSelectedElement({ color: colorSwatch.dataset.textColor });
+    }
+  });
+  elements.textListStyleSelect.addEventListener("change", () =>
+    handlers.updateSelectedElement(
+      { listStyle: elements.textListStyleSelect.value as TextListStyle },
+      { inspector: false },
+    ),
   );
   elements.shapeKindSelect.addEventListener("change", () =>
     handlers.updateSelectedElement(
@@ -354,12 +378,46 @@ function bindInspectorEvents(elements: AppEventElements, handlers: AppEventHandl
       { inspector: false },
     ),
   );
+  elements.shapeFields.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const fillSwatch = target?.closest<HTMLButtonElement>("[data-shape-fill]");
+    if (fillSwatch?.dataset.shapeFill) {
+      handlers.updateSelectedElement({ fill: fillSwatch.dataset.shapeFill });
+      return;
+    }
+
+    const strokeSwatch = target?.closest<HTMLButtonElement>("[data-shape-stroke]");
+    if (strokeSwatch?.dataset.shapeStroke) {
+      handlers.updateSelectedElement({ stroke: strokeSwatch.dataset.shapeStroke });
+    }
+  });
   elements.shapeFillInput.addEventListener("input", () =>
-    handlers.updateSelectedElement({ fill: elements.shapeFillInput.value }, { inspector: false }),
+    handlers.updateSelectedElement({ fill: elements.shapeFillInput.value }),
+  );
+  elements.shapeFillNoneButton.addEventListener("click", () =>
+    handlers.updateSelectedElement({ fill: "none" }),
   );
   elements.shapeStrokeInput.addEventListener("input", () =>
+    handlers.updateSelectedElement({ stroke: elements.shapeStrokeInput.value }),
+  );
+  elements.shapeStrokeNoneButton.addEventListener("click", () =>
+    handlers.updateSelectedElement({ stroke: "none" }),
+  );
+  elements.shapeStrokeWidthInput.addEventListener("input", () =>
     handlers.updateSelectedElement(
-      { stroke: elements.shapeStrokeInput.value },
+      { strokeWidth: readNumber(elements.shapeStrokeWidthInput) },
+      { inspector: false },
+    ),
+  );
+  elements.shapeArrowHeadSelect.addEventListener("change", () =>
+    handlers.updateSelectedElement(
+      { arrowHead: elements.shapeArrowHeadSelect.value as ShapeArrowHead },
+      { inspector: false },
+    ),
+  );
+  elements.shapeRadiusInput.addEventListener("input", () =>
+    handlers.updateSelectedElement(
+      { radius: readNumber(elements.shapeRadiusInput) },
       { inspector: false },
     ),
   );

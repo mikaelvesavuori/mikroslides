@@ -3,6 +3,7 @@ import type {
   DeckAspectRatio,
   ImageSlideElement,
   MikroSlideRecord,
+  ShapeArrowHead,
   ShapeSlideElement,
   SlideElement,
   TextSlideElement,
@@ -148,8 +149,8 @@ function drawTextElement(
   context.textAlign = element.align;
   context.textBaseline = "alphabetic";
 
-  if (element.listStyle === "bullet") {
-    drawBulletTextElement(context, element, box, fontSize, lineHeight);
+  if (element.listStyle !== "none") {
+    drawListTextElement(context, element, box, fontSize, lineHeight);
     context.restore();
     return;
   }
@@ -168,7 +169,7 @@ function drawTextElement(
   context.restore();
 }
 
-function drawBulletTextElement(
+function drawListTextElement(
   context: CanvasRenderingContext2D,
   element: TextSlideElement | ShapeSlideElement,
   box: ElementBox,
@@ -176,8 +177,8 @@ function drawBulletTextElement(
   lineHeight: number,
 ) {
   context.textAlign = "left";
-  const bulletX = 0;
-  const textX = fontSize * 0.82;
+  const markerX = 0;
+  const textX = element.listStyle === "numbered" ? fontSize * 1.35 : fontSize * 0.82;
   const maxLineWidth = Math.max(1, box.width - textX);
   const itemLines = textListItems(element.content).map((item) =>
     wrapText(context, item, maxLineWidth),
@@ -185,8 +186,10 @@ function drawBulletTextElement(
   const totalLines = itemLines.reduce((count, lines) => count + Math.max(1, lines.length), 0);
   let y = textBlockStartY(element, box, Math.max(1, totalLines), fontSize, lineHeight);
 
-  for (const lines of itemLines) {
-    context.fillText("•", bulletX, y, textX * 0.8);
+  for (let index = 0; index < itemLines.length; index += 1) {
+    const lines = itemLines[index] ?? [""];
+    const marker = element.listStyle === "numbered" ? `${index + 1}.` : "•";
+    context.fillText(marker, markerX, y, textX * 0.8);
     for (const line of lines) {
       context.fillText(line, textX, y, maxLineWidth);
       y += lineHeight;
@@ -249,16 +252,29 @@ function drawShapeElement(
   box: ElementBox,
   scale: number,
 ) {
-  const strokeWidth = Math.max(1, element.strokeWidth * scale);
-  context.fillStyle = element.fill;
-  context.strokeStyle = element.stroke;
+  const strokeWidth = Math.max(0, element.strokeWidth * scale);
+  const hasFill = !isNonePaint(element.fill);
+  const hasStroke = !isNonePaint(element.stroke) && strokeWidth > 0;
+  if (hasFill) {
+    context.fillStyle = element.fill;
+  }
+  if (hasStroke) {
+    context.strokeStyle = element.stroke;
+  }
   context.lineWidth = strokeWidth;
 
   if (element.shape === "line") {
+    if (!hasStroke) {
+      return;
+    }
     context.beginPath();
-    context.moveTo(0, box.height / 2);
-    context.lineTo(box.width, box.height / 2);
+    const headInset = Math.min(box.width / 2, Math.max(10 * scale, strokeWidth * 4.4));
+    const startX = hasArrowHead(element.arrowHead, "start") ? headInset : 0;
+    const endX = hasArrowHead(element.arrowHead, "end") ? box.width - headInset : box.width;
+    context.moveTo(startX, box.height / 2);
+    context.lineTo(endX, box.height / 2);
     context.stroke();
+    drawLineArrowHeads(context, element.arrowHead, element.stroke, box, headInset);
     return;
   }
 
@@ -271,8 +287,12 @@ function drawShapeElement(
       element.radius * scale,
     ),
   );
-  context.fill();
-  context.stroke();
+  if (hasFill) {
+    context.fill();
+  }
+  if (hasStroke) {
+    context.stroke();
+  }
 
   const decoration = shapeDecorationPathCommands(element.shape, {
     x: 0,
@@ -280,11 +300,59 @@ function drawShapeElement(
     width: box.width,
     height: box.height,
   });
-  if (decoration) {
+  if (decoration && hasStroke) {
     context.beginPath();
     tracePathCommands(context, decoration);
     context.stroke();
   }
+}
+
+function drawLineArrowHeads(
+  context: CanvasRenderingContext2D,
+  arrowHead: ShapeArrowHead,
+  color: string,
+  box: ElementBox,
+  size: number,
+) {
+  context.fillStyle = color;
+  if (hasArrowHead(arrowHead, "start")) {
+    drawArrowTriangle(context, { x: 0, y: box.height / 2 }, 0, size);
+  }
+  if (hasArrowHead(arrowHead, "end")) {
+    drawArrowTriangle(context, { x: box.width, y: box.height / 2 }, Math.PI, size);
+  }
+}
+
+function drawArrowTriangle(
+  context: CanvasRenderingContext2D,
+  tip: { x: number; y: number },
+  angle: number,
+  size: number,
+) {
+  const wing = 0.58;
+  const left = {
+    x: tip.x + Math.cos(angle - wing) * size,
+    y: tip.y + Math.sin(angle - wing) * size,
+  };
+  const right = {
+    x: tip.x + Math.cos(angle + wing) * size,
+    y: tip.y + Math.sin(angle + wing) * size,
+  };
+  context.beginPath();
+  context.moveTo(tip.x, tip.y);
+  context.lineTo(left.x, left.y);
+  context.lineTo(right.x, right.y);
+  context.closePath();
+  context.fill();
+}
+
+function hasArrowHead(arrowHead: ShapeArrowHead, endpoint: "start" | "end") {
+  return arrowHead === "both" || arrowHead === endpoint;
+}
+
+function isNonePaint(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return normalized === "none" || normalized === "transparent";
 }
 
 async function drawImageElement(

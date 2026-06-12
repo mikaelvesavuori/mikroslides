@@ -28,10 +28,13 @@ async function main() {
 
     await page.goto(targetUrl, { waitUntil: "networkidle" });
     providerRequests.length = 0;
+    await page.click("#add-text-btn");
+    await page.waitForSelector("#manage-fonts-btn");
     await page.evaluate(() => {
       document.querySelector("#manage-fonts-btn")?.click();
     });
     await page.waitForSelector("#font-dialog[open]");
+    await page.click("#font-browse-tab");
     await page.waitForTimeout(750);
     if (providerRequests.length > 0) {
       throw new Error(`Font dialog opened provider requests: ${providerRequests.join(", ")}`);
@@ -44,12 +47,13 @@ async function main() {
     await page.click("#load-font-catalog-btn");
     const bunnyRequest = await bunnyRequestPromise;
 
-    const interRequestPromise = page.waitForRequest(
-      (request) => request.url().includes("rsms.me/inter/font-files/InterVariable.woff2"),
-      { timeout: 5000 },
-    );
     await page.click('[data-source-font-id="inter"]');
-    const interRequest = await interRequestPromise;
+    await page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-source-font-id="inter"] .font-catalog-meta')
+          ?.textContent?.trim() === "Installed",
+    );
 
     await browser.close();
     console.log(
@@ -57,7 +61,7 @@ async function main() {
         {
           afterOpenProviderRequests: 0,
           bunnyRequest: bunnyRequest.url(),
-          interRequest: interRequest.url(),
+          sourceFont: "Inter added",
         },
         null,
         2,

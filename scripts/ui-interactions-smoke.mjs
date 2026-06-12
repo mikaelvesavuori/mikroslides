@@ -116,8 +116,9 @@ async function assertFontDialogCatalogGate(page) {
   await page.waitForFunction(() => document.querySelector("#font-dialog")?.open);
   await page.waitForFunction(
     () =>
-      document.querySelector("#load-font-catalog-btn")?.textContent?.trim() === "Load catalog" &&
-      document.querySelector("#font-catalog-status")?.textContent?.trim() === "Curated",
+      document.querySelector("#load-font-catalog-btn")?.textContent?.trim() ===
+        "Browse online fonts" &&
+      document.querySelector("#font-catalog-status")?.textContent?.trim() === "",
   );
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => !document.querySelector("#font-dialog")?.open);
@@ -150,16 +151,19 @@ async function assertMultiSelectInspector(page) {
 
 async function assertDoubleClickTextEditing(page) {
   const beforeCount = await page.locator("#slide-canvas [data-element-id]").count();
-  await page.locator("#slide-canvas [data-text-editor]", { hasText: "New text" }).dblclick();
-  await page.waitForSelector('[data-text-editor][contenteditable="true"]');
+  await page
+    .locator('#slide-canvas [data-element-id][data-kind="text"]', { hasText: "New text" })
+    .dblclick();
+  await page.waitForSelector('[data-text-editor][contenteditable="plaintext-only"]');
   await page.keyboard.press("Backspace");
   await page.waitForFunction(
     (count) => document.querySelectorAll("#slide-canvas [data-element-id]").length === count,
     beforeCount,
   );
-  await page.locator('[data-text-editor][contenteditable="true"]').click();
+  await page.click('#slide-canvas [data-element-id][data-kind="shape"]', { force: true });
   await page.waitForFunction(
-    () => !document.querySelector('#slide-canvas [data-text-editor][contenteditable="true"]'),
+    () =>
+      !document.querySelector('#slide-canvas [data-text-editor][contenteditable="plaintext-only"]'),
   );
 }
 

@@ -22,7 +22,12 @@ import {
   duplicateElementsInPlaceInActiveSlide,
   updateElementsInActiveSlide,
 } from "./deckMutations.js";
-import { canvasPointPercent, elementIdsInRect, type PercentRect } from "./interactionGeometry.js";
+import {
+  canvasPointPercent,
+  elementIdsInRect,
+  type PercentRect,
+  pointInElementBounds,
+} from "./interactionGeometry.js";
 import { isMultiSelectEvent, nextInteractionSelection } from "./selection.js";
 import {
   insertTextAtCurrentSelection,
@@ -109,12 +114,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
 
     const point = getCanvasPointPercent(clientX, clientY);
     for (const element of [...slide.elements].reverse()) {
-      const inside =
-        point.x >= element.x &&
-        point.x <= element.x + element.width &&
-        point.y >= element.y &&
-        point.y <= element.y + element.height;
-      if (!inside) {
+      if (!pointInElementBounds(point, element)) {
         continue;
       }
 
@@ -292,6 +292,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       const elementId = canvasElementIdFromTarget(target);
       const element = options.getSlide()?.elements.find((item) => item.id === elementId) ?? null;
       const isResize = Boolean(target?.closest("[data-resize]"));
+      const isRotate = Boolean(target?.closest("[data-rotate]"));
       const wasSelected = Boolean(elementId && options.getSelectedElementIds().includes(elementId));
       const activeTextEditor = target?.closest<HTMLElement>("[data-text-editor]");
       const activeTextOverlay = target?.closest<HTMLElement>("[data-text-edit-overlay]");
@@ -303,9 +304,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       if (isActiveTextEditorTarget && !isResize) {
         if (!activeTextEditor && editingTextElementId) {
           options.canvas
-            .querySelector<HTMLElement>(
-              `[data-text-editor="${cssEscape(editingTextElementId)}"]`,
-            )
+            .querySelector<HTMLElement>(`[data-text-editor="${cssEscape(editingTextElementId)}"]`)
             ?.focus();
         }
         textEditPointerId = event.pointerId;
@@ -333,6 +332,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
         element,
         elementId: elementId ?? null,
         isEditableTarget: isEditableCanvasTarget(target),
+        isRotate,
         isResize,
         isSelected: wasSelected,
         multiSelect,
@@ -402,6 +402,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       dragState = createDragState({
         clientX: event.clientX,
         clientY: event.clientY,
+        canvasRect: options.canvas.getBoundingClientRect(),
         element: dragElement,
         mode: action.mode,
         selectedElements: selectedElementsForDrag,

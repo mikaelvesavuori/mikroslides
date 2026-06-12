@@ -31,6 +31,15 @@ describe("slide renderer", () => {
     );
   });
 
+  it("renders numbered list text as an ordered list", () => {
+    const element = createTextElement({
+      content: "1. Plan\n2. Ship",
+      listStyle: "numbered",
+    });
+
+    expect(renderTextElementContent(element)).toBe("<ol><li>Plan</li><li>Ship</li></ol>");
+  });
+
   it("renders selected/editing state and resolves image/font sources", () => {
     const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
     slide.elements = [
@@ -65,6 +74,7 @@ describe("slide renderer", () => {
     expect(html).toContain("--line-height:1.35");
     expect(html).toContain('src="blob:image_1"');
     expect(html).toContain("element-resize-handle");
+    expect(html).toContain("element-rotate-handle");
   });
 
   it("omits contenteditable when text is not actively being edited", () => {
@@ -84,7 +94,7 @@ describe("slide renderer", () => {
     slide.elements = [
       createShapeElement({ id: "diamond", shape: "diamond", content: "Decision" }),
       createShapeElement({ id: "database", shape: "database" }),
-      createShapeElement({ id: "line", shape: "line" }),
+      createShapeElement({ arrowHead: "end", id: "line", shape: "line", strokeWidth: 3 }),
     ];
 
     const html = renderSlideElements(slide);
@@ -95,6 +105,18 @@ describe("slide renderer", () => {
     expect(html).toContain('class="slide-shape-fill"');
     expect(html).toContain('class="slide-shape-decoration"');
     expect(html).toContain('class="slide-shape-line"');
+    expect(html).toContain('class="slide-shape-arrow-head"');
+    expect(html).toContain("--stroke-width:3");
+  });
+
+  it("renders shape fill and stroke none values", () => {
+    const slide = MikroDeck.create({ title: "Render" }).toRecord().slides[0];
+    slide.elements = [createShapeElement({ fill: "none", id: "shape", stroke: "none" })];
+
+    const html = renderSlideElements(slide);
+
+    expect(html).toContain("--fill:none");
+    expect(html).toContain("--stroke:none");
   });
 
   it("renders editable shape labels", () => {
@@ -132,9 +154,7 @@ describe("slide renderer", () => {
     expect(getElementLabel(createImageElement({ alt: "Product screenshot" }), 1)).toBe(
       "Product screenshot",
     );
-    expect(getElementLabel(createShapeElement({ content: "Launch gate" }), 2)).toBe(
-      "Launch gate",
-    );
+    expect(getElementLabel(createShapeElement({ content: "Launch gate" }), 2)).toBe("Launch gate");
   });
 
   it("renders escaped slide thumbnails with active state", () => {

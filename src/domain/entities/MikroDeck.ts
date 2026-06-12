@@ -8,6 +8,7 @@ import type {
   MikroDeckSnapshot,
   MikroFontRecord,
   MikroSlideRecord,
+  ShapeArrowHead,
   ShapeSlideElement,
   SlideElement,
   SlideLayoutKind,
@@ -98,7 +99,7 @@ function normalizeTextFontFamily(value: unknown): TextFontFamily {
 }
 
 function normalizeTextListStyle(value: unknown): TextListStyle {
-  return value === "bullet" ? "bullet" : "none";
+  return value === "bullet" || value === "numbered" ? value : "none";
 }
 
 function normalizeTextVerticalAlignment(value: unknown): TextVerticalAlignment {
@@ -121,6 +122,10 @@ function normalizeSlideShapeKind(value: unknown): SlideShapeKind {
     value === "triangle"
     ? value
     : "rect";
+}
+
+function normalizeShapeArrowHead(value: unknown): ShapeArrowHead {
+  return value === "start" || value === "end" || value === "both" ? value : "none";
 }
 
 function normalizeFontRecord(value: MikroFontRecord): MikroFontRecord | null {
@@ -239,6 +244,7 @@ export function createTextElement(input: Partial<TextSlideElement> = {}): TextSl
 }
 
 export function createShapeElement(input: Partial<ShapeSlideElement> = {}): ShapeSlideElement {
+  const shape = normalizeSlideShapeKind(input.shape);
   return normalizeElementGeometry({
     id: input.id ?? createId("el"),
     kind: "shape",
@@ -249,10 +255,11 @@ export function createShapeElement(input: Partial<ShapeSlideElement> = {}): Shap
     rotation: input.rotation ?? 0,
     opacity: input.opacity ?? 1,
     locked: input.locked === true,
-    shape: normalizeSlideShapeKind(input.shape),
-    fill: input.fill ?? "#dbeafe",
+    shape,
+    fill: input.fill ?? (shape === "line" ? "none" : "#dbeafe"),
     stroke: input.stroke ?? defaultDeckTheme.accent,
     strokeWidth: clamp(input.strokeWidth ?? 1, 0, 10),
+    arrowHead: normalizeShapeArrowHead(input.arrowHead),
     radius: clamp(input.radius ?? 8, 0, 48),
     content: input.content ?? "",
     color: input.color ?? defaultDeckTheme.text,

@@ -40,7 +40,7 @@
     "smoke:ui": "npm run build && node scripts/ui-interactions-smoke.mjs",
     "deploy": "npm run deploy:cloudflare",
     "deploy:cloudflare": "npm run verify && npx wrangler deploy",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run docs:build"
   },
   "devDependencies": {
     "@biomejs/biome": "2",

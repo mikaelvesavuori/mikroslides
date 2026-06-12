@@ -7,6 +7,7 @@ import {
   type MikroDeckRecord,
   type MikroSlideRecord,
   OutlineImportService,
+  type ShapeSlideElement,
   type SlideElement,
   type SlideShapeKind,
   type TextListStyle,
@@ -42,10 +43,7 @@ import { createFontManager } from "./fontManager.js";
 import { cssFontStackForFont } from "./fontRuntime.js";
 import { createFontRuntimeController } from "./fontRuntimeController.js";
 import { createPresenterController } from "./presenterController.js";
-import {
-  renderShapeSelector,
-  type ShapeSelectorTool,
-} from "./shapeSelectorView.js";
+import { renderShapeSelector, type ShapeSelectorTool } from "./shapeSelectorView.js";
 import { createSlideContextMenuController } from "./slideContextMenuController.js";
 import { builtInTemplates } from "./slideLayouts.js";
 import { createSlideListInteraction } from "./slideListInteraction.js";
@@ -131,7 +129,6 @@ const fontManager = createFontManager({
 });
 
 const exportController = createExportController({
-  baseHref: () => window.location.href,
   documentRef: document,
   elements,
   fontsReady: () => document.fonts.ready,
@@ -694,12 +691,15 @@ function addTextElement() {
   deckActionsController.addTextElement();
 }
 
-function addShapeElement(shape?: SlideShapeKind) {
-  if (shape && shape !== "line") {
+function addShapeElement(shape?: ShapeSelectorTool) {
+  if (shape) {
     activeShapeTool = shape;
     renderShapeTools();
   }
-  deckActionsController.addShapeElement(shape ?? activeShapeTool);
+  const tool = shape ?? activeShapeTool;
+  const shapeKind: SlideShapeKind = tool === "arrow" ? "line" : tool;
+  const patch: Partial<ShapeSlideElement> = tool === "arrow" ? { arrowHead: "end" } : {};
+  deckActionsController.addShapeElement(shapeKind, patch);
 }
 
 function alignSelectedElements(alignment: ObjectAlignment) {

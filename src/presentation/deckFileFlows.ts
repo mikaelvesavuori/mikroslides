@@ -25,7 +25,6 @@ export type ExportDialogState = {
 export function exportDialogState(
   deck: MikroDeckRecord | null,
   slide: MikroSlideRecord | null,
-  baseHref: string,
 ): ExportDialogState {
   if (!deck) {
     return {
@@ -37,47 +36,12 @@ export function exportDialogState(
     };
   }
 
-  const imageSources = deck.slides.flatMap((deckSlide) =>
-    deckSlide.elements.flatMap((element) =>
-      element.kind === "image" && element.src ? [element.src] : [],
-    ),
-  );
-  const storedImages = imageSources.filter((src) => assetIdFromSrc(src)).length;
-  const embeddedImages = imageSources.filter((src) => src.startsWith("data:")).length;
-  const remoteImages = imageSources.filter((src) => isRemoteImageSource(src, baseHref)).length;
-  const storedFonts = deck.fonts.filter((font) => font.source === "local").length;
-  const bunnyFonts = deck.fonts.filter((font) => font.source === "bunny").length;
-  const sourceFonts = deck.fonts.filter((font) => font.source === "source").length;
-  const details = [
-    `${deck.slides.length} ${deck.slides.length === 1 ? "slide" : "slides"}`,
-    deck.aspectRatio,
-  ];
-
-  if (storedImages > 0) {
-    details.push(`${storedImages} stored ${storedImages === 1 ? "image" : "images"}`);
-  }
-  if (embeddedImages > 0) {
-    details.push(`${embeddedImages} embedded ${embeddedImages === 1 ? "image" : "images"}`);
-  }
-  if (remoteImages > 0) {
-    details.push(`${remoteImages} remote ${remoteImages === 1 ? "image" : "images"}`);
-  }
-  if (storedFonts > 0) {
-    details.push(`${storedFonts} local ${storedFonts === 1 ? "font" : "fonts"}`);
-  }
-  if (bunnyFonts > 0) {
-    details.push(`${bunnyFonts} Bunny ${bunnyFonts === 1 ? "font" : "fonts"}`);
-  }
-  if (sourceFonts > 0) {
-    details.push(`${sourceFonts} source ${sourceFonts === 1 ? "font" : "fonts"}`);
-  }
-
   return {
     canExportJson: true,
     canExportPdf: true,
     canExportPng: Boolean(slide),
     canExportPortable: true,
-    statusText: slide ? `${details.join(" / ")} / Current: ${slide.title}` : details.join(" / "),
+    statusText: "",
   };
 }
 
@@ -176,19 +140,6 @@ export async function readImportFileFromEvent(
     input,
     text: await readFileAsText(file),
   };
-}
-
-export function isRemoteImageSource(src: string, baseHref: string) {
-  if (!src || src.startsWith("data:") || src.startsWith("asset:")) {
-    return false;
-  }
-
-  try {
-    const url = new URL(src, baseHref);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 }
 
 export function toFileSlug(value: string) {

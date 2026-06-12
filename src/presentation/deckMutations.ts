@@ -6,6 +6,7 @@ import {
   type MikroDeckRecord,
   type MikroFontRecord,
   type MikroSlideRecord,
+  type ShapeSlideElement,
   type SlideElement,
   type SlideShapeKind,
   type TextFontFamily,
@@ -142,12 +143,20 @@ export function addDefaultTextElement(deck: MikroDeckRecord) {
   return addElementToActiveSlide(deck, element);
 }
 
-export function addDefaultShapeElement(deck: MikroDeckRecord, shape: SlideShapeKind = "rect") {
+export function addDefaultShapeElement(
+  deck: MikroDeckRecord,
+  shape: SlideShapeKind = "rect",
+  patch: Partial<ShapeSlideElement> = {},
+) {
+  const lineDefaults: Partial<ShapeSlideElement> =
+    shape === "line" ? { fill: "none", height: 8, strokeWidth: 2, width: 34 } : {};
   const element = createShapeElement({
     x: 50,
     y: 36,
     width: 26,
     height: 20,
+    ...lineDefaults,
+    ...patch,
     shape,
   });
   return addElementToActiveSlide(deck, element);
@@ -286,9 +295,9 @@ function mergeTemplateElementsWithSlideContent(
   currentElements: SlideElement[],
   templateElements: SlideElement[],
 ) {
-  const textSources = currentElements.filter(isTextBearingElement).filter((element) =>
-    element.content.trim(),
-  );
+  const textSources = currentElements
+    .filter(isTextBearingElement)
+    .filter((element) => element.content.trim());
   const imageSources = currentElements.filter(
     (element): element is Extract<SlideElement, { kind: "image" }> =>
       element.kind === "image" && Boolean(element.src.trim()),

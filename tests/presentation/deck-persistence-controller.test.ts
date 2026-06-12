@@ -91,6 +91,7 @@ function storage() {
 function harness(
   input: {
     activeDeck?: MikroDeckRecord | null;
+    confirm?: (message: string) => boolean;
     service?: DeckPersistenceService;
     storageAvailable?: boolean;
   } = {},
@@ -122,6 +123,7 @@ function harness(
     },
     windowRef: {
       clearTimeout: () => calls.push("clear-timeout"),
+      confirm: input.confirm,
       setTimeout: (callback: TimerHandler) => {
         if (typeof callback === "function") {
           callback();
@@ -178,6 +180,27 @@ describe("deck persistence controller", () => {
     );
     expect(test.getDeck()?.id).toBe("deck_b");
     expect(test.calls).toContain("toast:Deck deleted");
+  });
+
+  it("cancels deck library delete when confirmation is rejected", async () => {
+    const deleted: string[] = [];
+    const test = harness({
+      confirm: () => false,
+      service: service({
+        delete: async (deckId) => {
+          deleted.push(deckId);
+        },
+      }),
+    });
+    const dialog = { close: () => test.calls.push("dialog-close") };
+
+    await test.controller.handleDeckListClick(
+      libraryEvent("delete-deck", "deck_a"),
+      dialog as unknown as HTMLDialogElement,
+    );
+
+    expect(deleted).toEqual([]);
+    expect(test.calls).not.toContain("toast:Deck deleted");
   });
 
   it("persists and loads recovery drafts best-effort", async () => {

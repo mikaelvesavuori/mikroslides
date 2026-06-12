@@ -81,7 +81,7 @@ function readTextFontFamily(value: unknown): TextFontFamily {
 }
 
 function readTextListStyle(value: unknown): TextListStyle {
-  return value === "bullet" ? "bullet" : "none";
+  return value === "bullet" || value === "numbered" ? value : "none";
 }
 
 function readFontRecord(value: unknown): MikroFontRecord | null {
@@ -193,6 +193,7 @@ function readElement(value: unknown): SlideElement | null {
       fill: readString(value.fill, "#dbeafe"),
       stroke: readString(value.stroke, defaultDeckTheme.accent),
       strokeWidth: readNumber(value.strokeWidth, 1),
+      arrowHead: readShapeArrowHead(value.arrowHead),
       radius: readNumber(value.radius, 8),
       content: typeof value.content === "string" ? value.content : "",
       color: readString(value.color, defaultDeckTheme.text),
@@ -229,6 +230,10 @@ function readShapeKind(value: unknown) {
     value === "triangle"
     ? value
     : "rect";
+}
+
+function readShapeArrowHead(value: unknown) {
+  return value === "start" || value === "end" || value === "both" ? value : "none";
 }
 
 function readSlide(value: unknown, index: number): MikroSlideRecord | null {
@@ -316,7 +321,7 @@ function isMarkdownSourceName(sourceName: string | undefined) {
 }
 
 function looksLikeJson(text: string) {
-  return /^[{\[]/.test(text.trim());
+  return /^[{[]/.test(text.trim());
 }
 
 export function readDeckImportEnvelope(text: string, sourceName?: string): DeckImportEnvelope {

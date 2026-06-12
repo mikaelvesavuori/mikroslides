@@ -1,7 +1,7 @@
 import type { SlideShapeKind } from "../index.js";
 import { escapeAttribute } from "./htmlEscape.js";
 
-export type ShapeSelectorTool = Exclude<SlideShapeKind, "line">;
+export type ShapeSelectorTool = SlideShapeKind | "arrow";
 
 export const shapeSelectorDefinitions: Record<
   ShapeSelectorTool,
@@ -19,9 +19,15 @@ export const shapeSelectorDefinitions: Record<
   hexagon: { label: "Hexagon", icon: "#icon-hexagon" },
   octagon: { label: "Octagon", icon: "#icon-octagon" },
   chevron: { label: "Chevron", icon: "#icon-chevron-shape" },
+  line: { label: "Line", icon: "#icon-line" },
+  arrow: { label: "Arrow", icon: "#icon-arrow" },
 };
 
 export const shapeSelectorTools = Object.keys(shapeSelectorDefinitions) as ShapeSelectorTool[];
+
+export function isShapeSelectorTool(value: unknown): value is ShapeSelectorTool {
+  return typeof value === "string" && value in shapeSelectorDefinitions;
+}
 
 export function shapeSelectorTitle(shape: ShapeSelectorTool) {
   const definition = shapeSelectorDefinitions[shape];

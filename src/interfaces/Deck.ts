@@ -35,10 +35,11 @@ export type SlideShapeKind =
   | "triangle";
 export type TextAlignment = "left" | "center" | "right";
 export type TextVerticalAlignment = "top" | "center" | "bottom";
+export type ShapeArrowHead = "none" | "start" | "end" | "both";
 export type ImageFit = "cover" | "contain";
 export type SystemTextFontFamily = "system" | "serif" | "mono";
 export type TextFontFamily = SystemTextFontFamily | `font:${string}`;
-export type TextListStyle = "none" | "bullet";
+export type TextListStyle = "none" | "bullet" | "numbered";
 export type MikroFontSource = "local" | "bunny" | "source";
 
 export interface DeckTheme {
@@ -86,6 +87,7 @@ export interface ShapeSlideElement extends SlideElementBase {
   fill: string;
   stroke: string;
   strokeWidth: number;
+  arrowHead: ShapeArrowHead;
   radius: number;
   content: string;
   color: string;

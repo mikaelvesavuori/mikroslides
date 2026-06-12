@@ -37,7 +37,9 @@ export type DeckPersistenceControllerOptions = {
   setLibraryDecks: (decks: MikroDeckRecord[]) => void;
   showToast: (message: string) => void;
   syncAssetObjectUrls: () => Promise<void>;
-  windowRef: Pick<Window, "clearTimeout" | "setTimeout">;
+  windowRef: Pick<Window, "clearTimeout" | "setTimeout"> & {
+    confirm?: (message: string) => boolean;
+  };
 };
 
 export function createDeckPersistenceController(options: DeckPersistenceControllerOptions) {
@@ -154,6 +156,12 @@ export function createDeckPersistenceController(options: DeckPersistenceControll
       }
 
       if (action === "delete-deck") {
+        const confirmed =
+          options.windowRef.confirm?.("Delete this deck? This cannot be undone.") ?? true;
+        if (!confirmed) {
+          return;
+        }
+
         await options.service.delete(deckId);
         const decksAfterDelete = await options.service.list();
         const activeDeck = options.getDeck();
@@ -188,10 +196,7 @@ export function createDeckPersistenceController(options: DeckPersistenceControll
       }
 
       try {
-        const importedDeck = await options.service.importFile(
-          importFile.text,
-          importFile.fileName,
-        );
+        const importedDeck = await options.service.importFile(importFile.text, importFile.fileName);
         options.setDeck(importedDeck);
         options.selectSlide();
         options.clearHistory();

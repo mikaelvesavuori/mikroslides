@@ -13,7 +13,9 @@ function element() {
         this.values[name] = value;
       },
     },
+    append: () => undefined,
     textContent: "",
+    querySelector: () => null,
     value: "",
   };
 }

@@ -3,6 +3,7 @@ import {
   defaultDeckTheme,
   type MikroDeckRecord,
   type MikroSlideRecord,
+  type ShapeSlideElement,
   type SlideElement,
   type SlideShapeKind,
   type TextListStyle,
@@ -102,7 +103,9 @@ export function createDeckActionsController(options: DeckActionsControllerOption
       return;
     }
 
-    const editable = lockPatchOnly(patch) ? selected : selected.filter((element) => !element.locked);
+    const editable = lockPatchOnly(patch)
+      ? selected
+      : selected.filter((element) => !element.locked);
     updateSelectedElementGeometry(
       editable.map((element) => ({ id: element.id, patch })),
       renderOptions,
@@ -175,10 +178,10 @@ export function createDeckActionsController(options: DeckActionsControllerOption
   }
 
   return {
-    addShapeElement(shape: SlideShapeKind = "rect") {
+    addShapeElement(shape: SlideShapeKind = "rect", patch: Partial<ShapeSlideElement> = {}) {
       const deck = options.getDeck();
       if (deck) {
-        options.commitDeckMutation(addDefaultShapeElement(deck, shape));
+        options.commitDeckMutation(addDefaultShapeElement(deck, shape, patch));
       }
     },
     addSlide() {

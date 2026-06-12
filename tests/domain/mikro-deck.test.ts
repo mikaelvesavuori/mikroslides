@@ -73,6 +73,10 @@ describe("MikroDeck", () => {
     expect(createShapeElement({ shape: "database" }).shape).toBe("database");
     expect(createShapeElement({ shape: "chevron" }).shape).toBe("chevron");
     expect(createShapeElement({ shape: "nope" as never }).shape).toBe("rect");
+    expect(createShapeElement({ arrowHead: "both", shape: "line" }).arrowHead).toBe("both");
+    expect(createShapeElement({ arrowHead: "weird" as never, shape: "line" }).arrowHead).toBe(
+      "none",
+    );
   });
 
   it("normalizes shape labels", () => {

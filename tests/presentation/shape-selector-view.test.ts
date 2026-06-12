@@ -1,7 +1,7 @@
 import {
   renderShapeSelector,
-  shapeSelectorTools,
   shapeSelectorTitle,
+  shapeSelectorTools,
 } from "../../src/presentation/shapeSelectorView.js";
 
 describe("shape selector view", () => {
@@ -18,8 +18,9 @@ describe("shape selector view", () => {
     expect(shapeOptions.innerHTML).toContain('data-shape-tool="rect"');
     expect(shapeOptions.innerHTML).toContain('data-shape-tool="database"');
     expect(shapeOptions.innerHTML).toContain('data-shape-tool="chevron"');
-    expect(shapeOptions.innerHTML).not.toContain('data-shape-tool="line"');
-    expect(shapeSelectorTools).toHaveLength(12);
+    expect(shapeOptions.innerHTML).toContain('data-shape-tool="line"');
+    expect(shapeOptions.innerHTML).toContain('data-shape-tool="arrow"');
+    expect(shapeSelectorTools).toHaveLength(14);
     expect(shapeSelectorTitle("rect")).toBe("Rectangle (R)");
   });
 });

@@ -23,6 +23,7 @@ import {
   canvasPointPercent,
   elementIdsInRect,
   marqueeRectFromPoints,
+  pointInElementBounds,
   rectsIntersect,
 } from "../../src/presentation/interactionGeometry.js";
 import {
@@ -86,6 +87,20 @@ describe("interaction helpers", () => {
         createTextElement({ id: "outside", x: 70, y: 70, width: 10, height: 10 }),
       ]),
     ).toEqual(["inside"]);
+  });
+
+  it("checks points against rotated element bounds", () => {
+    const element = createTextElement({
+      height: 20,
+      id: "rotated",
+      rotation: 45,
+      width: 20,
+      x: 40,
+      y: 40,
+    });
+
+    expect(pointInElementBounds({ x: 50, y: 50 }, element)).toBe(true);
+    expect(pointInElementBounds({ x: 40, y: 40 }, element)).toBe(false);
   });
 
   it("computes drag geometry for moving multiple selected elements", () => {
@@ -228,6 +243,25 @@ describe("interaction helpers", () => {
     ]);
   });
 
+  it("computes rotation geometry and snaps while shift is held", () => {
+    const shape = createShapeElement({ id: "shape", x: 10, y: 10, width: 20, height: 10 });
+    const dragState = createDragState({
+      canvasRect: { height: 500, left: 0, top: 0, width: 1000 },
+      clientX: 200,
+      clientY: 50,
+      element: shape,
+      mode: "rotate",
+      selectedElements: [shape],
+    });
+
+    expect(dragGeometryUpdates(dragState, 300, 75, { width: 1000, height: 500 }, false)).toEqual([
+      { id: "shape", patch: { rotation: 90 } },
+    ]);
+    expect(dragGeometryUpdates(dragState, 300, 130, { width: 1000, height: 500 }, true)).toEqual([
+      { id: "shape", patch: { rotation: 120 } },
+    ]);
+  });
+
   it("tracks selection marquee state and additive selection", () => {
     const state = createSelectionMarqueeState({
       additive: true,
@@ -261,12 +295,16 @@ describe("interaction helpers", () => {
       constrainedMenuPosition(500, 500, { width: 120, height: 80 }, { width: 520, height: 520 }),
     ).toEqual({ x: 392, y: 432 });
     expect(isContextActionDisabled("copy", menuAvailability({ hasSelection: false }))).toBe(true);
-    expect(isContextActionDisabled("paste", menuAvailability({ hasClipboard: false }))).toBe(
+    expect(isContextActionDisabled("paste", menuAvailability({ hasClipboard: false }))).toBe(true);
+    expect(isContextActionDisabled("lock", menuAvailability({ hasUnlockedSelection: false }))).toBe(
       true,
     );
-    expect(isContextActionDisabled("lock", menuAvailability({ hasUnlockedSelection: false }))).toBe(true);
-    expect(isContextActionDisabled("unlock", menuAvailability({ hasLockedSelection: false }))).toBe(true);
-    expect(isContextActionDisabled("add-text", menuAvailability({ hasSelection: false }))).toBe(false);
+    expect(isContextActionDisabled("unlock", menuAvailability({ hasLockedSelection: false }))).toBe(
+      true,
+    );
+    expect(isContextActionDisabled("add-text", menuAvailability({ hasSelection: false }))).toBe(
+      false,
+    );
   });
 
   it("classifies canvas context-menu selection behavior", () => {
