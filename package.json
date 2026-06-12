@@ -40,7 +40,12 @@
     "smoke:ui": "npm run build && node scripts/ui-interactions-smoke.mjs",
     "deploy": "npm run deploy:cloudflare",
     "deploy:cloudflare": "npm run verify && npx wrangler deploy",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run docs:build"
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run docs:build",
+    "release": "npm run build && npm run sbom && npm run scan && npm run licenses && npm run release:assets",
+    "release:assets": "node scripts/create-release-assets.mjs",
+    "sbom": "node scripts/create-prod-sbom.mjs",
+    "scan": "mkdir -p security && grype sbom:security/sbom.spdx.json -o json > security/grype-report.json",
+    "licenses": "mkdir -p security && grant check security/sbom.spdx.json --config .grant.yaml > security/grant-report.txt || { cat security/grant-report.txt; exit 1; }"
   },
   "devDependencies": {
     "@biomejs/biome": "2",
