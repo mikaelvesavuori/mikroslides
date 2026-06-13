@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MikroSlides">
   <rect width="512" height="512" rx="112" fill="#111113"/>
-  <path d="M126 136h260c24 0 44 20 44 44v152c0 24-20 44-44 44H126c-24 0-44-20-44-44V180c0-24 20-44 44-44Zm60 84h78M186 292h140" fill="none" stroke="#ff9f45" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(256 256) scale(.86 .9) translate(-256 -256)">
+    <path d="M126 136h260c24 0 44 20 44 44v152c0 24-20 44-44 44H126c-24 0-44-20-44-44V180c0-24 20-44 44-44Zm60 84h78M186 292h140" fill="none" stroke="#ff9f45" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
 </svg>
