@@ -23,6 +23,8 @@ export function createMikroSlidesElements(root: Document = document) {
     slideList: queryElement<HTMLElement>(root, "#slide-list"),
     slideCanvas: queryElement<HTMLElement>(root, "#slide-canvas"),
     speakerNotes: queryElement<HTMLTextAreaElement>(root, "#speaker-notes"),
+    selectionToolbar: queryElement<HTMLElement>(root, "#selection-toolbar"),
+    selectionToolbarLabel: queryElement<HTMLElement>(root, "#selection-toolbar-label"),
     toast: queryElement<HTMLElement>(root, "#toast"),
     printDeck: queryElement<HTMLElement>(root, "#print-deck"),
     newDeckButton: queryElement<HTMLButtonElement>(root, "#new-deck-btn"),

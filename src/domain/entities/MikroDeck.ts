@@ -302,7 +302,7 @@ export function createBlankSlide(input: Partial<MikroSlideRecord> = {}): MikroSl
     transition: normalizeSlideTransition(input.transition),
     elements: input.elements?.map(sanitizeElement) ?? [
       createTextElement({
-        content: "Untitled",
+        content: "Slide title",
         x: 12,
         y: 16,
         width: 62,
@@ -342,7 +342,7 @@ function sanitizeSlide(slide: MikroSlideRecord, index: number): MikroSlideRecord
 
 function createStarterSlides(): MikroSlideRecord[] {
   const titleSlide = createBlankSlide({
-    title: "MikroSlides",
+    title: "Presentation title",
     layout: "title",
     elements: [
       createShapeElement({
@@ -355,7 +355,7 @@ function createStarterSlides(): MikroSlideRecord[] {
         radius: 3,
       }),
       createTextElement({
-        content: "MikroSlides",
+        content: "Presentation title",
         x: 23,
         y: 23,
         width: 58,
@@ -364,7 +364,7 @@ function createStarterSlides(): MikroSlideRecord[] {
         fontWeight: 760,
       }),
       createTextElement({
-        content: "Local-first decks with focused controls and clean PDF export.",
+        content: "Subtitle",
         x: 24,
         y: 45,
         width: 52,
@@ -377,11 +377,11 @@ function createStarterSlides(): MikroSlideRecord[] {
   });
 
   const storySlide = createBlankSlide({
-    title: "Tell the story",
+    title: "Slide title",
     layout: "bullets",
     elements: [
       createTextElement({
-        content: "Tell the story",
+        content: "Slide title",
         x: 10,
         y: 10,
         width: 72,
@@ -390,7 +390,7 @@ function createStarterSlides(): MikroSlideRecord[] {
         fontWeight: 720,
       }),
       createTextElement({
-        content: "One idea per slide\nSimple layouts\nPresenter notes when you need them",
+        content: "First point\nSecond point\nThird point",
         x: 13,
         y: 32,
         width: 50,
@@ -420,11 +420,11 @@ function createStarterSlides(): MikroSlideRecord[] {
   });
 
   const closeSlide = createBlankSlide({
-    title: "Ship it",
+    title: "Thank you",
     layout: "closing",
     elements: [
       createTextElement({
-        content: "Ship it",
+        content: "Thank you",
         x: 11,
         y: 18,
         width: 54,
@@ -433,7 +433,7 @@ function createStarterSlides(): MikroSlideRecord[] {
         fontWeight: 760,
       }),
       createTextElement({
-        content: "Export JSON for local files.\nExport PDF for sharing.",
+        content: "Questions?",
         x: 12,
         y: 43,
         width: 45,

@@ -132,7 +132,7 @@ export function renderSlideElement(
     const src = options.resolveImageSource?.(element.src) ?? element.src;
     body = src
       ? `<img class="slide-image" src="${escapeAttribute(src)}" alt="${escapeAttribute(element.alt)}" style="${escapeAttribute(style)}" />`
-      : `<div class="slide-image-placeholder" style="${escapeAttribute(style)}">Image</div>`;
+      : `<div class="slide-image-placeholder" style="${escapeAttribute(style)}">Add image</div>`;
   }
 
   return `

@@ -22,6 +22,7 @@ const distAssetsDir = join(distDir, "assets");
 const packageVersion = JSON.parse(readFileSync("./package.json", "utf8")).version as string;
 const skippedStaticAssetExtensions = new Set([".css", ".html", ".js", ".mjs", ".ts", ".mts"]);
 const skippedMetadataFiles = new Set([".DS_Store", "Thumbs.db"]);
+const allowedStaticAssets = new Set(["service-worker.js"]);
 
 async function buildWebApp() {
   console.log("Building app bundle...");
@@ -102,6 +103,10 @@ function statExists(filePath: string) {
 function shouldSkipStaticAsset(entry: string) {
   if (skippedMetadataFiles.has(entry) || entry.startsWith(".")) {
     return true;
+  }
+
+  if (allowedStaticAssets.has(entry)) {
+    return false;
   }
 
   return skippedStaticAssetExtensions.has(extname(entry));

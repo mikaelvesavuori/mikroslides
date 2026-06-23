@@ -255,7 +255,7 @@ describe("canvas controller", () => {
     expect(test.controller.getEditingTextElementId()).toBeNull();
   });
 
-  it("treats drag-starts on locked objects like empty canvas marquee", () => {
+  it("selects locked objects without starting a drag", () => {
     const test = harness({
       elements: [
         createTextElement({
@@ -269,7 +269,7 @@ describe("canvas controller", () => {
         }),
         createTextElement({ content: "Body", id: "body", x: 20, y: 20, width: 20, height: 20 }),
       ],
-      selectedElementIds: ["background"],
+      selectedElementIds: ["body"],
     });
     const target = new FakeHTMLElement({
       "[data-element-id]": { dataset: { elementId: "background" } },
@@ -287,20 +287,11 @@ describe("canvas controller", () => {
       shiftKey: false,
       target,
     } as unknown as PointerEvent);
-    test.controller.handlePointerMove({
-      clientX: 400,
-      clientY: 250,
-      pointerId: 1,
-    } as unknown as PointerEvent);
-    test.controller.handlePointerUp({
-      clientX: 400,
-      clientY: 250,
-      pointerId: 1,
-    } as unknown as PointerEvent);
 
-    expect(test.getSelectedElementIds()).toEqual(["body"]);
-    expect(test.calls).not.toContain("select:background");
+    expect(test.getSelectedElementIds()).toEqual(["background"]);
+    expect(test.calls).toEqual(expect.arrayContaining(["select:background", "render-canvas"]));
     expect(test.calls).not.toContain("stage-history");
+    expect(test.calls).not.toContain("geometry");
   });
 
   it("selects object targets before opening the context menu", () => {

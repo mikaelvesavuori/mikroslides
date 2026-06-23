@@ -76,6 +76,7 @@ export function canvasPointerDownAction(options: {
   if (
     !options.isRotate &&
     !options.isResize &&
+    !options.element.locked &&
     (options.element.kind === "text" || options.element.kind === "shape") &&
     options.detail >= 2
   ) {

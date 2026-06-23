@@ -83,6 +83,7 @@ export type AppEventElements = {
   slideContextMenu: HTMLElement;
   slideCanvas: HTMLElement;
   slideList: HTMLElement;
+  selectionToolbar: HTMLElement;
   speakerNotes: HTMLTextAreaElement;
   templateSelect: HTMLSelectElement;
   textColorInput: HTMLInputElement;
@@ -242,6 +243,7 @@ export function bindAppEvents(
   bindSlideEvents(elements, handlers);
   bindCanvasEvents(elements, handlers, windowRef);
   bindInspectorEvents(elements, handlers);
+  bindSelectionToolbarEvents(elements, handlers);
   bindPresenterEvents(elements, handlers, documentRef);
   bindLayerEvents(elements, handlers);
   fontManager.bindEvents();
@@ -467,6 +469,50 @@ function bindLayerEvents(elements: AppEventElements, handlers: AppEventHandlers)
   elements.saveTemplateConfirmButton.addEventListener("click", handlers.saveUserTemplateFromDialog);
 }
 
+function bindSelectionToolbarEvents(elements: AppEventElements, handlers: AppEventHandlers) {
+  elements.selectionToolbar.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const textSwatch = target?.closest<HTMLButtonElement>("[data-text-color]");
+    if (textSwatch?.dataset.textColor) {
+      handlers.updateSelectedElement({ color: textSwatch.dataset.textColor });
+      return;
+    }
+
+    const fillSwatch = target?.closest<HTMLButtonElement>("[data-shape-fill]");
+    if (fillSwatch?.dataset.shapeFill) {
+      handlers.updateSelectedElement({ fill: fillSwatch.dataset.shapeFill });
+      return;
+    }
+
+    const action = selectionToolbarActionFromTarget(target);
+    if (!action) {
+      return;
+    }
+
+    if (action === "back" || action === "front") {
+      handlers.reorderSelectedElements(action);
+      return;
+    }
+
+    if (action === "clear-fill") {
+      handlers.updateSelectedElement({ fill: "none" });
+      return;
+    }
+
+    if (action === "delete") {
+      handlers.deleteSelectedElement();
+      return;
+    }
+
+    if (action === "duplicate") {
+      handlers.duplicateSelectedElement();
+      return;
+    }
+
+    handlers.updateSelectedElement({ locked: action === "lock" });
+  });
+}
+
 function bindExportEvents(elements: AppEventElements, handlers: AppEventHandlers) {
   elements.exportJsonAction.addEventListener("click", handlers.exportJson);
   elements.exportPortableAction.addEventListener("click", () => void handlers.exportPortable());
@@ -547,6 +593,35 @@ export function objectAlignmentFromTarget(target: HTMLElement | null): ObjectAli
   const button = target?.closest<HTMLButtonElement>("[data-object-align]");
   const alignment = button?.dataset.objectAlign;
   return isObjectAlignment(alignment) ? alignment : null;
+}
+
+export type SelectionToolbarAction =
+  | "back"
+  | "clear-fill"
+  | "delete"
+  | "duplicate"
+  | "front"
+  | "lock"
+  | "unlock";
+
+export function selectionToolbarActionFromTarget(
+  target: Element | null,
+): SelectionToolbarAction | null {
+  const button = target?.closest<HTMLButtonElement>("[data-selection-action]");
+  const action = button?.dataset.selectionAction;
+  return isSelectionToolbarAction(action) ? action : null;
+}
+
+function isSelectionToolbarAction(value: string | undefined): value is SelectionToolbarAction {
+  return (
+    value === "back" ||
+    value === "clear-fill" ||
+    value === "delete" ||
+    value === "duplicate" ||
+    value === "front" ||
+    value === "lock" ||
+    value === "unlock"
+  );
 }
 
 function isObjectAlignment(value: string | undefined): value is ObjectAlignment {

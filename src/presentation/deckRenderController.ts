@@ -11,6 +11,7 @@ import type { CommandTemplate } from "./commandActions.js";
 import { renderDeckLibraryRows } from "./deckLibrary.js";
 import { type InspectorPanelElements, renderInspectorPanel } from "./inspectorPanel.js";
 import { renderPrintDeckSurface, syncDeckSurfaceChrome } from "./presentationSurfaces.js";
+import { renderSelectionToolbar } from "./selectionToolbar.js";
 import {
   renderDeckAspectOptions,
   renderDeckThemeOptions,
@@ -41,6 +42,8 @@ export type DeckRenderElements = InspectorPanelElements &
     | "presenterDialog"
     | "printDeck"
     | "redoButton"
+    | "selectionToolbar"
+    | "selectionToolbarLabel"
     | "slideCanvas"
     | "slideList"
     | "templateSelect"
@@ -152,6 +155,11 @@ export function createDeckRenderController(options: DeckRenderControllerOptions)
         selectedElementIds: options.getSelectedElementIds(),
         selectedElements: options.getSelectedElements(),
         slide: options.getSlide(),
+      });
+      renderSelectionToolbar({
+        editingTextElementId: options.getEditingTextElementId(),
+        elements: options.elements,
+        selectedElements: options.getSelectedElements(),
       });
     },
     renderLibrary() {

@@ -408,7 +408,7 @@ function drawImagePlaceholder(context: CanvasRenderingContext2D, box: ElementBox
   context.font = `${Math.max(12, box.width / 16)}px system-ui, sans-serif`;
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText("Image", box.width / 2, box.height / 2, box.width - 16);
+  context.fillText("Add image", box.width / 2, box.height / 2, box.width - 16);
   context.restore();
 }
 

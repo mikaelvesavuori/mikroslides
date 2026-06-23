@@ -100,10 +100,7 @@ export function createCanvasController(options: CanvasControllerOptions) {
       return [];
     }
 
-    return elementIdsInRect(
-      rect,
-      slide.elements.filter((element) => !element.locked),
-    );
+    return elementIdsInRect(rect, slide.elements);
   }
 
   function editableTextElementAtPoint(clientX: number, clientY: number) {
@@ -366,7 +363,11 @@ export function createCanvasController(options: CanvasControllerOptions) {
       }
 
       if (action.element.locked) {
-        startSelectionMarquee(event);
+        selectElementFromInteraction(action.element.id, multiSelect);
+        options.renderCanvas();
+        options.renderInspector();
+        ignoreNextCanvasClick = true;
+        event.preventDefault();
         return;
       }
 

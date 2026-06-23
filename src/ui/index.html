@@ -51,6 +51,12 @@
       <symbol id="icon-copy-object" viewBox="0 0 24 24">
         <path d="M8 8h10v10H8zM5 15H4V4h11v1M11 12h4m-2-2v4" stroke-linecap="round" stroke-linejoin="round" />
       </symbol>
+      <symbol id="icon-lock" viewBox="0 0 24 24">
+        <path d="M7.5 10V7.5a4.5 4.5 0 0 1 9 0V10m-10 0h11v10h-11V10Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-unlock" viewBox="0 0 24 24">
+        <path d="M9 10V7.5a4.5 4.5 0 0 1 8.78-1.55M6.5 10h11v10h-11V10Z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
       <symbol id="icon-copy-slide" viewBox="0 0 24 24">
         <path d="M7 7h12v9H7zM4 17.5v-13h13M10 19.5h6" stroke-linecap="round" stroke-linejoin="round" />
       </symbol>
@@ -170,6 +176,24 @@
       <symbol id="icon-align-right" viewBox="0 0 24 24">
         <path d="M4.5 6.75h15m-5.25 4.5h5.25m-15 4.5h15m-5.25 4.5h5.25" stroke-linecap="round"
           stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-object-align-left" viewBox="0 0 24 24">
+        <path d="M5 4v16M9 7h8v10H9z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-object-align-center" viewBox="0 0 24 24">
+        <path d="M12 4v16M8 7h8v10H8z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-object-align-right" viewBox="0 0 24 24">
+        <path d="M19 4v16M7 7h8v10H7z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-object-align-top" viewBox="0 0 24 24">
+        <path d="M4 5h16M7 9h10v8H7z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-object-align-middle" viewBox="0 0 24 24">
+        <path d="M4 12h16M7 8h10v8H7z" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="icon-object-align-bottom" viewBox="0 0 24 24">
+        <path d="M4 19h16M7 7h10v8H7z" stroke-linecap="round" stroke-linejoin="round" />
       </symbol>
       <symbol id="icon-chevron-up" viewBox="0 0 24 24">
         <path d="m6 15 6-6 6 6" stroke-linecap="round" stroke-linejoin="round" />
@@ -300,6 +324,111 @@
               </svg>
             </button>
           </nav>
+          <section id="selection-toolbar" class="selection-toolbar" role="toolbar" aria-label="Selection controls"
+            hidden>
+            <span id="selection-toolbar-label" class="selection-toolbar-label"></span>
+            <span class="selection-toolbar-separator" aria-hidden="true"></span>
+            <span class="selection-toolbar-group" data-selection-group="text">
+              <button class="selection-swatch" data-text-color="#111827" style="--swatch: #111827" type="button"
+                title="Ink text" aria-label="Ink text"></button>
+              <button class="selection-swatch" data-text-color="#ffffff" style="--swatch: #ffffff" type="button"
+                title="White text" aria-label="White text"></button>
+              <button class="selection-swatch" data-text-color="#1665d8" style="--swatch: #1665d8" type="button"
+                title="Blue text" aria-label="Blue text"></button>
+              <button class="selection-toolbar-btn" type="button" data-align="left" title="Align text left"
+                aria-label="Align text left">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-align-left"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" type="button" data-align="center" title="Center text"
+                aria-label="Center text">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-align-center"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" type="button" data-align="right" title="Align text right"
+                aria-label="Align text right">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-align-right"></use>
+                </svg>
+              </button>
+            </span>
+            <span class="selection-toolbar-group" data-selection-group="shape">
+              <button class="selection-toolbar-btn" data-selection-action="clear-fill" type="button" title="No fill"
+                aria-label="No fill">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-x-mark"></use>
+                </svg>
+              </button>
+              <button class="selection-swatch" data-shape-fill="#fde68a" style="--swatch: #fde68a" type="button"
+                title="Yellow fill" aria-label="Yellow fill"></button>
+              <button class="selection-swatch" data-shape-fill="#dbeafe" style="--swatch: #dbeafe" type="button"
+                title="Blue fill" aria-label="Blue fill"></button>
+              <button class="selection-swatch" data-shape-fill="#d1fae5" style="--swatch: #d1fae5" type="button"
+                title="Mint fill" aria-label="Mint fill"></button>
+              <button class="selection-swatch" data-shape-fill="#ffe4e6" style="--swatch: #ffe4e6" type="button"
+                title="Rose fill" aria-label="Rose fill"></button>
+            </span>
+            <span class="selection-toolbar-group" data-selection-group="common">
+              <button class="selection-toolbar-btn" type="button" data-object-align="left" title="Align left"
+                aria-label="Align object left">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-object-align-left"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" type="button" data-object-align="center" title="Align center"
+                aria-label="Align object center">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-object-align-center"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" type="button" data-object-align="right" title="Align right"
+                aria-label="Align object right">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-object-align-right"></use>
+                </svg>
+              </button>
+            </span>
+            <span class="selection-toolbar-group" data-selection-group="actions">
+              <button class="selection-toolbar-btn" data-selection-action="front" type="button" title="Bring to front"
+                aria-label="Bring to front">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-chevron-up"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" data-selection-action="back" type="button" title="Send to back"
+                aria-label="Send to back">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-chevron-down"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" data-selection-action="duplicate" type="button" title="Duplicate"
+                aria-label="Duplicate object">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-copy-object"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" data-selection-action="lock" type="button" title="Lock"
+                aria-label="Lock object">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-lock"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn" data-selection-action="unlock" type="button" title="Unlock"
+                aria-label="Unlock object" hidden>
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-unlock"></use>
+                </svg>
+              </button>
+              <button class="selection-toolbar-btn danger" data-selection-action="delete" type="button" title="Delete"
+                aria-label="Delete object">
+                <svg class="icon" aria-hidden="true">
+                  <use href="#icon-trash"></use>
+                </svg>
+              </button>
+            </span>
+          </section>
           <div class="canvas-wrap">
             <div id="slide-canvas" class="slide-canvas" tabindex="0" aria-label="Current slide"></div>
           </div>
@@ -413,29 +542,29 @@
               <div class="segmented alignment-segmented" aria-label="Object alignment">
                 <button class="segment-btn" type="button" data-object-align="left" title="Align object to left edge"
                   aria-label="Align object left"><svg class="icon" aria-hidden="true">
-                    <use href="#icon-align-left"></use>
+                    <use href="#icon-object-align-left"></use>
                   </svg></button>
                 <button class="segment-btn" type="button" data-object-align="center"
                   title="Align object to horizontal center" aria-label="Align object center"><svg class="icon"
                     aria-hidden="true">
-                    <use href="#icon-align-center"></use>
+                    <use href="#icon-object-align-center"></use>
                   </svg></button>
                 <button class="segment-btn" type="button" data-object-align="right" title="Align object to right edge"
                   aria-label="Align object right"><svg class="icon" aria-hidden="true">
-                    <use href="#icon-align-right"></use>
+                    <use href="#icon-object-align-right"></use>
                   </svg></button>
                 <button class="segment-btn" type="button" data-object-align="top" title="Align object to top edge"
                   aria-label="Align object top"><svg class="icon" aria-hidden="true">
-                    <use href="#icon-chevron-up"></use>
+                    <use href="#icon-object-align-top"></use>
                   </svg></button>
                 <button class="segment-btn" type="button" data-object-align="middle"
                   title="Align object to vertical center" aria-label="Align object middle"><svg class="icon"
                     aria-hidden="true">
-                    <use href="#icon-minus"></use>
+                    <use href="#icon-object-align-middle"></use>
                   </svg></button>
                 <button class="segment-btn" type="button" data-object-align="bottom" title="Align object to bottom edge"
                   aria-label="Align object bottom"><svg class="icon" aria-hidden="true">
-                    <use href="#icon-chevron-down"></use>
+                    <use href="#icon-object-align-bottom"></use>
                   </svg></button>
               </div>
             </div>

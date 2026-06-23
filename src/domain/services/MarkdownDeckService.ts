@@ -581,7 +581,7 @@ function listStyleForBody(lines: string[]) {
 }
 
 function createBulletSlide(slide: MarkdownSlide, theme: DeckTheme): MikroSlideRecord {
-  const body = slide.body.join("\n") || "Add supporting detail here.";
+  const body = slide.body.join("\n") || "Add text";
   return createBlankSlide({
     title: slide.title,
     layout: slide.layout || "bullets",

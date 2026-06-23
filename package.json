@@ -1,6 +1,6 @@
 {
   "name": "mikroslides",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MikroSlides is a minimalist local-first presentation app.",
   "license": "MIT",
   "author": "Mikael Vesavuori",
@@ -45,7 +45,9 @@
     "release:assets": "node scripts/create-release-assets.mjs",
     "sbom": "node scripts/create-prod-sbom.mjs",
     "scan": "mkdir -p security && grype sbom:security/sbom.spdx.json -o json > security/grype-report.json",
-    "licenses": "mkdir -p security && grant check security/sbom.spdx.json --config .grant.yaml > security/grant-report.txt || { cat security/grant-report.txt; exit 1; }"
+    "licenses": "mkdir -p security && grant check security/sbom.spdx.json --config .grant.yaml > security/grant-report.txt || { cat security/grant-report.txt; exit 1; }",
+    "precommit": "npm run lint && npm run typecheck && npm run test",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@biomejs/biome": "2",
@@ -54,6 +56,7 @@
     "esbuild": "latest",
     "fake-indexeddb": "6",
     "html-minifier-terser": "latest",
+    "husky": "9.1.7",
     "lightningcss": "latest",
     "playwright": "^1.60.0",
     "tsx": "4",

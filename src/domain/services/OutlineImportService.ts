@@ -182,7 +182,7 @@ function createTitleSlide(title: string, intro: string[], theme: DeckTheme): Mik
         fontWeight: 760,
       }),
       createTextElement({
-        content: subtitle || "A clear deck from Markdown.",
+        content: subtitle || "Subtitle",
         x: 24,
         y: 48,
         width: 52,
@@ -196,7 +196,7 @@ function createTitleSlide(title: string, intro: string[], theme: DeckTheme): Mik
 }
 
 function createSectionSlide(section: ParsedSection, theme: DeckTheme): MikroSlideRecord {
-  const body = section.body.length ? section.body.join("\n") : "Add supporting detail here.";
+  const body = section.body.length ? section.body.join("\n") : "Add text";
   return createBlankSlide({
     title: section.title,
     layout: "bullets",

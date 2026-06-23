@@ -23,9 +23,9 @@ export const builtInTemplates = [
 ];
 
 export function createTemplateSlide(template: string, base: MikroSlideRecord, theme: DeckTheme) {
-  const title = base.title || "Untitled";
+  const title = base.title && base.title !== "Untitled" ? base.title : "Slide title";
   const background = base.background || theme.background;
-  const body = "Add supporting detail here.";
+  const body = "Add text";
 
   if (template === "section") {
     return createBlankSlide({
@@ -65,7 +65,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
       background,
       elements: [
         createTextElement({
-          content: "A strong point belongs on its own slide.",
+          content: "Add statement",
           x: 12,
           y: 25,
           width: 76,
@@ -138,7 +138,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           fontWeight: 740,
         }),
         createTextElement({
-          content: "Left idea\nSupporting detail",
+          content: "Left column\nAdd text",
           x: 11,
           y: 32,
           width: 34,
@@ -148,7 +148,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           fontWeight: 430,
         }),
         createTextElement({
-          content: "Right idea\nSupporting detail",
+          content: "Right column\nAdd text",
           x: 55,
           y: 32,
           width: 34,
@@ -265,7 +265,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           radius: 3,
         }),
         createTextElement({
-          content: "A clear sentence can carry the whole room.",
+          content: "Add quote",
           x: 20,
           y: 23,
           width: 62,
@@ -276,7 +276,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           fontWeight: 620,
         }),
         createTextElement({
-          content: "Speaker",
+          content: "Attribution",
           x: 22,
           y: 66,
           width: 30,
@@ -325,7 +325,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           radius: 5,
         }),
         createTextElement({
-          content: "Option A\n• Strength\n• Tradeoff",
+          content: "Option A\n• Detail\n• Detail",
           x: 13,
           y: 34,
           width: 29,
@@ -335,7 +335,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           fontWeight: 450,
         }),
         createTextElement({
-          content: "Option B\n• Strength\n• Tradeoff",
+          content: "Option B\n• Detail\n• Detail",
           x: 58,
           y: 34,
           width: 29,
@@ -386,7 +386,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
             strokeWidth: 2,
           }),
           createTextElement({
-            content: `Step ${index + 1}\nOutcome`,
+            content: `Step ${index + 1}\nDate`,
             x: x - 6,
             y: 60,
             width: 19,
@@ -430,7 +430,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           }),
         ),
         createTextElement({
-          content: "Metric\nSignal\nDecision",
+          content: "Metric\nValue\nNotes",
           x: 69,
           y: 34,
           width: 20,
@@ -461,7 +461,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
           fontWeight: 760,
         }),
         createTextElement({
-          content: "Questions and next steps",
+          content: "Questions?",
           x: 13,
           y: 51,
           width: 44,
@@ -500,7 +500,7 @@ export function createTemplateSlide(template: string, base: MikroSlideRecord, th
         fontWeight: 760,
       }),
       createTextElement({
-        content: "Subtitle or message",
+        content: "Subtitle",
         x: 12,
         y: 48,
         width: 48,
